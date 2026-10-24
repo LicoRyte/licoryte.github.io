@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lico's Archive</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="My corner of the internet. Games and experiments I made to learn things.">
+<style>
+/* Layout: a 2001-style personal homepage in green — gradient banner, scrolling news ticker, left nav column of Win98 panels, main column with welcome box, game window and a games table, 88x31 buttons at the bottom */
+:root {
+  --desk: #021A08;
+  --silver: #C0C0C0;
+  --silver-lt: #DFDFDF;
+  --hi: #FFFFFF;
+  --shade: #808080;
+  --dark: #0A0A0A;
+  --navy: #0B4A12;
+  --blue: #2E8B22;
+  --text: #000000;
+  --paper: #FFFFFF;
+  --link: #006E00;
+  --visited: #4B3A7A;
+  --new: #FF0000;
+  --ok: #007700;
+  --warn: #A04A00;
+  --lcd-bg: #001A00;
+  --lcd: #33FF33;
+  --sky: #CFF5A0;
+
+  --f-ui: Tahoma, Verdana, "DejaVu Sans", Geneva, sans-serif;
+  --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
+  --f-head: "Arial Black", "Arial Bold", Impact, Gadget, sans-serif;
+  --f-mono: "Courier New", Courier, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--desk);
+  background-image:
+    radial-gradient(1px 1px at 12px 18px, #ffffff 50%, transparent 51%),
+    radial-gradient(1px 1px at 70px 64px, #b6e33b 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 110px 30px, #ffffff 50%, transparent 51%),
+    radial-gradient(1px 1px at 40px 100px, #ffffff 50%, transparent 51%),
+    radial-gradient(1px 1px at 96px 118px, #ffff99 50%, transparent 51%);
+  background-size: 128px 128px;
+  color: var(--text);
+  font-family: var(--f-body);
+  font-size: 13px;
+  line-height: 1.5;
+}
+a { color: var(--link); }
+a:visited { color: var(--visited); }
+a:hover { color: var(--new); }
+:focus-visible { outline: 1px dotted var(--text); outline-offset: 2px; }
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 40px;
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 400px) {
+  .page {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+}
+
+/* Bevels */
+.raised {
+  background: var(--silver);
+  border: 2px solid;
+  border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
+}
+.sunken {
+  border: 2px solid;
+  border-color: var(--shade) var(--hi) var(--hi) var(--shade);
+  box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--silver-lt);
+}
+.btn {
+  font-family: var(--f-ui); font-size: 12px; color: var(--text);
+  background: var(--silver);
+  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
+  padding: 3px 12px; min-height: 26px; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+a.btn, a.btn:visited { color: var(--text); }
+.btn:active { border-color: var(--dark) var(--hi) var(--hi) var(--dark); box-shadow: inset 1px 1px 0 var(--shade); padding: 4px 11px 2px 13px; }
+.btn[disabled] { color: var(--shade); text-shadow: 1px 1px 0 var(--hi); cursor: default; }
+
+/* Banner */
+.banner {
+  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  background: linear-gradient(180deg, #052A0A 0%, var(--navy) 50%, #3FA82E 100%);
+  padding: 18px 20px 14px;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.hex {
+  --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  width: 92px; aspect-ratio: 0.866; flex-shrink: 0; display: block;
+  clip-path: var(--hex); background: #B6E33B; padding: 4px;
+}
+.hex-in {
+  width: 100%; height: 100%; clip-path: var(--hex);
+  background: radial-gradient(circle at 50% 40%, #2E8B22, #052A0A 75%);
+}
+.hex-in img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 30%; transform: scale(1.08); }
+.hex-wrap { display: block; flex-shrink: 0; filter: drop-shadow(3px 3px 0 #011005); }
+.hex-wrap:hover .hex { background: #FFFF66; }
+.banner-text { min-width: 0; flex: 1; }
+.banner h1 {
+  margin: 0; font-family: var(--f-head); font-weight: 900;
+  font-size: clamp(30px, 7vw, 54px); line-height: 1; letter-spacing: .01em;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E2FFA0 55%, #A6E83B 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(3px 3px 0 #011005);
+  text-wrap: balance;
+}
+.banner p { margin: 6px 0 0; color: var(--sky); font-style: italic; font-size: 13px; }
+
+/* Ticker */
+.ticker {
+  background: #000000; color: var(--lcd);
+  font-family: var(--f-mono); font-size: 13px; font-weight: bold;
+  overflow: hidden; white-space: nowrap; padding: 4px 0;
+}
+.ticker-track { display: inline-block; padding-left: 100%; animation: tick 28s linear infinite; }
+@keyframes tick { to { transform: translateX(-100%); } }
+
+/* Columns */
+.cols { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 10px; align-items: start; }
+.side, .main { display: grid; gap: 10px; min-width: 0; }
+@media (max-width: 720px) {
+  .cols { grid-template-columns: 1fr; }
+  .side { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+}
+
+/* Windows */
+.win { padding: 3px; min-width: 0; }
+.tbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: linear-gradient(90deg, var(--navy), var(--blue));
+  color: var(--hi); font-family: var(--f-ui); font-weight: bold; font-size: 12px;
+  padding: 3px 3px 3px 6px; min-height: 22px;
+}
+.tbar .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tbtns { display: flex; gap: 2px; flex-shrink: 0; }
+.tbtns > * {
+  width: 18px; height: 16px; padding: 0; display: grid; place-items: center;
+  font: bold 11px/1 var(--f-ui); color: var(--text); background: var(--silver);
+  border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+}
+.tbtns button { cursor: pointer; }
+.wbody { padding: 10px 10px 12px; }
+.wbody h2 { margin: 0 0 6px; font-family: var(--f-ui); font-size: 14px; }
+
+/* Sidebar */
+.nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.nav a { display: block; padding: 2px 4px; font-weight: bold; }
+.nav a::before { content: "» "; color: var(--navy); }
+.counter {
+  display: inline-block; background: var(--lcd-bg); color: var(--lcd);
+  font-family: var(--f-mono); font-weight: bold; font-size: 20px; letter-spacing: .12em;
+  padding: 2px 6px; font-variant-numeric: tabular-nums;
+}
+.info { display: grid; gap: 6px; font-size: 12px; }
+.info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; }
+.info dt { color: #333333; }
+.info dd { margin: 0; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
+.uc { font-size: 11px; color: #333333; border-top: 1px solid var(--shade); padding-top: 6px; margin: 0; }
+.uc b { color: var(--warn); }
+
+/* Welcome */
+.welcome { background: var(--paper); padding: 12px 14px; }
+.welcome p { margin: 0 0 8px; max-width: 64ch; }
+.welcome .sig { font-style: italic; color: #333333; margin: 0; }
+
+/* Player */
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 4px; }
+.toolbar .hint { margin-left: auto; font-size: 11px; color: #333333; font-family: var(--f-ui); }
+.stage { width: 100%; max-width: 100%; aspect-ratio: 16 / 9; background: #000000; position: relative; }
+.stage iframe { width: 100%; height: 100%; border: 0; display: block; background: #000000; }
+.dl-only {
+  position: absolute; inset: 0; display: grid; place-content: center; gap: 6px; text-align: center; padding: 16px;
+  color: #FFFFFF; font-family: var(--f-ui);
+}
+.dl-only b { font-family: var(--f-head); font-size: clamp(20px, 4vw, 32px); color: #FFFF66; }
+.props { margin-top: 8px; background: var(--paper); }
+.props table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.props th, .props td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--silver-lt); }
+.props th { width: 120px; background: #EFEFEF; font-family: var(--f-ui); color: #333333; font-weight: bold; white-space: nowrap; }
+.props tr:last-child th, .props tr:last-child td { border-bottom: 0; }
+.props .desc td { font-style: italic; }
+.dl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dl-list small { color: #555555; }
+@media (max-width: 520px) {
+  .props th { width: auto; display: block; border-bottom: 0; padding-bottom: 0; background: transparent; }
+  .props td { display: block; }
+  .props tr { display: block; border-bottom: 1px solid var(--silver-lt); }
+  .props th, .props td { border-bottom: 0; }
+}
+
+/* Games table */
+.listbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 4px 2px 8px; font-family: var(--f-ui); font-size: 12px; }
+.listbar label { display: flex; gap: 6px; align-items: center; }
+.listbar select { font-family: var(--f-ui); font-size: 12px; background: var(--paper); border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 2px; }
+.list { background: var(--paper); }
+.lhead, .row { display: grid; grid-template-columns: 76px minmax(0, 1fr) 150px; gap: 0 12px; }
+.lhead { background: var(--silver); font-family: var(--f-ui); font-size: 12px; font-weight: bold; }
+.lhead span { padding: 3px 6px; border-right: 1px solid var(--shade); border-bottom: 1px solid var(--shade); box-shadow: inset 1px 1px 0 var(--hi); }
+.lhead span:last-child { border-right: 0; }
+.row { padding: 8px 6px; border-bottom: 1px dotted var(--shade); align-items: start; }
+.row:nth-child(even) { background: #F1FAEA; }
+.row:last-child { border-bottom: 0; }
+.row.active { background: #FFFFCC; }
+.thumb { width: 64px; aspect-ratio: 4 / 3; max-width: 100%; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); display: block; background: var(--silver); }
+.thumb canvas, .thumb img { width: 100%; height: 100%; display: block; object-fit: cover; image-rendering: pixelated; }
+.gname { margin: 0; font-family: var(--f-ui); font-size: 15px; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.gname a { font-weight: bold; }
+.newtag { color: var(--new); font-family: var(--f-ui); font-weight: bold; font-size: 11px; animation: flash 1s steps(1) infinite; }
+@keyframes flash { 50% { visibility: hidden; } }
+.ex { font-size: 11px; color: #666666; font-weight: normal; }
+.gq { margin: 3px 0; font-size: 12px; }
+.gmeta { margin: 0; font-size: 11px; color: #555555; }
+.st { font-weight: bold; }
+.st-done { color: var(--ok); }
+.st-proto { color: var(--warn); }
+.st-parked { color: #666666; }
+.acts { display: grid; gap: 4px; justify-items: stretch; }
+.acts .btn { justify-content: center; }
+.empty, .load-error { padding: 16px; font-size: 13px; }
+.load-error code { font-family: var(--f-mono); background: #EFEFEF; padding: 0 4px; }
+@media (max-width: 560px) {
+  .lhead { display: none; }
+  .row { grid-template-columns: 64px minmax(0, 1fr); row-gap: 8px; }
+  .acts { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+}
+
+/* Footer */
+footer { display: grid; gap: 10px; justify-items: center; text-align: center; padding-top: 6px; color: #A8D890; font-size: 11px; }
+footer p { margin: 0; }
+footer a, footer a:visited { color: var(--sky); }
+.badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.badge {
+  width: 88px; height: 31px; display: grid; place-items: center; text-align: center;
+  font-family: var(--f-body); font-size: 9px; font-weight: bold; line-height: 1.1; letter-spacing: .02em;
+  border: 1px solid #000000; padding: 0 3px; text-transform: uppercase;
+}
+.b1 { background: linear-gradient(#FFFFFF, #C8C8C8); color: #000080; }
+.b2 { background: #000000; color: var(--lcd); font-family: var(--f-mono); }
+.b3 { background: linear-gradient(#FFEE66, #FF9900); color: #000000; }
+.b4 { background: linear-gradient(#7FD64A, #0B4A12); color: #FFFFFF; }
+.b5 { background: repeating-linear-gradient(45deg, #FFDD00 0 6px, #000000 6px 12px); color: #FFFFFF; text-shadow: 1px 1px 0 #000000, -1px -1px 0 #000000; }
+
+
+/* Dave */
+.dave-spot {
+  width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 6px;
+  padding-top: 18px; position: relative; isolation: isolate;
+}
+.bubble {
+  position: relative; z-index: 3; align-self: center; margin: 0 0 76px;
+  max-width: 270px; background: #FFFFFF; color: #000000; text-align: left;
+  font-family: var(--f-body); font-size: 13px; line-height: 1.4;
+  border: 2px solid #000000; border-radius: 14px; padding: 10px 12px;
+  box-shadow: 3px 3px 0 #000000;
+}
+.bubble::after {
+  content: ""; position: absolute; right: -12px; top: 50%; margin-top: -8px;
+  border-width: 8px 0 8px 12px; border-style: solid; border-color: transparent transparent transparent #000000;
+}
+.bubble::before {
+  content: ""; position: absolute; right: -8px; top: 50%; margin-top: -6px; z-index: 1;
+  border-width: 6px 0 6px 9px; border-style: solid; border-color: transparent transparent transparent #FFFFFF;
+}
+.bubble .who { display: block; font-family: var(--f-ui); font-weight: bold; font-size: 11px; color: var(--navy); margin-bottom: 2px; }
+.dave {
+  background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 1; min-width: 0;
+  -webkit-tap-highlight-color: transparent; position: relative; z-index: 1;
+}
+.dave img {
+  display: block; height: 290px; width: auto; max-width: 100%; object-fit: contain;
+  transform-origin: 50% 100%;
+  user-select: none; -webkit-user-drag: none;
+}
+.dave:hover img { filter: brightness(1.06); }
+.dave.squish img { animation: squish .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes squish {
+  0% { transform: scale(1, 1); }
+  25% { transform: scale(1.16, .76); }
+  50% { transform: scale(.92, 1.08); }
+  72% { transform: scale(1.04, .97); }
+  100% { transform: scale(1, 1); }
+}
+.desk {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 46px; z-index: 2; pointer-events: none;
+  background: var(--silver);
+  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade), 0 6px 0 #011005;
+}
+.desk::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--shade);
+  box-shadow: 0 1px 0 var(--hi);
+}
+.desk-note {
+  position: absolute; bottom: 8px; left: calc(50% + 60px); transform: rotate(-4deg);
+  background: #FFFF66; color: #000000; font-family: var(--f-mono); font-size: 11px; font-weight: bold;
+  padding: 2px 6px; box-shadow: 1px 1px 0 rgba(0, 0, 0, .4);
+}
+.pokes { font-size: 11px; color: #A8D890; margin: 0; }
+@media (max-width: 560px) {
+  .dave-spot { flex-direction: column; align-items: center; gap: 12px; }
+  .bubble { margin: 0; max-width: 100%; }
+  .bubble::after { right: auto; left: 50%; top: auto; bottom: -12px; margin: 0 0 0 -8px; border-width: 12px 8px 0 8px; border-color: #000000 transparent transparent transparent; }
+  .bubble::before { right: auto; left: 50%; top: auto; bottom: -8px; margin: 0 0 0 -6px; border-width: 9px 6px 0 6px; border-color: #FFFFFF transparent transparent transparent; }
+  .dave img { height: 230px; }
+  .desk { height: 40px; }
+  .desk-note { left: auto; right: 12px; }
+  .hex-wrap { width: 72px; }
+  .hex { width: 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; padding-left: 8px; }
+  .newtag { animation: none; }
+  .dave.squish img { animation-duration: .25s; }
+}
+</style>
+</head>
+<body>
+
+<div class="page" id="top">
+  <header class="banner">
+    <a class="hex-wrap" href="#dave" aria-label="Go say hi to Dave"><span class="hex"><span class="hex-in"><img src="img/dave-face.webp" width="240" height="240" alt=""></span></span></a>
+    <div class="banner-text">
+      <h1 id="heroTitle">Lico's Lab</h1>
+      <p id="tagline">Small games I made to learn one thing each.</p>
+    </div>
+  </header>
+
+  <div class="ticker sunken" aria-hidden="true"><span class="ticker-track" id="ticker">*** Welcome ***</span></div>
+
+  <div class="cols">
+    <aside class="side">
+      <div class="win raised">
+        <div class="tbar"><span class="name">where to?</span></div>
+        <div class="wbody">
+          <ul class="nav">
+            <li><a href="#top">home</a></li>
+            <li><a href="#games">stuff i made</a></li>
+            <li><a href="#welcome">about me</a></li>
+            <li><a href="#links">links</a></li>
+            <li><a href="#dave">bother Dave</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="win raised">
+        <div class="tbar"><span class="name">stats</span></div>
+        <div class="wbody info">
+          <div>things on the shelf:</div>
+          <div><span class="counter sunken" id="counter">000000</span></div>
+          <dl>
+            <dt>playable</dt><dd id="stPlay">0</dd>
+            <dt>downloads</dt><dd id="stDl">0</dd>
+            <dt>finished</dt><dd id="stDone">0</dd>
+            <dt>updated</dt><dd id="stSave">----</dd>
+          </dl>
+          <p class="uc"><b>under construction</b> forever. that's kind of the point.</p>
+        </div>
+      </div>
+
+      <div class="win raised" id="links">
+        <div class="tbar"><span class="name">elsewhere</span></div>
+        <div class="wbody"><ul class="nav" id="linkList"></ul></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="win raised" id="welcome" aria-labelledby="wTitle">
+        <div class="tbar"><span class="name" id="wTitle">hi there!</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
+        <div class="wbody">
+          <div class="welcome sunken" id="about"></div>
+        </div>
+      </section>
+
+      <section class="win raised" id="player" hidden aria-labelledby="pBar">
+        <div class="tbar">
+          <span class="name" id="pBar">Game.exe</span>
+          <div class="tbtns"><span aria-hidden="true">_</span><button type="button" id="fsMini" aria-label="Fullscreen">□</button><button type="button" id="pClose" aria-label="Close game">×</button></div>
+        </div>
+        <div class="wbody">
+          <div class="toolbar" id="stageTools">
+            <button type="button" class="btn" id="fsBtn">Fullscreen</button>
+            <a class="btn" id="tabBtn" href="#" target="_blank" rel="noopener">Open in new window</a>
+            <span class="hint">Click inside the game to use the keyboard.</span>
+          </div>
+          <div class="stage sunken" id="stage"></div>
+          <div class="props sunken">
+            <table>
+              <tbody>
+                <tr class="desc" id="fDesc"><th scope="row">About</th><td></td></tr>
+                <tr id="fQ"><th scope="row">The question</th><td></td></tr>
+                <tr id="fL"><th scope="row">What I learned</th><td></td></tr>
+                <tr id="fC"><th scope="row">Controls</th><td></td></tr>
+                <tr id="fM"><th scope="row">Made with</th><td></td></tr>
+                <tr id="fD"><th scope="row">Downloads</th><td><ul class="dl-list" id="dlList"></ul></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="win raised" id="games" aria-labelledby="gTitle">
+        <div class="tbar"><span class="name" id="gTitle">stuff i made</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
+        <div class="wbody">
+          <div class="listbar">
+            <label for="show">show:
+              <select id="show">
+                <option value="all">everything</option>
+                <option value="play">playable here</option>
+                <option value="dl">has a download</option>
+                <option value="done">finished</option>
+                <option value="prototype">prototypes</option>
+                <option value="parked">parked</option>
+              </select>
+            </label>
+            <span id="gCount">0 games</span>
+          </div>
+          <div class="list sunken">
+            <div class="lhead" aria-hidden="true"><span></span><span>name</span><span>get it</span></div>
+            <div id="grid"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <div class="badges">
+      <span class="badge b1">Made to learn</span>
+      <span class="badge b2">No ads · No tracking</span>
+      <span class="badge b3">HTML5 inside</span>
+      <span class="badge b4">Best viewed with any browser</span>
+      <span class="badge b2">Powered by coffee</span>
+      <span class="badge b5">Under construction</span>
+    </div>
+    <p id="footNote">Hand-made static site.</p>
+    <p><a href="#top">back to top ↑</a></p>
+    <div class="dave-spot" id="dave">
+      <p class="bubble" id="daveSay" role="status" aria-live="polite"><span class="who">Dave</span><span id="daveLine">*sigh* oh. a visitor. poke me if you need something.</span></p>
+      <button class="dave" id="daveBtn" type="button" aria-label="Poke Dave">
+        <img src="img/dave-half.webp" width="608" height="560" alt="Dave, a tired office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers" draggable="false">
+      </button>
+      <div class="desk" aria-hidden="true"><span class="desk-note">poke him</span></div>
+    </div>
+    <p class="pokes" id="pokes" hidden></p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  function h(tag, attrs = {}, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const k of kids.flat()) {
+      if (k == null || k === false || k === '') continue;
+      el.append(k.nodeType ? k : document.createTextNode(String(k)));
+    }
+    return el;
+  }
+
+  const STATUS = {
+    done: { label: 'finished', cls: 'st-done' },
+    prototype: { label: 'prototype', cls: 'st-proto' },
+    parked: { label: 'parked', cls: 'st-parked' }
+  };
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let DATA = null, games = [], filter = 'all', current = null, newest = null;
+
+  function fmtDate(d) {
+    if (!d) return '';
+    const m = String(d).match(/^(\d{4})-(\d{2})/);
+    return m ? `${MONTHS[+m[2] - 1]} ${m[1]}` : String(d);
+  }
+
+  /* Generated thumbnails */
+  function hash(str) { let v = 2166136261; for (const c of str) { v ^= c.charCodeAt(0); v = Math.imul(v, 16777619); } return v >>> 0; }
+  function rng(seed) {
+    return () => {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const THUMB_BG = ['#0B4A12', '#003300', '#1A2A00', '#000000'];
+  const THUMB_FG = ['#FFFF66', '#B6E33B', '#66FFCC', '#FFFFFF', '#33FF33'];
+  function drawThumbs() {
+    document.querySelectorAll('canvas[data-slug]').forEach(cv => {
+      const W = 16, H = 12;
+      cv.width = W; cv.height = H;
+      const c = cv.getContext('2d'), r = rng(hash(cv.dataset.slug));
+      c.fillStyle = THUMB_BG[Math.floor(r() * THUMB_BG.length)]; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 6; i++) c.fillRect(Math.floor(r() * W), Math.floor(r() * H), 1, 1);
+      const main = THUMB_FG[Math.floor(r() * THUMB_FG.length)];
+      for (let y = 0; y < 8; y++) for (let x = 0; x < 4; x++) {
+        if (r() < 0.55) {
+          c.fillStyle = r() < 0.8 ? main : '#C0C0C0';
+          c.fillRect(4 + x, 2 + y, 1, 1);
+          c.fillRect(11 - x, 2 + y, 1, 1);
+        }
+      }
+    });
+  }
+
+  /* Site */
+  function renderSite() {
+    const s = DATA.site || {};
+    if (s.title) $('#heroTitle').textContent = s.title;
+    $('#tagline').textContent = s.tagline || '';
+    const paras = (s.about || []).map(p => h('p', {}, p));
+    if (s.owner) paras.push(h('p', { class: 'sig' }, '- ' + s.owner));
+    $('#about').replaceChildren(...paras);
+    const links = s.links || [];
+    $('#linkList').replaceChildren(...(links.length ? links.map(l => h('li', {}, h('a', { href: l.url, target: '_blank', rel: 'noopener' }, l.label))) : [h('li', {}, 'no links yet.')]));
+
+    const dates = games.map(g => g.date).filter(Boolean).sort();
+    const last = dates.length ? dates[dates.length - 1] : '';
+    $('#counter').textContent = String(games.length).padStart(6, '0');
+    $('#stPlay').textContent = games.filter(g => g.play).length;
+    $('#stDl').textContent = games.filter(g => (g.downloads || []).length).length;
+    $('#stDone').textContent = games.filter(g => g.status === 'done').length;
+    $('#stSave').textContent = last || '----';
+    $('#footNote').textContent = `© ${(last || '2026').slice(0, 4)} ${s.owner || ''} · made by hand, not by a company · last updated ${last || 'never'}`;
+
+    newest = games[0] || null;
+    const bits = [`welcome to ${s.title || 'my site'}!`];
+    if (newest) bits.push(`new: ${newest.title} (${fmtDate(newest.date)})`);
+    bits.push(`${games.length} thing${games.length === 1 ? '' : 's'} on the shelf`, 'no ads, no tracking, no accounts', 'click a game to play it', 'say hi to Dave at the bottom');
+    $('#ticker').textContent = '*** ' + bits.join(' *** ') + ' ***';
+  }
+
+  function matches(g) {
+    if (filter === 'all') return true;
+    if (filter === 'play') return !!g.play;
+    if (filter === 'dl') return (g.downloads || []).length > 0;
+    return g.status === filter;
+  }
+
+  function row(g) {
+    const st = STATUS[g.status] || STATUS.prototype;
+    const n = (g.downloads || []).length;
+    const open = e => { e.preventDefault(); openGame(g.slug, true); };
+    const thumb = g.thumb ? h('img', { src: g.thumb, alt: '', loading: 'lazy' }) : h('canvas', { 'data-slug': g.slug, 'aria-hidden': 'true' });
+    return h('div', { class: 'row' + (current === g.slug ? ' active' : ''), 'data-slug': g.slug },
+      h('a', { class: 'thumb', href: '#' + g.slug, onclick: open, tabindex: '-1', 'aria-hidden': 'true' }, thumb),
+      h('div', {},
+        h('p', { class: 'gname' },
+          h('a', { href: '#' + g.slug, onclick: open }, g.title),
+          newest && newest.slug === g.slug && h('span', { class: 'newtag' }, 'NEW!'),
+          g.example && h('span', { class: 'ex' }, '(example)')),
+        g.question && h('p', { class: 'gq' }, h('b', {}, 'Q: '), g.question),
+        h('p', { class: 'gmeta' },
+          h('span', { class: 'st ' + st.cls }, '[' + st.label + ']'), ' ',
+          [g.engine, fmtDate(g.date)].filter(Boolean).join(' · '))),
+      h('div', { class: 'acts' },
+        g.play ? h('a', { class: 'btn', href: '#' + g.slug, onclick: open }, '▶ Play') : h('button', { class: 'btn', type: 'button', disabled: true }, 'No web version'),
+        n > 0 ? h('a', { class: 'btn', href: '#' + g.slug, onclick: open }, '⬇ Download' + (n > 1 ? ` (${n})` : '')) : null)
+    );
+  }
+
+  function renderGrid() {
+    const list = games.filter(matches);
+    $('#gCount').textContent = `${list.length} game${list.length === 1 ? '' : 's'}`;
+    $('#grid').replaceChildren(...(list.length ? list.map(row) : [h('p', { class: 'empty' }, 'nothing here yet.')]));
+    drawThumbs();
+  }
+
+  function setField(id, text) {
+    const f = $(id);
+    f.hidden = !text;
+    if (text) f.querySelector('td').textContent = text;
+  }
+
+  function openGame(slug, scroll) {
+    const g = games.find(x => x.slug === slug);
+    if (!g) return;
+    current = slug;
+    const player = $('#player');
+    player.hidden = false;
+    $('#pBar').textContent = `${g.title} - ${g.slug}.exe`;
+    setField('#fDesc', g.description);
+    setField('#fQ', g.question);
+    setField('#fL', g.learned);
+    setField('#fC', g.controls);
+    setField('#fM', [g.engine, fmtDate(g.date), (g.tags || []).join(', ')].filter(Boolean).join(' · '));
+
+    const stage = $('#stage');
+    if (g.play) {
+      stage.style.aspectRatio = (g.aspect || '16/9').replace('/', ' / ');
+      stage.replaceChildren(h('iframe', { src: g.play, title: g.title, allow: 'fullscreen; gamepad; autoplay', allowfullscreen: true }));
+      $('#stageTools').hidden = false;
+      $('#tabBtn').href = g.play;
+      $('#fsBtn').textContent = 'Fullscreen';
+      $('#fsMini').hidden = false;
+    } else {
+      stage.style.aspectRatio = '16 / 9';
+      stage.replaceChildren(h('div', { class: 'dl-only' }, h('b', {}, 'Download only'), h('span', {}, 'grab a build from the list below.')));
+      $('#stageTools').hidden = true;
+      $('#fsMini').hidden = true;
+    }
+
+    const dls = g.downloads || [];
+    $('#fD').hidden = !dls.length;
+    $('#dlList').replaceChildren(...dls.map(d =>
+      h('li', {}, h('a', { href: d.file || d.url, download: d.file ? '' : null, target: d.url ? '_blank' : null, rel: d.url ? 'noopener' : null }, d.label || d.file),
+        d.size && h('small', {}, ' (' + d.size + ')'))));
+
+    document.querySelectorAll('.row').forEach(c => c.classList.toggle('active', c.dataset.slug === slug));
+    try { history.replaceState(null, '', '#' + slug); } catch (e) {}
+    if (scroll) player.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function closeGame() {
+    $('#stage').replaceChildren();
+    $('#player').hidden = true;
+    current = null;
+    document.querySelectorAll('.row.active').forEach(c => c.classList.remove('active'));
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  }
+
+  function fullscreen() {
+    const st = $('#stage');
+    const req = st.requestFullscreen || st.webkitRequestFullscreen;
+    if (!req) { $('#fsBtn').textContent = 'Fullscreen not available'; return; }
+    Promise.resolve(req.call(st)).catch(() => { $('#fsBtn').textContent = 'Fullscreen not available'; });
+  }
+
+  $('#pClose').addEventListener('click', closeGame);
+  $('#fsBtn').addEventListener('click', fullscreen);
+  $('#fsMini').addEventListener('click', fullscreen);
+  $('#show').addEventListener('change', e => { filter = e.target.value; renderGrid(); });
+
+  function showLoadError(msg) {
+    $('#gCount').textContent = 'Error';
+    $('#grid').replaceChildren(h('div', { class: 'load-error' },
+      h('p', {}, h('b', {}, "Couldn't load games.json. "), msg || ''),
+      h('p', {}, 'If you opened index.html by double-clicking it, browsers block that. Run ', h('code', {}, 'python -m http.server'), ' in this folder and open ', h('code', {}, 'http://localhost:8000'), '.'),
+      h('p', {}, 'Still broken? Paste games.json into a JSON checker. A missing comma is the usual cause.')));
+  }
+
+  async function boot() {
+    try {
+      const r = await fetch('games.json', { cache: 'no-store' });
+      if (!r.ok) throw new Error('Server said ' + r.status + '.');
+      DATA = await r.json();
+    } catch (e) {
+      showLoadError(e instanceof SyntaxError ? 'The file has a typo: ' + e.message : '');
+      return;
+    }
+    games = (DATA.games || []).filter(g => g && g.slug && g.title)
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    renderSite();
+    renderGrid();
+    const slug = decodeURIComponent(location.hash.slice(1));
+    if (slug) openGame(slug, false);
+  }
+
+
+  /* Dave */
+  const DAVE_LINES = [
+    '*sips coffee* what.',
+    "I'm not a button. ...okay, I'm a button.",
+    'Third coffee. Do not ask about the first two.',
+    "This could've been an email.",
+    'Low battery. Please stop poking.',
+    "These papers aren't going to file themselves. Apparently.",
+    'Did you play the games, or did you just come down here to bother me?',
+    "Screen's flickering again. That's on you.",
+    '#1 Employee. The mug says so. The mug never lies.',
+    "It's Monday somewhere.",
+    "Overtime again. No, I don't get paid. I'm a drawing.",
+    'Okay, that one squished my antenna.',
+    'Lico made all of this to learn stuff. I just live here.',
+    'If a game breaks, it was a learning experience. That is the official policy.',
+    "Need a reboot. Don't unplug me.",
+    'I have a sticky note for this somewhere.',
+    'Printer jammed. Not my problem today.',
+    'You again. Fine. Hi.',
+    '*screen flickers* ...sorry. Old monitor.',
+    'Try the top game. Or don\'t. I\'m not your boss.'
+  ];
+  const DAVE_MILESTONES = {
+    10: 'Ten pokes. Do you need help with something, or is this a cry for attention.',
+    25: 'Twenty-five. I am filing a complaint. With myself. I am HR.',
+    50: 'Fifty pokes. Respect. Go play a game, champ.',
+    100: "A hundred. You win. There's no prize. There's never a prize."
+  };
+  let pokes = 0, lastLine = -1;
+  const daveBtn = $('#daveBtn');
+  daveBtn.addEventListener('click', () => {
+    pokes++;
+    daveBtn.classList.remove('squish');
+    void daveBtn.offsetWidth;
+    daveBtn.classList.add('squish');
+    let line = DAVE_MILESTONES[pokes];
+    if (!line) {
+      let i;
+      do { i = Math.floor(Math.random() * DAVE_LINES.length); } while (i === lastLine);
+      lastLine = i;
+      line = DAVE_LINES[i];
+    }
+    $('#daveLine').textContent = line;
+    const pk = $('#pokes');
+    pk.hidden = false;
+    pk.textContent = `times Dave has been poked this visit: ${pokes}`;
+  });
+  daveBtn.addEventListener('animationend', () => daveBtn.classList.remove('squish'));
+
+  window.addEventListener('hashchange', () => {
+    const slug = decodeURIComponent(location.hash.slice(1));
+    if (slug && slug !== current) openGame(slug, true);
+  });
+  boot();
+})();
+</script>
+
+</body>
+</html>

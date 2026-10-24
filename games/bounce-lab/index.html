@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bounce Lab</title>
+<style>
+  html,body{margin:0;height:100%;background:#f6f0dc;overflow:hidden;touch-action:none}
+  canvas{display:block;width:100%;height:100%;object-fit:contain}
+</style>
+</head>
+<body>
+<canvas id="c" width="640" height="360"></canvas>
+<script>
+const cv = document.getElementById('c'), x = cv.getContext('2d');
+const W = 640, H = 360;
+const COLORS = ['#b6e33b', '#ffd84a', '#ff8a5b', '#7fc8f8'];
+const BOUNCE = { '1': 0.5, '2': 0.8, '3': 0.95 };
+let balls = [], gravity = true, rest = 0.8;
+
+function pos(e) {
+  const r = cv.getBoundingClientRect();
+  const s = Math.min(r.width / W, r.height / H);
+  return [(e.clientX - r.left - (r.width - W * s) / 2) / s, (e.clientY - r.top - (r.height - H * s) / 2) / s];
+}
+cv.addEventListener('pointerdown', e => {
+  const [px, py] = pos(e);
+  for (let i = 0; i < 3; i++) balls.push({
+    x: px, y: py, r: 8 + Math.random() * 10,
+    vx: (Math.random() - 0.5) * 300, vy: -Math.random() * 200,
+    c: COLORS[Math.floor(Math.random() * COLORS.length)]
+  });
+  if (balls.length > 150) balls.splice(0, balls.length - 150);
+});
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (k === 'g') gravity = !gravity;
+  if (k === 'c') balls = [];
+  if (BOUNCE[k]) rest = BOUNCE[k];
+});
+
+function step(dt) {
+  for (const b of balls) {
+    if (gravity) b.vy += 900 * dt;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.y + b.r > H - 20) { b.y = H - 20 - b.r; b.vy *= -rest; b.vx *= 0.99; }
+    if (b.y - b.r < 0) { b.y = b.r; b.vy *= -rest; }
+    if (b.x - b.r < 0) { b.x = b.r; b.vx *= -rest; }
+    if (b.x + b.r > W) { b.x = W - b.r; b.vx *= -rest; }
+  }
+}
+
+function draw() {
+  x.fillStyle = '#f6f0dc'; x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#e6dcbc'; x.lineWidth = 1;
+  for (let i = 0; i < W; i += 32) { x.beginPath(); x.moveTo(i + .5, 0); x.lineTo(i + .5, H); x.stroke(); }
+  for (let j = 0; j < H; j += 32) { x.beginPath(); x.moveTo(0, j + .5); x.lineTo(W, j + .5); x.stroke(); }
+  x.fillStyle = '#1e1b14'; x.fillRect(0, H - 20, W, 20);
+  for (const b of balls) {
+    x.fillStyle = b.c; x.strokeStyle = '#1e1b14'; x.lineWidth = 3;
+    x.beginPath(); x.arc(b.x, b.y, b.r, 0, Math.PI * 2); x.fill(); x.stroke();
+  }
+  x.fillStyle = '#1e1b14'; x.font = 'bold 14px monospace'; x.textAlign = 'left';
+  x.fillText(`BALLS ${balls.length}   BOUNCE ${rest}   GRAVITY ${gravity ? 'ON' : 'OFF'}`, 12, 22);
+  x.fillStyle = '#f6f0dc'; x.font = 'bold 12px monospace';
+  x.fillText('TAP TO DROP  ·  1 2 3 BOUNCINESS  ·  G GRAVITY  ·  C CLEAR', 12, H - 6);
+}
+
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.033, (now - last) / 1000); last = now;
+  step(dt); draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

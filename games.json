@@ -1,0 +1,96 @@
+{
+  "site": {
+    "title": "Lico's Archive",
+    "owner": "Lico",
+    "tagline": "my little corner of the internet. games, experiments, and other stuff i made to learn things.",
+    "about": [
+      "hi, i'm Lico! welcome to my archive.",
+      "this is where i keep the games and experiments i make for fun. each one started with a question i wanted to figure out. once i figured it out, it's done.",
+      "some are finished, some are prototypes, some are parked because they already taught me what i wanted. all of them are a little dumb. that's fine.",
+      "play stuff right here in the browser or grab a download. no ads, no tracking, no accounts. oh, and Dave lives at the bottom. he's tired. be nice."
+    ],
+    "links": [
+      {
+        "label": "my itch.io (LicoTheWhat)",
+        "url": "https://licothewhat.itch.io/"
+      },
+      {
+        "label": "my Newgrounds",
+        "url": "https://licothewhat.newgrounds.com"
+      },
+      {
+        "label": "my GitHub (LicoRyte)",
+        "url": "https://github.com/LicoRyte"
+      }
+    ]
+  },
+  "games": [
+    {
+      "slug": "dodge-box",
+      "title": "Dodge Box",
+      "example": true,
+      "date": "2026-10-24",
+      "status": "done",
+      "engine": "Vanilla JS",
+      "tags": [
+        "canvas",
+        "arcade"
+      ],
+      "question": "How fast can difficulty ramp before it stops feeling fair?",
+      "learned": "Spawn rate and fall speed both scaling with time felt brutal. Ramping only one of them at once felt fair for much longer.",
+      "description": "Move a green square. Don't get hit by yellow ones. That's it.",
+      "controls": "Arrow keys or A/D to move. Drag on touch screens. Space or tap to start.",
+      "play": "games/dodge-box/index.html",
+      "aspect": "16/9",
+      "downloads": [
+        {
+          "label": "Web build (.zip)",
+          "file": "downloads/dodge-box-web.zip",
+          "size": "2 KB"
+        }
+      ]
+    },
+    {
+      "slug": "bounce-lab",
+      "title": "Bounce Lab",
+      "example": true,
+      "date": "2026-10-20",
+      "status": "prototype",
+      "engine": "Vanilla JS",
+      "tags": [
+        "physics",
+        "toy"
+      ],
+      "question": "How much does restitution change how a bounce feels?",
+      "learned": "Below 0.5 things feel heavy and dead. Above 0.9 they feel like rubber toys. 0.8 reads as 'normal ball' to most people.",
+      "description": "A physics toy. Tap to drop balls and change how bouncy the world is.",
+      "controls": "Tap or click to drop. 1, 2, 3 change bounciness. G toggles gravity. C clears.",
+      "play": "games/bounce-lab/index.html",
+      "aspect": "16/9",
+      "downloads": []
+    },
+    {
+      "slug": "desktop-slot",
+      "title": "Desktop Build Slot",
+      "example": true,
+      "date": "2026-10-12",
+      "status": "parked",
+      "engine": "Any engine",
+      "tags": [
+        "download"
+      ],
+      "question": "What does a download-only entry look like here?",
+      "learned": "Entries without a 'play' field show a download panel instead of a game window.",
+      "description": "A placeholder for a Windows, Mac or Linux build you want people to download.",
+      "controls": "",
+      "play": "",
+      "downloads": [
+        {
+          "label": "Windows (.zip)",
+          "file": "downloads/desktop-slot-placeholder.zip",
+          "size": "1 KB"
+        }
+      ]
+    }
+  ]
+}
