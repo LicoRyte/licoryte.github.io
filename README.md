@@ -1,102 +1,62 @@
-# Lico's Archive
+# Lico's Awesome Archive
 
-My personal game shelf. Live at https://licoryte.github.io
+My personal corner of the interest. Live at https://licoryte.github.io
 
-No backend, no database, no account. One file (`games.json`) controls everything on the shelf.
+No backend, no database, no account. Everything is edited right on github.com — no app or terminal needed.
 
 ```
 licoryte.github.io/
 ├─ index.html        the site itself (you rarely touch this)
-├─ games.json        the list of games  ← edit this
-├─ games/<slug>/     one folder per browser game (must contain index.html)
-├─ downloads/        zips, exes, apks for people to download
+├─ games.json        site text, links and the list of game cartridges  ← edit this
+├─ img/covers/       cover images for the cartridges
 ├─ img/gallery/      gallery pictures (just drop images here)
 ├─ img/background/   background image (keep one here)
-└─ img/              Dave's pictures
+├─ img/              Dave's pictures
+└─ fonts/            the retro fonts (Pixelify Sans, VT323, Comic Neue — all free, OFL)
 ```
 
-## One-time setup
+Changes go live 1–2 minutes after you commit. Refresh with Ctrl+F5. Progress: the **Actions** tab on GitHub (green check = live).
 
-The GitHub website can't upload files over 25 MB, and a Godot web export's `.wasm` is around 37 MB. So use **GitHub Desktop** (free, no terminal).
+## Add a game cartridge
 
-1. Install GitHub Desktop from https://desktop.github.com and sign in as LicoRyte.
-2. File → Clone repository → pick `LicoRyte/licoryte.github.io` → Clone.
-   Remember the local path (e.g. `Documents\GitHub\licoryte.github.io`).
+Each game is a cartridge on the shelf. Clicking it opens the game's page (itch.io, Newgrounds, your own site, anything).
 
-## Add a game
+**1. Upload the cover image** (optional, but it looks better)
+- Open https://github.com/LicoRyte/licoryte.github.io/tree/main/img/covers
+- **Add file → Upload files**, drag the image in, **Commit changes**.
+- Any size works; it's cropped to 4:3 (like 800×600). Your itch.io cover image is perfect.
+- No cover? The cartridge gets a random pixel sprite instead.
 
-### 1. Export the game into the site folder
-
-**Godot 4**
-- Project → Export → Add… → **Web**.
-- Under **Variant**, turn **Thread Support OFF**. (GitHub Pages can't send the headers threaded builds need. Leaving it on gives a black screen or an error.)
-- Export Path: `games/<slug>/index.html` inside your cloned folder, e.g.
-  `Documents\GitHub\licoryte.github.io\games\spelighter\index.html`
-- Click **Export Project**, untick "Export With Debug".
-- Optional test before you go further: in the Godot editor, the "Run in browser" button (top right, next to Play) runs the web build locally. If it breaks there, it'll break on the site too.
-
-**Unity WebGL**
-- Player Settings → Publishing Settings → Compression Format: **Disabled** (or turn on Decompression Fallback).
-- Build into `games/<slug>/`.
-
-**Anything else** (plain JS, Phaser, PICO-8, GameMaker HTML5): put the export in `games/<slug>/` with its `index.html` at the top of that folder.
-
-`<slug>` = short name, lowercase, letters/numbers/dashes only. It's also the share link: `licoryte.github.io/#<slug>`.
-
-### 2. (Optional) Add download builds
-
-Drop zips into `downloads/`. Single files must be under 100 MB. For bigger builds, link to itch.io or a GitHub Release instead (see `url` below).
-
-### 3. Add the entry to games.json
-
-Open `games.json` in VS Code or Notepad. Paste this inside the `"games": [ ]` brackets and change the values:
+**2. Add the entry**
+- Open https://github.com/LicoRyte/licoryte.github.io/blob/main/games.json and click the ✏️ pencil (Edit).
+- Inside `"games": [ ... ]`, add a block like this:
 
 ```json
 {
-  "slug": "spelighter",
   "title": "Spelighter",
-  "date": "2026-10-24",
-  "status": "prototype",
-  "engine": "Godot 4",
-  "tags": ["platformer", "pixel art"],
-  "question": "what i wanted to figure out",
-  "learned": "what i figured out",
+  "url": "https://licothewhat.itch.io/spelighter",
+  "image": "img/covers/spelighter.png",
   "description": "one or two lines about the game",
-  "controls": "WASD to move, Space to jump",
-  "play": "games/spelighter/index.html",
-  "aspect": "16/9",
-  "downloads": [
-    { "label": "Windows (.zip)", "file": "downloads/spelighter-win.zip", "size": "59 MB" },
-    { "label": "Builds on itch.io", "url": "https://licothewhat.itch.io/spelighter" }
-  ]
+  "engine": "Godot",
+  "year": "2026",
+  "tags": ["platformer"],
+  "status": "prototype"
 }
 ```
 
-- **More than one game:** put a comma between entries `{ ... }, { ... }`, but no comma after the last one. A wrong comma is the #1 way to break the site. Paste the file into https://jsonlint.com if unsure.
-- `status`: `done`, `prototype` or `parked`.
-- `play`: `""` for download-only games.
-- `downloads`: `[]` for none. Use `file` for things in `downloads/`, `url` for links elsewhere.
-- `question` / `learned` / `controls`: leave as `""` to hide that row.
-- `thumb`: optional, e.g. `"games/spelighter/thumb.png"`. Without it the site draws a pixel sprite.
-- Newest `date` shows first and gets the blinking NEW! tag.
+- **Commit changes**.
 
-### 4. (Optional) Test the whole site locally
+Field notes:
+- Only `title` and `url` are really needed. Leave anything else out if you don't want it.
+- `image`: must match the file name you uploaded exactly (capital letters count).
+- `status`: `prototype` or `wip` → yellow WIP sticker, `done` → DONE sticker, `parked` → PARKED. Leave it out for no sticker.
+- `color`: optional label color, e.g. `"color": "#FF9EC7"`. Without it a color is picked from the title.
+- Order on the shelf = order in the list. Put new games at the top.
+- **Commas:** a comma between blocks `{ ... }, { ... }`, none after the last one. A wrong comma is the #1 way to break the site. If unsure, paste the file into https://jsonlint.com before committing.
 
-Double-clicking `index.html` won't work (the browser blocks it from reading `games.json`). In the site folder, open a terminal and run:
+## Remove or edit a game
 
-```
-py -m http.server
-```
-
-Then open http://localhost:8000. Ctrl+C to stop.
-
-### 5. Publish
-
-1. Open GitHub Desktop. Your changes are listed on the left.
-2. Type a summary at the bottom left (e.g. "add spelighter") → **Commit to main**.
-3. Click **Push origin** at the top.
-4. Wait 1–2 minutes, then refresh https://licoryte.github.io (Ctrl+F5).
-   Progress: github.com/LicoRyte/licoryte.github.io → **Actions** tab. Green check = live.
+Edit `games.json` on github.com (pencil icon), delete or change the block, commit. To delete a cover: open it in `img/covers/` → **⋯ → Delete file**.
 
 ## Add a picture to the gallery (easy way, no app needed)
 
@@ -126,22 +86,16 @@ Put **one** image in `img/background/` and delete the old one (`forest.webp`). O
 - Tall or wide both work; it's cropped to fill the screen. Around 1400–2000 px and under ~1 MB loads fast.
 - To force a specific image instead, set `"background": "img/background/whatever.jpg"` in `games.json` (inside `"site"`). Leave it `""` to use the folder.
 
-## Remove or update a game
-
-- **Remove:** delete its `games/<slug>/` folder and its entry in `games.json` → commit → push.
-- **Update:** export over the same folder → commit → push.
-
 ## If it breaks
 
-- **"Couldn't load games.json"** on the site: a typo in `games.json`. Check commas and quotes.
-- **Black screen / "SharedArrayBuffer" or "Cross-Origin Isolation" error** in a Godot game: Thread Support is still on. Turn it off and re-export.
-- **Blank Unity game**: compression is on. Set it to Disabled.
-- **Push rejected for a big file**: a file is over 100 MB. Move it out and link it with `url` instead.
-- **Changes don't show**: wait 2 minutes, then Ctrl+F5.
+- **"Couldn't load games.json"** on the site: a typo in `games.json`. Check commas and quotes, or paste it into https://jsonlint.com.
+- **Cover doesn't show:** the `image` path doesn't match the file name exactly, or the deploy isn't finished yet.
+- **Changes don't show:** wait 2 minutes, then Ctrl+F5.
+- **Undo a mistake:** on GitHub open **Commits**, find the last good one, and copy the old file contents back.
 
 ## Change the look
 
-Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray.
+Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray. Fonts are set in `--f-ui` (pixel), `--f-mono` (LCD), `--f-comic` (Dave's bubble) and `--f-body` (reading text).
 
 ## Sparkles
 

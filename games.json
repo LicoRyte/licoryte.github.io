@@ -26,7 +26,29 @@
       }
     ]
   },
-  "games": [],
+  "games": [
+    {
+      "title": "Spelighter",
+      "url": "https://licothewhat.itch.io/spelighter",
+      "image": "img/covers/spelighter.png",
+      "description": "Clancies explores a dark cave system with a flashlight. Climb, swim, find the way out.",
+      "engine": "Godot",
+      "tags": [
+        "platformer"
+      ],
+      "status": "prototype"
+    },
+    {
+      "title": "HOWL : Lost Pancake",
+      "url": "https://licothewhat.itch.io/howl-in-dev",
+      "image": "img/covers/howl.png",
+      "description": "Clancies the axolotl goes into a cave to find a lost pancake. Short, pretty difficult platformer.",
+      "engine": "GameMaker",
+      "tags": [
+        "platformer"
+      ]
+    }
+  ],
   "gallery": [
     {
       "file": "img/gallery/dave.webp",
