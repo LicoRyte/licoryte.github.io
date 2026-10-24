@@ -1,13 +1,13 @@
 {
   "site": {
-    "title": "Lico's Archive",
+    "title": "Lico's Web Blog",
     "owner": "Lico",
-    "tagline": "my little corner of the internet. games, experiments, and other stuff i made to learn things.",
+    "tagline": "my little corner of the interest. games, experiments, and other stuff i made to learn things.",
     "about": [
-      "hi, i'm Lico! welcome to my archive.",
+      "hi, i'm Lico! welcome to my web.",
       "this is where i keep the games and experiments i make for fun. each one started with a question i wanted to figure out. once i figured it out, it's done.",
-      "some are finished, some are prototypes, some are parked because they already taught me what i wanted. all of them are a little dumb. that's fine.",
-      "play stuff right here in the browser or grab a download. no ads, no tracking, no accounts. oh, and Dave lives at the bottom. he's tired. be nice."
+      "some are finished, some are prototypes, some are parked because they already taught me what i wanted. all of them are a little dumb.",
+      "play stuff right here in the browser or grab a download. oh, and Dave lives at the bottom. he's tired. be nice."
     ],
     "links": [
       {
