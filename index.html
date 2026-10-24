@@ -7,10 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="My corner of the internet. Games and experiments I made to learn things.">
 <style>
-/* Fonts (self-hosted in /fonts, SIL Open Font License) */
-@font-face { font-family: "Pixelify Sans"; font-weight: 400; font-display: swap; src: url("fonts/pixelify-sans-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Pixelify Sans"; font-weight: 600; font-display: swap; src: url("fonts/pixelify-sans-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Pixelify Sans"; font-weight: 700; font-display: swap; src: url("fonts/pixelify-sans-latin-700-normal.woff2") format("woff2"); }
+/* Fonts: VT323 (LCD counter) and Comic Neue (Dave's bubble) are self-hosted in /fonts, SIL Open Font License. The rest are classic system fonts. */
 @font-face { font-family: "VT323"; font-weight: 400; font-display: swap; src: url("fonts/vt323-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Comic Neue"; font-weight: 700; font-display: swap; src: url("fonts/comic-neue-latin-700-normal.woff2") format("woff2"); }
 /* Layout: a 2001-style personal homepage in green — gradient banner, left nav column of Win98 panels, main column with welcome box, game window and a games table, 88x31 buttons at the bottom */
@@ -34,9 +31,9 @@
   --lcd: #33FF33;
   --sky: #CFF5A0;
 
-  --f-ui: "Pixelify Sans", Tahoma, Verdana, sans-serif;
+  --f-ui: Tahoma, Verdana, "Segoe UI", Geneva, "DejaVu Sans", sans-serif;
   --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
-  --f-head: "Pixelify Sans", "Arial Black", Impact, sans-serif;
+  --f-head: "Trebuchet MS", "Lucida Grande", "Segoe UI", Tahoma, sans-serif;
   --f-mono: "VT323", "Courier New", Courier, monospace;
   --f-comic: "Comic Neue", "Comic Sans MS", "Chalkboard SE", cursive;
   color-scheme: light;
@@ -94,7 +91,7 @@ a:hover { color: var(--new); }
   box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--silver-lt);
 }
 .btn {
-  font-family: var(--f-ui); font-size: 14px; color: var(--text);
+  font-family: var(--f-ui); font-size: 12px; color: var(--text);
   background: var(--silver);
   border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
   box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
@@ -149,7 +146,7 @@ a.btn, a.btn:visited { color: var(--text); }
 .tbar {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   background: linear-gradient(90deg, var(--navy), var(--blue));
-  color: var(--hi); font-family: var(--f-ui); font-weight: 600; font-size: 14px; letter-spacing: .02em;
+  color: var(--hi); font-family: var(--f-ui); font-weight: bold; font-size: 12px;
   padding: 3px 3px 3px 6px; min-height: 22px;
 }
 .tbar .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -165,14 +162,14 @@ a.btn, a.btn:visited { color: var(--text); }
 
 /* Sidebar */
 .nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.nav a { display: block; padding: 2px 4px; font-family: var(--f-ui); font-size: 15px; font-weight: 600; }
+.nav a { display: block; padding: 2px 4px; font-family: var(--f-ui); font-size: 13px; font-weight: bold; }
 .nav a::before { content: "» "; color: var(--navy); }
 .counter {
   display: inline-block; background: var(--lcd-bg); color: var(--lcd);
   font-family: var(--f-mono); font-size: 30px; line-height: 1; letter-spacing: .1em;
   padding: 2px 6px; font-variant-numeric: tabular-nums;
 }
-.info { display: grid; gap: 6px; font-size: 12px; font-family: var(--f-ui); font-size: 14px; }
+.info { display: grid; gap: 6px; font-family: var(--f-ui); font-size: 12px; }
 .info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; }
 .info dt { color: #333333; }
 .info dd { margin: 0; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
@@ -184,59 +181,27 @@ a.btn, a.btn:visited { color: var(--text); }
 .welcome p { margin: 0 0 8px; max-width: 64ch; }
 .welcome .sig { font-style: italic; color: #333333; margin: 0; }
 
-/* Cartridge shelf */
-.shelf { background: var(--paper); padding: 18px 14px 14px; }
-.carts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 16px; }
+/* Game cards */
+.shelf { background: var(--paper); padding: 14px; }
+.carts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 860px) { .carts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 400px) { .carts { grid-template-columns: minmax(0, 1fr); } }
-.slot { display: grid; gap: 8px; align-content: start; min-width: 0; }
-.cart {
-  --label: #B6E33B;
-  position: relative; display: grid; gap: 8px; padding: 22px 10px 10px;
-  text-decoration: none; color: #1A1A1A;
-  background: linear-gradient(180deg, #D6D6D2 0%, #BDBDB8 60%, #A9A9A4 100%);
-  border: 2px solid #1A1A1A; border-radius: 6px 6px 4px 4px;
-  box-shadow: inset 2px 2px 0 #EDEDEA, inset -2px -2px 0 #8E8E89, 4px 4px 0 rgba(0, 0, 0, .55);
-  transition: transform .12s steps(2), box-shadow .12s steps(2);
+.card {
+  display: grid; grid-template-rows: auto auto 1fr auto auto; gap: 8px; padding: 6px 6px 8px; min-width: 0;
+  text-decoration: none; color: var(--text);
 }
-a.cart:visited { color: #1A1A1A; }
-.cart::before {
-  content: ""; position: absolute; top: 6px; left: 14px; right: 14px; height: 9px;
-  background: repeating-linear-gradient(90deg, #8E8E89 0 2px, #E4E4E0 2px 3px, transparent 3px 7px);
-  border-radius: 2px;
-}
-.cart:hover { transform: translateY(-5px); box-shadow: inset 2px 2px 0 #EDEDEA, inset -2px -2px 0 #8E8E89, 5px 9px 0 rgba(0, 0, 0, .45); }
-.cart:active { transform: translateY(2px); box-shadow: inset 2px 2px 0 #EDEDEA, inset -2px -2px 0 #8E8E89, 2px 2px 0 rgba(0, 0, 0, .55); }
-.cart:focus-visible { outline: 3px solid #FFFF66; outline-offset: 3px; }
-.label {
-  display: grid; gap: 6px; padding: 6px; position: relative;
-  background: var(--label); border: 2px solid #1A1A1A; border-radius: 4px;
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .55);
-}
-.art { display: block; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; background: #000000; border: 2px solid #1A1A1A; }
+a.card:visited { color: var(--text); }
+.card:hover .gtitle { color: var(--blue); text-decoration: underline; }
+.card:focus-visible { outline: 2px dotted var(--text); outline-offset: 2px; }
+.art { display: block; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; background: #000000; }
 .art img, .art canvas { width: 100%; height: 100%; display: block; object-fit: cover; image-rendering: pixelated; }
-.ltitle {
-  font-family: var(--f-head); font-weight: 700; font-size: 19px; line-height: 1.05; text-align: center;
-  color: #111111; text-transform: uppercase; letter-spacing: .02em; text-wrap: balance; overflow-wrap: anywhere;
-  min-height: 2.1em; display: grid; place-items: center;
-}
-.sticker {
-  position: absolute; top: -9px; right: -7px; transform: rotate(6deg);
-  font-family: var(--f-ui); font-weight: 700; font-size: 12px; line-height: 1;
-  padding: 3px 6px; border: 2px solid #1A1A1A; background: #FFFFFF; color: #1A1A1A;
-}
-.sticker.wip { background: #FFFF66; }
-.sticker.done { background: #66FFCC; }
-.emboss {
-  display: flex; justify-content: space-between; align-items: center; gap: 6px;
-  font-family: var(--f-ui); font-weight: 600; font-size: 13px; color: #5E5E5A;
-  text-shadow: 1px 1px 0 #EDEDEA; padding: 0 2px;
-}
-.emboss .go { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.cart-info { display: grid; gap: 2px; font-size: 12px; padding: 0 2px; min-width: 0; }
-.cart-info p { margin: 0; }
-.cart-info .meta { color: #555555; font-size: 11px; }
-.listbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 2px 2px 8px; font-family: var(--f-ui); font-size: 14px; }
+.gtitle { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 17px; line-height: 1.1; text-wrap: balance; overflow-wrap: anywhere; }
+.gdesc { margin: 0; font-size: 12px; line-height: 1.45; }
+.gfacts { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; font-size: 12px; background: #F1FAEA; border: 1px solid var(--silver); padding: 5px 7px; }
+.gfacts dt { font-family: var(--f-ui); font-weight: bold; color: #333333; }
+.gfacts dd { margin: 0; overflow-wrap: anywhere; }
+.card .btn { justify-content: center; }
+.listbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 2px 2px 8px; font-family: var(--f-ui); font-size: 12px; }
 .empty, .load-error { padding: 16px; font-size: 13px; }
 .carts .empty, .carts .load-error { grid-column: 1 / -1; }
 .load-error code { font-family: var(--f-mono); font-size: 16px; background: #EFEFEF; padding: 0 4px; }
@@ -278,7 +243,7 @@ footer a, footer a:visited { color: var(--sky); }
   content: ""; position: absolute; right: -8px; top: 50%; margin-top: -6px; z-index: 1;
   border-width: 6px 0 6px 9px; border-style: solid; border-color: transparent transparent transparent #FFFFFF;
 }
-.bubble .who { display: block; font-family: var(--f-ui); font-weight: 600; font-size: 13px; color: var(--navy); margin-bottom: 2px; }
+.bubble .who { display: block; font-family: var(--f-ui); font-weight: bold; font-size: 11px; color: var(--navy); margin-bottom: 2px; }
 .dave {
   background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 1; min-width: 0;
   -webkit-tap-highlight-color: transparent; position: relative; z-index: 1;
@@ -339,7 +304,7 @@ footer a, footer a:visited { color: var(--sky); }
   border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade);
 }
 .gitem img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.gitem .cap { font-family: var(--f-ui); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gitem .cap { font-family: var(--f-ui); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gitem:hover .ph, .gitem:focus-visible .ph { outline: 2px solid var(--blue); outline-offset: 1px; }
 .gal .empty { grid-column: 1 / -1; }
 
@@ -357,7 +322,7 @@ footer a, footer a:visited { color: var(--sky); }
 .lb-count { font-family: var(--f-ui); font-size: 11px; color: #333333; }
 
 /* Sparkle toggle */
-.toggle { display: flex; gap: 6px; align-items: center; font-family: var(--f-ui); font-size: 13px; cursor: pointer; border-top: 1px solid var(--shade); padding-top: 6px; }
+.toggle { display: flex; gap: 6px; align-items: center; font-family: var(--f-ui); font-size: 12px; cursor: pointer; border-top: 1px solid var(--shade); padding-top: 6px; }
 .toggle input { margin: 0; }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
 
@@ -425,7 +390,7 @@ footer a, footer a:visited { color: var(--sky); }
       <div class="win raised">
         <div class="tbar"><span class="name">stats</span></div>
         <div class="wbody info">
-          <div>cartridges on the shelf:</div>
+          <div>games on the shelf:</div>
           <div><span class="counter sunken" id="counter">000000</span></div>
           <dl>
             <dt>pictures</dt><dd id="stPics">0</dd>
@@ -453,7 +418,7 @@ footer a, footer a:visited { color: var(--sky); }
       <section class="win raised" id="games" aria-labelledby="gTitle">
         <div class="tbar"><span class="name" id="gTitle">stuff i made</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
         <div class="wbody">
-          <div class="listbar"><span>pick a cartridge. it opens where the game lives.</span><span id="gCount">0 games</span></div>
+          <div class="listbar"><span>click a game to open where it lives.</span><span id="gCount">0 games</span></div>
           <div class="shelf sunken"><div class="carts" id="grid"></div></div>
         </div>
       </section>
@@ -522,8 +487,6 @@ footer a, footer a:visited { color: var(--sky); }
     return el;
   }
 
-  const STICKER = { prototype: ['WIP', 'wip'], wip: ['WIP', 'wip'], done: ['DONE', 'done'], finished: ['DONE', 'done'], parked: ['PARKED', ''] };
-  const LABELS = ['#B6E33B', '#FFD84A', '#7FD8F0', '#FF9EC7', '#FFB35C', '#C9A6FF'];
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let DATA = null, games = [], pics = [];
@@ -651,29 +614,22 @@ footer a, footer a:visited { color: var(--sky); }
     } catch (e) { return 'website'; }
   }
 
-  function cart(g, i) {
+  function cart(g) {
     const key = g.slug || g.title;
-    const color = g.color || LABELS[hash(key) % LABELS.length];
-    const st = STICKER[String(g.status || '').toLowerCase()];
     const fallback = () => h('canvas', { 'data-slug': key, 'aria-hidden': 'true' });
     const art = g.image
       ? h('img', { src: src(g.image), alt: '', loading: 'lazy', onerror: e => { e.target.replaceWith(fallback()); drawThumbs(); } })
       : fallback();
-    const meta = [g.engine, g.year || fmtDate(g.date), (g.tags || []).join(', ')].filter(Boolean).join(' · ');
-    return h('article', { class: 'slot' },
-      h('a', { class: 'cart', href: g.url || '#', target: g.url ? '_blank' : null, rel: g.url ? 'noopener' : null,
-               style: '--label:' + color, 'aria-label': `${g.title} (opens ${hostLabel(g.url)})`,
-               onclick: e => { if (!g.url) e.preventDefault(); daveReact('game', g.title); } },
-        h('span', { class: 'label' },
-          h('span', { class: 'art' }, art),
-          h('span', { class: 'ltitle' }, g.title),
-          st && h('span', { class: 'sticker ' + st[1] }, st[0])),
-        h('span', { class: 'emboss', 'aria-hidden': 'true' },
-          h('span', { class: 'go' }, '▶ ' + (g.url ? hostLabel(g.url) : 'no link yet')),
-          h('span', {}, String(i + 1).padStart(2, '0')))),
-      (g.description || meta) && h('div', { class: 'cart-info' },
-        g.description && h('p', {}, g.description),
-        meta && h('p', { class: 'meta' }, meta)));
+    const list = v => Array.isArray(v) ? v.join(', ') : v;
+    const facts = [['platform', list(g.platform)], ['genre', list(g.genre)]].filter(f => f[1]);
+    const where = g.url ? hostLabel(g.url) : '';
+    return h('a', { class: 'card raised', href: g.url || '#', target: g.url ? '_blank' : null, rel: g.url ? 'noopener' : null,
+                    onclick: e => { if (!g.url) e.preventDefault(); daveReact('game', g.title); } },
+      h('span', { class: 'art sunken' }, art),
+      h('h3', { class: 'gtitle' }, g.title),
+      h('p', { class: 'gdesc' }, g.description || ''),
+      facts.length ? h('dl', { class: 'gfacts' }, ...facts.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)])) : h('span', {}),
+      h('span', { class: 'btn' }, g.url ? `▶ Play on ${where}` : 'No link yet'));
   }
 
   function renderGrid() {
@@ -911,7 +867,7 @@ footer a, footer a:visited { color: var(--sky); }
     if (kind === 'game') say(pick([
       `Off to ${extra}. Bring me back a souvenir.`,
       `${extra}? Bold choice. Tell me how it goes. Or don't.`,
-      `Blowing on the ${extra} cartridge. That's how it works, right?`
+      `Opening ${extra} in a new tab. I'll hold your coffee.`
     ]));
     else if (kind === 'pic') say(pick([
       'Nice picture. Very... picture-y.',

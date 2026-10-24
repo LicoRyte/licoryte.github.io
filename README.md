@@ -7,25 +7,25 @@ No backend, no database, no account. Everything is edited right on github.com �
 ```
 licoryte.github.io/
 ├─ index.html        the site itself (you rarely touch this)
-├─ games.json        site text, links and the list of game cartridges  ← edit this
-├─ img/covers/       cover images for the cartridges
+├─ games.json        site text, links and the list of games  ← edit this
+├─ img/covers/       cover images for the game cards
 ├─ img/gallery/      gallery pictures (just drop images here)
 ├─ img/background/   background image (keep one here)
 ├─ img/              Dave's pictures
-└─ fonts/            the retro fonts (Pixelify Sans, VT323, Comic Neue — all free, OFL)
+└─ fonts/            VT323 (counter) and Comic Neue (Dave's bubble) — free, OFL
 ```
 
 Changes go live 1–2 minutes after you commit. Refresh with Ctrl+F5. Progress: the **Actions** tab on GitHub (green check = live).
 
-## Add a game cartridge
+## Add a game
 
-Each game is a cartridge on the shelf. Clicking it opens the game's page (itch.io, Newgrounds, your own site, anything).
+Each game is a card on the shelf: cover image, title, description, platform, genre, and a button that opens the game's page (itch.io, Newgrounds, your own site, anything).
 
 **1. Upload the cover image** (optional, but it looks better)
 - Open https://github.com/LicoRyte/licoryte.github.io/tree/main/img/covers
 - **Add file → Upload files**, drag the image in, **Commit changes**.
 - Any size works; it's cropped to 4:3 (like 800×600). Your itch.io cover image is perfect.
-- No cover? The cartridge gets a random pixel sprite instead.
+- No cover? The card gets a random pixel sprite instead.
 
 **2. Add the entry**
 - Open https://github.com/LicoRyte/licoryte.github.io/blob/main/games.json and click the ✏️ pencil (Edit).
@@ -37,20 +37,16 @@ Each game is a cartridge on the shelf. Clicking it opens the game's page (itch.i
   "url": "https://licothewhat.itch.io/spelighter",
   "image": "img/covers/spelighter.png",
   "description": "one or two lines about the game",
-  "engine": "Godot",
-  "year": "2026",
-  "tags": ["platformer"],
-  "status": "prototype"
+  "platform": "Windows, Linux",
+  "genre": "Platformer"
 }
 ```
 
 - **Commit changes**.
 
 Field notes:
-- Only `title` and `url` are really needed. Leave anything else out if you don't want it.
+- Only `title` and `url` are really needed. Leave out `platform` or `genre` and that row just disappears.
 - `image`: must match the file name you uploaded exactly (capital letters count).
-- `status`: `prototype` or `wip` → yellow WIP sticker, `done` → DONE sticker, `parked` → PARKED. Leave it out for no sticker.
-- `color`: optional label color, e.g. `"color": "#FF9EC7"`. Without it a color is picked from the title.
 - Order on the shelf = order in the list. Put new games at the top.
 - **Commas:** a comma between blocks `{ ... }, { ... }`, none after the last one. A wrong comma is the #1 way to break the site. If unsure, paste the file into https://jsonlint.com before committing.
 
@@ -95,7 +91,7 @@ Put **one** image in `img/background/` and delete the old one (`forest.webp`). O
 
 ## Change the look
 
-Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray. Fonts are set in `--f-ui` (pixel), `--f-mono` (LCD), `--f-comic` (Dave's bubble) and `--f-body` (reading text).
+Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray. Fonts are set in `--f-ui` (Tahoma, window chrome), `--f-head` (Trebuchet MS, headings), `--f-body` (Verdana, reading text), `--f-mono` (LCD counter) and `--f-comic` (Dave's bubble).
 
 ## Sparkles
 
