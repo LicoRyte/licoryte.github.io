@@ -26,6 +26,30 @@
   },
   "games": [
     {
+      "slug": "spelighter",
+      "title": "Spelighter",
+      "date": "2026-10-24",
+      "status": "prototype",
+      "engine": "Godot 4",
+      "tags": [
+        "platformer",
+        "pixel art",
+        "exploration"
+      ],
+      "question": "",
+      "learned": "",
+      "description": "Clancies returns, braver than before, to explore a dark cave system and find her way back to the surface. A resprite edition of Howl with a flashlight, climbing and swimming. Art by Lico Ryte & JohnQ.",
+      "controls": "WASD to move. Space to jump. R to climb. Left click for the flashlight.",
+      "play": "games/spelighter/index.html",
+      "aspect": "16/9",
+      "downloads": [
+        {
+          "label": "Windows & Linux builds (itch.io)",
+          "url": "https://licothewhat.itch.io/spelighter"
+        }
+      ]
+    },
+    {
       "slug": "dodge-box",
       "title": "Dodge Box",
       "example": true,
