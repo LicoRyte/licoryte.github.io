@@ -36,19 +36,22 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; }
 body {
   background-color: var(--desk);
-  background-image:
-    radial-gradient(1px 1px at 12px 18px, #ffffff 50%, transparent 51%),
-    radial-gradient(1px 1px at 70px 64px, #b6e33b 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 110px 30px, #ffffff 50%, transparent 51%),
-    radial-gradient(1px 1px at 40px 100px, #ffffff 50%, transparent 51%),
-    radial-gradient(1px 1px at 96px 118px, #ffff99 50%, transparent 51%);
-  background-size: 128px 128px;
   color: var(--text);
   font-family: var(--f-body);
   font-size: 13px;
   line-height: 1.5;
+}
+.bg {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(2, 26, 8, .20) 0%, rgba(2, 26, 8, .35) 60%, rgba(2, 26, 8, .65) 100%),
+    url("img/bg-forest.webp") center 30% / cover no-repeat,
+    var(--desk);
 }
 a { color: var(--link); }
 a:visited { color: var(--visited); }
@@ -245,7 +248,7 @@ a.btn, a.btn:visited { color: var(--text); }
 
 /* Footer */
 footer { display: grid; gap: 10px; justify-items: center; text-align: center; padding-top: 6px; color: #A8D890; font-size: 11px; }
-footer p { margin: 0; }
+footer p { margin: 0; text-shadow: 1px 1px 0 #000000, 0 0 6px #000000; }
 footer a, footer a:visited { color: var(--sky); }
 .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .badge {
@@ -270,7 +273,7 @@ footer a, footer a:visited { color: var(--sky); }
   max-width: 270px; background: #FFFFFF; color: #000000; text-align: left;
   font-family: var(--f-body); font-size: 13px; line-height: 1.4;
   border: 2px solid #000000; border-radius: 14px; padding: 10px 12px;
-  box-shadow: 3px 3px 0 #000000;
+  box-shadow: 3px 3px 0 #000000; text-shadow: none;
 }
 .bubble::after {
   content: ""; position: absolute; right: -12px; top: 50%; margin-top: -8px;
@@ -314,7 +317,7 @@ footer a, footer a:visited { color: var(--sky); }
   background: #FFFF66; color: #000000; font-family: var(--f-mono); font-size: 11px; font-weight: bold;
   padding: 2px 6px; box-shadow: 1px 1px 0 rgba(0, 0, 0, .4);
 }
-.pokes { font-size: 11px; color: #A8D890; margin: 0; }
+.pokes { font-size: 11px; color: #CFF5A0; margin: 0; text-shadow: 1px 1px 0 #000000, 0 0 6px #000000; }
 @media (max-width: 560px) {
   .dave-spot { flex-direction: column; align-items: center; gap: 12px; }
   .bubble { margin: 0; max-width: 100%; }
@@ -326,15 +329,80 @@ footer a, footer a:visited { color: var(--sky); }
   .hex-wrap, .hex { width: 72px; height: 83px; }
 }
 
+
+/* Gallery */
+.gal {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 128px), 1fr)); gap: 12px;
+  padding: 10px; background: var(--paper);
+}
+.gitem {
+  display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0;
+  cursor: pointer; font: inherit; color: inherit; text-align: center; min-width: 0;
+}
+.gitem .ph {
+  display: block; aspect-ratio: 1; max-width: 100%; overflow: hidden; background: #EFEFEF;
+  border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade);
+}
+.gitem img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gitem .cap { font-family: var(--f-ui); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gitem:hover .ph, .gitem:focus-visible .ph { outline: 2px solid var(--blue); outline-offset: 1px; }
+.gal .empty { grid-column: 1 / -1; }
+
+/* Picture viewer */
+.lb {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+  background: rgba(1, 16, 5, .78);
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+}
+.lb .win { width: min(100%, 880px); max-height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.lb-view { background: #000000; display: grid; place-items: center; min-height: 0; overflow: hidden; margin: 3px 0; }
+.lb-view img { max-width: 100%; max-height: min(72vh, 900px); width: auto; height: auto; display: block; object-fit: contain; }
+.lb-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 4px 3px; }
+.lb-note { flex: 1 1 200px; min-width: 0; font-size: 12px; margin: 0; }
+.lb-count { font-family: var(--f-ui); font-size: 11px; color: #333333; }
+
+/* Sparkle toggle */
+.toggle { display: flex; gap: 6px; align-items: center; font-family: var(--f-ui); font-size: 12px; cursor: pointer; border-top: 1px solid var(--shade); padding-top: 6px; }
+.toggle input { margin: 0; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+
+/* Dave moods */
+.dave { transition: filter .6s; }
+.dave-spot[data-mood="asleep"] .dave { filter: brightness(.5) saturate(.45); }
+.dave-spot[data-mood="asleep"].woken .dave { filter: brightness(.85) saturate(.8); }
+.dave-spot[data-mood="slump"] .dave { filter: brightness(.88) saturate(.8); }
+.dave-spot[data-mood="happy"] .dave { filter: saturate(1.3) brightness(1.06); }
+.dave-spot[data-mood="annoyed"] .dave { animation: glitch .18s steps(2) infinite; }
+@keyframes glitch {
+  0% { filter: hue-rotate(0deg); transform: translateX(0); }
+  50% { filter: hue-rotate(260deg) saturate(2.2); transform: translateX(3px); }
+  100% { filter: hue-rotate(0deg); transform: translateX(-2px); }
+}
+.zzz {
+  position: absolute; z-index: 3; left: calc(50% + 40px); top: 22px; display: none; pointer-events: none;
+  font-family: var(--f-head); color: #CFF5A0; font-size: 22px; text-shadow: 2px 2px 0 #011005;
+}
+.zzz span { display: inline-block; animation: zz 2.4s ease-in-out infinite; }
+.zzz span:nth-child(2) { font-size: .8em; animation-delay: .4s; }
+.zzz span:nth-child(3) { font-size: .6em; animation-delay: .8s; }
+@keyframes zz { 0%, 100% { transform: translateY(0); opacity: .3; } 50% { transform: translateY(-10px); opacity: 1; } }
+.dave-spot[data-mood="asleep"]:not(.woken) .zzz { display: block; }
+.mood-tag { font-weight: normal; color: #555555; }
+@media (max-width: 560px) { .zzz { left: auto; right: 18%; top: auto; bottom: 200px; } }
+
 @media (prefers-reduced-motion: reduce) {
   .ticker-track { animation: none; padding-left: 8px; }
   .newtag { animation: none; }
   .dave.squish img { animation-duration: .25s; }
+  .zzz span { animation: none; opacity: .8; }
+  .dave-spot[data-mood="annoyed"] .dave { animation: none; filter: hue-rotate(260deg) saturate(2); }
 }
 </style>
 </head>
 <body>
 
+<div class="bg" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
 <div class="page" id="top">
   <header class="banner">
     <a class="hex-wrap" href="#dave" aria-label="Go say hi to Dave"><span class="hex"><span class="hex-in"><img src="img/dave-face.webp" width="240" height="240" alt=""></span></span></a>
@@ -354,6 +422,7 @@ footer a, footer a:visited { color: var(--sky); }
           <ul class="nav">
             <li><a href="#top">home</a></li>
             <li><a href="#games">stuff i made</a></li>
+            <li><a href="#gallery">gallery</a></li>
             <li><a href="#welcome">about me</a></li>
             <li><a href="#links">links</a></li>
             <li><a href="#dave">bother Dave</a></li>
@@ -370,9 +439,11 @@ footer a, footer a:visited { color: var(--sky); }
             <dt>playable</dt><dd id="stPlay">0</dd>
             <dt>downloads</dt><dd id="stDl">0</dd>
             <dt>finished</dt><dd id="stDone">0</dd>
+            <dt>pictures</dt><dd id="stPics">0</dd>
             <dt>updated</dt><dd id="stSave">----</dd>
           </dl>
           <p class="uc"><b>under construction</b> forever. that's kind of the point.</p>
+          <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
         </div>
       </div>
 
@@ -439,6 +510,13 @@ footer a, footer a:visited { color: var(--sky); }
           </div>
         </div>
       </section>
+
+      <section class="win raised" id="gallery" aria-labelledby="galTitle">
+        <div class="tbar"><span class="name" id="galTitle">gallery</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
+        <div class="wbody">
+          <div class="gal sunken" id="galGrid"></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -453,8 +531,9 @@ footer a, footer a:visited { color: var(--sky); }
     </div>
     <p id="footNote">Hand-made static site.</p>
     <p><a href="#top">back to top ↑</a></p>
-    <div class="dave-spot" id="dave">
-      <p class="bubble" id="daveSay" role="status" aria-live="polite"><span class="who">Dave</span><span id="daveLine">*sigh* oh. a visitor. poke me if you need something.</span></p>
+    <div class="dave-spot" id="dave" data-mood="working">
+      <div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
+      <p class="bubble" id="daveSay" role="status" aria-live="polite"><span class="who">Dave <span class="mood-tag" id="daveMood"></span></span><span id="daveLine">*sigh* oh. a visitor. poke me if you need something.</span></p>
       <button class="dave" id="daveBtn" type="button" aria-label="Poke Dave">
         <img src="img/dave-half.webp" width="608" height="560" alt="Dave, a tired office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers" draggable="false">
       </button>
@@ -462,6 +541,20 @@ footer a, footer a:visited { color: var(--sky); }
     </div>
     <p class="pokes" id="pokes" hidden></p>
   </footer>
+</div>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+  <div class="win raised">
+    <div class="tbar"><span class="name" id="lbTitle">picture.bmp</span><div class="tbtns"><button type="button" id="lbClose" aria-label="Close picture">×</button></div></div>
+    <div class="lb-view sunken"><img id="lbImg" src="data:," alt=""></div>
+    <div class="lb-foot">
+      <button type="button" class="btn" id="lbPrev">◀ Prev</button>
+      <button type="button" class="btn" id="lbNext">Next ▶</button>
+      <p class="lb-note" id="lbNote"></p>
+      <span class="lb-count" id="lbCount"></span>
+      <a class="btn" id="lbFull" href="#" target="_blank" rel="noopener">Full size</a>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -489,7 +582,7 @@ footer a, footer a:visited { color: var(--sky); }
   };
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let DATA = null, games = [], filter = 'all', current = null, newest = null;
+  let DATA = null, games = [], pics = [], filter = 'all', current = null, newest = null;
 
   function fmtDate(d) {
     if (!d) return '';
@@ -546,12 +639,14 @@ footer a, footer a:visited { color: var(--sky); }
     $('#stDl').textContent = games.filter(g => (g.downloads || []).length).length;
     $('#stDone').textContent = games.filter(g => g.status === 'done').length;
     $('#stSave').textContent = last || '----';
+    $('#stPics').textContent = pics.length;
     $('#footNote').textContent = `© ${(last || '2026').slice(0, 4)} ${s.owner || ''} · made by hand, not by a company · last updated ${last || 'never'}`;
 
     newest = games[0] || null;
     const bits = [`welcome to ${s.title || 'my site'}!`];
     if (newest) bits.push(`new: ${newest.title} (${fmtDate(newest.date)})`);
-    bits.push(`${games.length} thing${games.length === 1 ? '' : 's'} on the shelf`, 'no ads, no tracking, no accounts', 'click a game to play it', 'say hi to Dave at the bottom');
+    bits.push(`${games.length} thing${games.length === 1 ? '' : 's'} on the shelf`, 'no ads, no tracking, no accounts', 'click a game to play it', pics.length ? `${pics.length} picture${pics.length === 1 ? '' : 's'} in the gallery` : null, 'say hi to Dave at the bottom');
+    bits.splice(0, bits.length, ...bits.filter(Boolean));
     $('#ticker').textContent = '*** ' + bits.join(' *** ') + ' ***';
   }
 
@@ -634,6 +729,7 @@ footer a, footer a:visited { color: var(--sky); }
     document.querySelectorAll('.row').forEach(c => c.classList.toggle('active', c.dataset.slug === slug));
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
     if (scroll) player.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    daveReact('game', g.title);
   }
 
   function closeGame() {
@@ -671,22 +767,74 @@ footer a, footer a:visited { color: var(--sky); }
       DATA = await r.json();
     } catch (e) {
       showLoadError(e instanceof SyntaxError ? 'The file has a typo: ' + e.message : '');
+      renderGallery();
+      setMood();
       return;
     }
     games = (DATA.games || []).filter(g => g && g.slug && g.title)
       .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    pics = (DATA.gallery || []).filter(x => x && x.file);
     renderSite();
     renderGrid();
+    renderGallery();
+    setMood();
     const slug = decodeURIComponent(location.hash.slice(1));
     if (slug) openGame(slug, false);
   }
 
 
+  /* Gallery */
+  let lbIndex = 0, lbReturn = null;
+  function renderGallery() {
+    const grid = $('#galGrid');
+    $('#galTitle').textContent = `gallery — ${pics.length} picture${pics.length === 1 ? '' : 's'}`;
+    if (!pics.length) { grid.replaceChildren(h('p', { class: 'empty' }, 'no pictures yet.')); return; }
+    grid.replaceChildren(...pics.map((pic, i) =>
+      h('button', { type: 'button', class: 'gitem', onclick: () => openPic(i), 'aria-label': 'Open picture: ' + (pic.title || 'untitled') },
+        h('span', { class: 'ph' }, h('img', { src: pic.thumb || pic.file, alt: pic.alt || pic.title || '', loading: 'lazy' })),
+        h('span', { class: 'cap' }, pic.title || 'untitled'))));
+  }
+  function showPic(i) {
+    lbIndex = (i + pics.length) % pics.length;
+    const pic = pics[lbIndex];
+    const img = $('#lbImg');
+    img.src = pic.file; img.alt = pic.alt || pic.title || '';
+    const name = (pic.file.split('/').pop() || 'picture');
+    $('#lbTitle').textContent = (pic.title ? pic.title + ' - ' : '') + name;
+    $('#lbNote').textContent = [pic.note, fmtDate(pic.date)].filter(Boolean).join(' · ');
+    $('#lbCount').textContent = `${lbIndex + 1} / ${pics.length}`;
+    $('#lbFull').href = pic.file;
+    const multi = pics.length > 1;
+    $('#lbPrev').hidden = !multi; $('#lbNext').hidden = !multi;
+  }
+  function openPic(i) {
+    lbReturn = document.activeElement;
+    showPic(i);
+    $('#lb').hidden = false;
+    $('#lbClose').focus();
+    daveReact('pic');
+  }
+  function closePic() {
+    $('#lb').hidden = true;
+    $('#lbImg').src = 'data:,';
+    if (lbReturn && lbReturn.focus) lbReturn.focus();
+  }
+  $('#lbClose').addEventListener('click', closePic);
+  $('#lbPrev').addEventListener('click', () => showPic(lbIndex - 1));
+  $('#lbNext').addEventListener('click', () => showPic(lbIndex + 1));
+  $('#lb').addEventListener('click', e => { if (e.target.id === 'lb') closePic(); });
+  document.addEventListener('keydown', e => {
+    if ($('#lb').hidden) return;
+    if (e.key === 'Escape') closePic();
+    else if (e.key === 'ArrowLeft' && pics.length > 1) showPic(lbIndex - 1);
+    else if (e.key === 'ArrowRight' && pics.length > 1) showPic(lbIndex + 1);
+  });
+
   /* Dave */
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
   const DAVE_LINES = [
     '*sips coffee* what.',
     "I'm not a button. ...okay, I'm a button.",
-    'Third coffee. Do not ask about the first two.',
     "This could've been an email.",
     'Low battery. Please stop poking.',
     "These papers aren't going to file themselves. Apparently.",
@@ -697,17 +845,86 @@ footer a, footer a:visited { color: var(--sky); }
     'Is Printer broken again or somethin\'?',
     "I hate Monday, and so are you",
     'I like Golden Retriever, they are silly. Wait.. what im even doin\'',
-    "Overtime again. No, I don't get paid. I'm a drawing.",
     'Okay, that one squished my antenna.',
     'Lico made all of this to learn stuff. I just live here.',
     'If a game breaks, it was a learning experience. That is the official policy.',
     "Need a reboot. Don't unplug me.",
     'I have a sticky note for this somewhere.',
-    'Printer jammed. Not my problem today.',
     'You again. Fine. Hi.',
     '*screen flickers* ...sorry. Old monitor.',
-    'Try the top game. Or don\'t. I\'m not your boss.'
+    "Try the top game. Or don't. I'm not your boss."
   ];
+  const MOODS = {
+    asleep: { tag: 'asleep', greet: 'zzz... *mumbles something about spreadsheets*', lines: [
+      'huh? what. who. ...it\'s the middle of the night.',
+      'Five more minutes. Five more years.',
+      "I was dreaming I got a raise. Thanks for ruining that.",
+      '*screen wakes up* ...no. *screen goes back to sleep*',
+      'The office is closed. Go to bed. I mean it.',
+      'zzz... the printer... it\'s alive...'
+    ] },
+    booting: { tag: 'booting up', greet: 'Booting... 12%... need coffee to continue.', lines: [
+      'Too early. Systems not fully loaded.',
+      'First coffee. Do not talk to me until the second one.',
+      'Good morning. Allegedly.',
+      '*loading bar stuck at 99%*',
+      'Who schedules things before 9. Who does that.'
+    ] },
+    working: { tag: 'working', greet: '*typing* Oh. A visitor. Poke me if you need something.', lines: [
+      'Busy. Very busy. Look at all these papers.',
+      'In a meeting. With myself. It is going badly.',
+      'Third coffee. Do not ask about the first two.',
+      "I'm on a deadline. The deadline is fake, but I'm on it."
+    ] },
+    lunch: { tag: 'lunch break', greet: 'On lunch. Come back in an hour. Or don\'t.', lines: [
+      "I'm on break. This is an unpaid poke.",
+      'Lunch is a sandwich and 40 emails.',
+      "Can't talk. Eating. Don't ask how, I'm a monitor.",
+      'Break room microwave is broken again. Classic.'
+    ] },
+    slump: { tag: 'afternoon slump', greet: '*screen dims slightly* ...2pm. the worst hour.', lines: [
+      'Post-lunch shutdown in progress.',
+      "My eyes are open. Technically. They're pixels.",
+      'If I stare at this paper long enough, it will do itself.',
+      'Another coffee. For science.'
+    ] },
+    overtime: { tag: 'overtime', greet: 'Still here. Overtime. Again.', lines: [
+      "Overtime again. No, I don't get paid. I'm a drawing.",
+      'Everyone went home. I live here.',
+      'The cleaning crew waved at me. We are friends now.',
+      'One more file. Then another one. Forever.'
+    ] },
+    late: { tag: 'should go home', greet: "It's late. Why are you on a website about games. ...why am I.", lines: [
+      'Go to sleep. I mean it.',
+      "It's way past office hours. I'm judging both of us.",
+      'The building lights turned off. I am the only light.',
+      "Okay one more game and then bed. That's what Lico says every night."
+    ] },
+    monday: { tag: 'monday', greet: 'Monday. *stares into the void*', lines: [
+      "It's Monday. I don't want to talk about it.",
+      'Monday. The printer knows. The printer is also suffering.',
+      '4 more days. Not that I\'m counting. I am counting.',
+      'Mondays should be illegal. I emailed HR. I am HR.'
+    ] },
+    happy: { tag: 'friday', greet: "Friday afternoon. I'm almost... happy? Weird.", lines: [
+      "It's Friday. I'm allowed to smile. I won't, but I'm allowed.",
+      'Weekend loading... 87%...',
+      'Not even the printer can ruin this.',
+      'Poke me all you want. Nothing hurts on a Friday.'
+    ] },
+    weekend: { tag: 'day off', greet: "It's the weekend. Why am I here. Why are YOU here.", lines: [
+      "Day off. I'm only here because I live here.",
+      'No emails. No meetings. Just vibes. Tired vibes.',
+      "Weekend Dave doesn't do papers. Weekend Dave does nothing.",
+      'Go outside. Look at the forest. That background is real, probably.'
+    ] },
+    annoyed: { tag: 'annoyed', greet: '', lines: [
+      'STOP. *screen glitches* stop that.',
+      'You are poking too fast. My refresh rate cannot handle this.',
+      'ERROR: TOO MANY POKES. PLEASE WAIT.',
+      'I will unplug myself. Don\'t test me.'
+    ] }
+  };
   const DAVE_MILESTONES = {
     10: 'Ten pokes. Do you need help with something, or is this a cry for attention.',
     20: 'Twenty.... Are you serious?',
@@ -715,26 +932,160 @@ footer a, footer a:visited { color: var(--sky); }
     50: 'Fifty pokes. Respect. Go play a game, champ.',
     100: "A hundred. You win. There's no prize. There's never a prize."
   };
-  let pokes = 0, lastLine = -1;
-  const daveBtn = $('#daveBtn');
-  daveBtn.addEventListener('click', () => {
-    pokes++;
-    daveBtn.classList.remove('squish');
-    void daveBtn.offsetWidth;
-    daveBtn.classList.add('squish');
-    let line = DAVE_MILESTONES[pokes];
-    if (!line) {
-      let i;
-      do { i = Math.floor(Math.random() * DAVE_LINES.length); } while (i === lastLine);
-      lastLine = i;
-      line = DAVE_LINES[i];
-    }
+  const spot = $('#dave'), daveBtn = $('#daveBtn');
+  let mood = 'working', overrideUntil = 0, wokenTimer = 0, lastSaid = '', lastTalk = 0, pokes = 0, pokeTimes = [], greeted = false;
+
+  function moodFromClock(d = new Date()) {
+    const hr = d.getHours(), day = d.getDay();
+    if (hr < 6) return 'asleep';
+    if (day === 0 || day === 6) return hr >= 22 ? 'late' : 'weekend';
+    if (day === 1 && hr >= 9 && hr < 17) return 'monday';
+    if (day === 5 && hr >= 15 && hr < 22) return 'happy';
+    if (hr < 9) return 'booting';
+    if (hr < 12) return 'working';
+    if (hr < 13) return 'lunch';
+    if (hr < 17) return 'slump';
+    if (hr < 22) return 'overtime';
+    return 'late';
+  }
+  function say(line) {
+    lastSaid = line; lastTalk = Date.now();
     $('#daveLine').textContent = line;
+  }
+  function setMood(force) {
+    if (!force && Date.now() < overrideUntil) return;
+    const next = force || moodFromClock();
+    const changed = next !== mood;
+    mood = next;
+    spot.dataset.mood = mood;
+    $('#daveMood').textContent = '· ' + MOODS[mood].tag;
+    if (!greeted || (changed && !force && Date.now() - lastTalk > 20000)) {
+      greeted = true;
+      say(games.length || !DATA ? MOODS[mood].greet : MOODS[mood].greet + ' Also the shelf is empty. Lico is "working on it."');
+    }
+  }
+  function moodLine() {
+    const pool = mood === 'annoyed' || mood === 'asleep' ? MOODS[mood].lines : (Math.random() < 0.6 ? MOODS[mood].lines : DAVE_LINES);
+    let line, n = 0;
+    do { line = pick(pool); n++; } while (line === lastSaid && n < 8);
+    return line;
+  }
+  function daveReact(kind, extra) {
+    if (Date.now() - lastTalk < 2500) return;
+    if (mood === 'asleep') { say(kind === 'game' ? '*mumbles* ...good game... zzz' : '*one eye opens* ...nice picture... zzz'); return; }
+    if (kind === 'game') say(pick([
+      `Oh, ${extra}. Good pick. ...I think. I've never played it. I'm a drawing.`,
+      `${extra}? Bold choice. Tell me how it goes. Or don't.`,
+      `Loading ${extra}... faster than my morning boot, at least.`
+    ]));
+    else if (kind === 'pic') say(pick([
+      'Nice picture. Very... picture-y.',
+      "Ooh, art. I'd hang that in the break room.",
+      "That's going on the fridge. We don't have a fridge. Still."
+    ]));
+    else if (kind === 'idle') say(pick([
+      '...hello? Still there? *screen dims a bit*',
+      'You went quiet. Did you fall asleep? Relatable.',
+      'Idle detected. Entering screensaver mode. Just kidding. I wish.'
+    ]));
+  }
+
+  daveBtn.addEventListener('click', () => {
+    const now = Date.now();
+    pokes++;
+    pokeTimes = pokeTimes.filter(t => now - t < 4000); pokeTimes.push(now);
+    daveBtn.classList.remove('squish'); void daveBtn.offsetWidth; daveBtn.classList.add('squish');
+
+    if (pokeTimes.length >= 6 && mood !== 'annoyed') {
+      overrideUntil = now + 6000;
+      setMood('annoyed');
+      setTimeout(() => { overrideUntil = 0; setMood(); }, 6050);
+    }
+    if (mood === 'asleep') {
+      spot.classList.add('woken');
+      clearTimeout(wokenTimer);
+      wokenTimer = setTimeout(() => spot.classList.remove('woken'), 6000);
+    }
+    say(DAVE_MILESTONES[pokes] || moodLine());
     const pk = $('#pokes');
     pk.hidden = false;
     pk.textContent = `times Dave has been poked this visit: ${pokes}`;
+    sparkleAt(daveBtn);
   });
-  daveBtn.addEventListener('animationend', () => daveBtn.classList.remove('squish'));
+  daveBtn.addEventListener('animationend', e => { if (e.target.tagName === 'IMG') daveBtn.classList.remove('squish'); });
+
+  setInterval(() => setMood(), 60000);
+  let idleTimer = 0, idleSaid = false;
+  const resetIdle = () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { if (!idleSaid) { idleSaid = true; daveReact('idle'); } }, 90000);
+  };
+  ['pointermove', 'keydown', 'scroll', 'touchstart'].forEach(ev => addEventListener(ev, resetIdle, { passive: true }));
+  resetIdle();
+
+  /* Sparkles + cursor trail */
+  const fx = $('#fx'), fxc = fx.getContext('2d');
+  const FX_COLORS = ['#B6E33B', '#FFFF66', '#FFFFFF', '#66FFCC', '#33FF33'];
+  let parts = [], fxOn = !reduced, fxRunning = false, lastTrail = { x: -99, y: -99 }, dpr = 1;
+  try { const v = localStorage.getItem('lico-fx'); if (v !== null) fxOn = v === '1'; } catch (e) {}
+  const fxToggle = $('#fxToggle');
+  fxToggle.checked = fxOn;
+  fxToggle.addEventListener('change', () => {
+    fxOn = fxToggle.checked;
+    try { localStorage.setItem('lico-fx', fxOn ? '1' : '0'); } catch (e) {}
+    if (!fxOn) { parts = []; fxc.clearRect(0, 0, fx.width, fx.height); }
+    else sparkleAt(fxToggle);
+  });
+  function sizeFx() {
+    dpr = Math.min(2, devicePixelRatio || 1);
+    fx.width = Math.round(innerWidth * dpr); fx.height = Math.round(innerHeight * dpr);
+    fxc.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  sizeFx(); addEventListener('resize', sizeFx);
+
+  function addPart(x, y, kind) {
+    if (parts.length > 260) parts.shift();
+    if (kind === 'trail') {
+      parts.push({ x: x + (Math.random() - .5) * 6, y: y + (Math.random() - .5) * 6, vx: (Math.random() - .5) * .4, vy: .3 + Math.random() * .5,
+        life: 1, decay: .03 + Math.random() * .02, size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: false });
+    } else {
+      const a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 3.5;
+      parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, decay: .018 + Math.random() * .015,
+        size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: Math.random() < .55 });
+    }
+    if (!fxRunning) { fxRunning = true; requestAnimationFrame(tick); }
+  }
+  function burst(x, y, n = 16) { if (!fxOn) return; for (let i = 0; i < n; i++) addPart(x, y, 'burst'); }
+  function sparkleAt(el) { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .3, 22); }
+  function drawPixelStar(x, y, s) {
+    fxc.fillRect(x - s, y - s * 3, s * 2, s * 6);
+    fxc.fillRect(x - s * 3, y - s, s * 6, s * 2);
+  }
+  function tick() {
+    fxc.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter(p => p.life > 0);
+    for (const p of parts) {
+      p.x += p.vx; p.y += p.vy;
+      p.vy += p.star ? .06 : .015;
+      p.vx *= .98; p.life -= p.decay;
+      fxc.globalAlpha = Math.max(0, p.life);
+      fxc.fillStyle = p.c;
+      const x = Math.round(p.x), y = Math.round(p.y);
+      if (p.star) drawPixelStar(x, y, Math.max(1, Math.round(p.size / 2 * (0.5 + p.life / 2))));
+      else fxc.fillRect(x, y, p.size, p.size);
+    }
+    fxc.globalAlpha = 1;
+    if (parts.length) requestAnimationFrame(tick); else fxRunning = false;
+  }
+  addEventListener('pointermove', e => {
+    if (!fxOn || e.pointerType !== 'mouse') return;
+    const dx = e.clientX - lastTrail.x, dy = e.clientY - lastTrail.y;
+    if (dx * dx + dy * dy < 64) return;
+    lastTrail = { x: e.clientX, y: e.clientY };
+    addPart(e.clientX, e.clientY, 'trail');
+    if (Math.random() < .35) addPart(e.clientX, e.clientY, 'trail');
+  }, { passive: true });
+  addEventListener('pointerdown', e => { if (e.target !== daveBtn && !daveBtn.contains(e.target)) burst(e.clientX, e.clientY, 12); }, { passive: true });
 
   window.addEventListener('hashchange', () => {
     const slug = decodeURIComponent(location.hash.slice(1));

@@ -96,6 +96,18 @@ Then open http://localhost:8000. Ctrl+C to stop.
 4. Wait 1–2 minutes, then refresh https://licoryte.github.io (Ctrl+F5).
    Progress: github.com/LicoRyte/licoryte.github.io → **Actions** tab. Green check = live.
 
+## Add a picture to the gallery
+
+1. Put the image in `img/gallery/` (jpg, png, gif or webp). Keep it under ~2 MB; resize big photos to about 1600 px wide first.
+2. Add an entry to the `"gallery": [ ]` list at the bottom of `games.json`:
+
+```json
+{ "file": "img/gallery/my-drawing.png", "title": "My drawing", "note": "optional caption", "date": "2026-10-24", "alt": "what the picture shows, for screen readers" }
+```
+
+Only `file` is required. Order in the list = order on the page. Same comma rule as games.
+3. Commit → push.
+
 ## Remove or update a game
 
 - **Remove:** delete its `games/<slug>/` folder and its entry in `games.json` → commit → push.
@@ -113,6 +125,11 @@ Then open http://localhost:8000. Ctrl+C to stop.
 
 Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray.
 
+## Background, sparkles
+
+- Background photo: `img/bg-forest.webp`. Replace the file (same name) to change it.
+- Sparkles & cursor trail: visitors can turn them off with the checkbox in the "stats" box. They start off for people who set "reduce motion" on their device.
+
 ## Dave
 
-`img/dave-half.webp` (bottom of the page) and `img/dave-face.webp` (header hexagon). His lines are in `index.html`: search for `DAVE_LINES`, and `DAVE_MILESTONES` for the special lines after 10, 25, 50 and 100 pokes.
+`img/dave-half.webp` (bottom of the page) and `img/dave-face.webp` (header hexagon). His lines are in `index.html`: `DAVE_LINES` (any time), `MOODS` (lines per mood: asleep 0-6, booting up, working, lunch, afternoon slump, overtime, late, monday, friday, day off on weekends, annoyed when poked 6 times in 4 seconds) and `DAVE_MILESTONES` (after 10, 25, 50 and 100 pokes). Moods follow the visitor's own clock.

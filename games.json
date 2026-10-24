@@ -24,5 +24,14 @@
       }
     ]
   },
-  "games": []
+  "games": [],
+  "gallery": [
+    {
+      "file": "img/gallery/dave.webp",
+      "title": "Dave",
+      "note": "",
+      "date": "2026-10-24",
+      "alt": "Dave, an office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers"
+    }
+  ]
 }
