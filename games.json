@@ -2,6 +2,8 @@
   "site": {
     "title": "Lico's Awesome Archive",
     "owner": "Lico",
+    "repo": "LicoRyte/licoryte.github.io",
+    "background": "",
     "tagline": "my little corner of the interest. games, experiments, and other stuff i made to learn things.",
     "about": [
       "hi, i'm Lico! welcome to my web.",

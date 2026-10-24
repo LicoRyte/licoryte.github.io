@@ -10,6 +10,8 @@ licoryte.github.io/
 ├─ games.json        the list of games  ← edit this
 ├─ games/<slug>/     one folder per browser game (must contain index.html)
 ├─ downloads/        zips, exes, apks for people to download
+├─ img/gallery/      gallery pictures (just drop images here)
+├─ img/background/   background image (keep one here)
 └─ img/              Dave's pictures
 ```
 
@@ -96,17 +98,33 @@ Then open http://localhost:8000. Ctrl+C to stop.
 4. Wait 1–2 minutes, then refresh https://licoryte.github.io (Ctrl+F5).
    Progress: github.com/LicoRyte/licoryte.github.io → **Actions** tab. Green check = live.
 
-## Add a picture to the gallery
+## Add a picture to the gallery (easy way, no app needed)
 
-1. Put the image in `img/gallery/` (jpg, png, gif or webp). Keep it under ~2 MB; resize big photos to about 1600 px wide first.
-2. Add an entry to the `"gallery": [ ]` list at the bottom of `games.json`:
+Just put an image in `img/gallery/`. The site finds it by itself. No `games.json` edit needed.
+
+On github.com:
+1. Open https://github.com/LicoRyte/licoryte.github.io/tree/main/img/gallery
+2. **Add file → Upload files**, drag your images in (each under 25 MB; jpg, png, gif, webp).
+3. **Commit changes**. Wait 1–2 minutes, refresh the site.
+
+Or with GitHub Desktop: copy the image into `img/gallery/` → commit → push.
+
+- The title comes from the file name: `my-cool_drawing.png` shows as "my cool drawing".
+- Order is by file name. Start names with numbers (`01-...`, `02-...`) to control it.
+- To delete a picture: open it on github.com → **⋯ → Delete file** → commit.
+- Optional: to give a picture a nicer title, a caption or a date, add it to the `"gallery"` list in `games.json`. Listed pictures show first, in list order:
 
 ```json
-{ "file": "img/gallery/my-drawing.png", "title": "My drawing", "note": "optional caption", "date": "2026-10-24", "alt": "what the picture shows, for screen readers" }
+{ "file": "img/gallery/my-cool_drawing.png", "title": "Cool drawing", "note": "drawn at 2am", "date": "2026-10-24", "alt": "what the picture shows" }
 ```
 
-Only `file` is required. Order in the list = order on the page. Same comma rule as games.
-3. Commit → push.
+## Change the background
+
+Put **one** image in `img/background/` and delete the old one (`forest.webp`). On github.com: open https://github.com/LicoRyte/licoryte.github.io/tree/main/img/background → upload the new image → then open `forest.webp` → **⋯ → Delete file**.
+
+- If there are several images in that folder, the first one by file name wins.
+- Tall or wide both work; it's cropped to fill the screen. Around 1400–2000 px and under ~1 MB loads fast.
+- To force a specific image instead, set `"background": "img/background/whatever.jpg"` in `games.json` (inside `"site"`). Leave it `""` to use the folder.
 
 ## Remove or update a game
 
@@ -125,9 +143,8 @@ Only `file` is required. Order in the list = order on the page. Same comma rule 
 
 Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray.
 
-## Background, sparkles
+## Sparkles
 
-- Background photo: `img/bg-forest.webp`. Replace the file (same name) to change it.
 - Sparkles & cursor trail: visitors can turn them off with the checkbox in the "stats" box. They start off for people who set "reduce motion" on their device.
 
 ## Dave

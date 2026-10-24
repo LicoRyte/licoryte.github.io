@@ -50,7 +50,7 @@ body {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     linear-gradient(180deg, rgba(2, 26, 8, .20) 0%, rgba(2, 26, 8, .35) 60%, rgba(2, 26, 8, .65) 100%),
-    url("img/bg-forest.webp") center 30% / cover no-repeat,
+    var(--bg-img, none) center 30% / cover no-repeat,
     var(--desk);
 }
 a { color: var(--link); }
@@ -583,6 +583,61 @@ footer a, footer a:visited { color: var(--sky); }
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let DATA = null, games = [], pics = [], filter = 'all', current = null, newest = null;
+  const IMG_RE = /\.(png|jpe?g|gif|webp|avif)$/i;
+  const DEFAULT_BG = 'img/background/forest.webp';
+  const src = f => /^(https?:|data:)/.test(f) ? f : encodeURI(f);
+
+  /* Background: the image in img/background/ (or site.background in games.json) */
+  function applyBg(path) {
+    if (!path) return;
+    document.querySelector('.bg').style.setProperty('--bg-img', `url("${src(path)}")`);
+    try { localStorage.setItem('lico-bg', path); } catch (e) {}
+  }
+  try { applyBg(localStorage.getItem('lico-bg') || DEFAULT_BG); } catch (e) { applyBg(DEFAULT_BG); }
+
+  /* Read the repo's file list from GitHub, so dropped-in images show up without editing games.json */
+  async function repoFiles() {
+    const s = (DATA && DATA.site) || {};
+    let repo = s.repo;
+    if (!repo && location.hostname.endsWith('.github.io')) {
+      const owner = location.hostname.split('.')[0];
+      const seg = location.pathname.split('/').filter(Boolean)[0];
+      repo = owner + '/' + (seg && !seg.includes('.') ? seg : location.hostname);
+    }
+    if (!repo) return null;
+    const key = 'lico-tree:' + repo;
+    try {
+      const c = JSON.parse(sessionStorage.getItem(key) || 'null');
+      if (c && Date.now() - c.t < 120000) return c.files;
+    } catch (e) {}
+    try {
+      const r = await fetch(`https://api.github.com/repos/${repo}/git/trees/${s.branch || 'main'}?recursive=1`);
+      if (!r.ok) return null;
+      const j = await r.json();
+      const files = (j.tree || []).filter(x => x.type === 'blob').map(x => x.path);
+      try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), files })); } catch (e) {}
+      return files;
+    } catch (e) { return null; }
+  }
+  const niceName = f => decodeURIComponent(f.split('/').pop().replace(IMG_RE, '')).replace(/[-_]+/g, ' ').trim();
+  function buildPics(files) {
+    const listed = ((DATA && DATA.gallery) || []).filter(x => x && x.file);
+    if (!files) return listed;
+    const have = new Set(files);
+    const known = new Set(listed.map(x => x.file));
+    const out = listed.filter(x => !x.file.startsWith('img/gallery/') || have.has(x.file));
+    files.filter(f => f.startsWith('img/gallery/') && IMG_RE.test(f) && !known.has(f))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .forEach(f => out.push({ file: f, title: niceName(f) }));
+    return out;
+  }
+  function pickBg(files) {
+    const s = (DATA && DATA.site) || {};
+    if (s.background) return s.background;
+    if (!files) return null;
+    const bgs = files.filter(f => f.startsWith('img/background/') && IMG_RE.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    return bgs[0] || null;
+  }
 
   function fmtDate(d) {
     if (!d) return '';
@@ -773,11 +828,19 @@ footer a, footer a:visited { color: var(--sky); }
     }
     games = (DATA.games || []).filter(g => g && g.slug && g.title)
       .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-    pics = (DATA.gallery || []).filter(x => x && x.file);
+    pics = buildPics(null);
+    if (DATA.site && DATA.site.background) applyBg(DATA.site.background);
     renderSite();
     renderGrid();
     renderGallery();
     setMood();
+    repoFiles().then(files => {
+      if (!files) return;
+      applyBg(pickBg(files));
+      pics = buildPics(files);
+      renderGallery();
+      renderSite();
+    });
     const slug = decodeURIComponent(location.hash.slice(1));
     if (slug) openGame(slug, false);
   }
@@ -791,19 +854,19 @@ footer a, footer a:visited { color: var(--sky); }
     if (!pics.length) { grid.replaceChildren(h('p', { class: 'empty' }, 'no pictures yet.')); return; }
     grid.replaceChildren(...pics.map((pic, i) =>
       h('button', { type: 'button', class: 'gitem', onclick: () => openPic(i), 'aria-label': 'Open picture: ' + (pic.title || 'untitled') },
-        h('span', { class: 'ph' }, h('img', { src: pic.thumb || pic.file, alt: pic.alt || pic.title || '', loading: 'lazy' })),
+        h('span', { class: 'ph' }, h('img', { src: src(pic.thumb || pic.file), alt: pic.alt || pic.title || '', loading: 'lazy', onerror: e => { const b = e.target.closest('.gitem'); if (b) b.hidden = true; } })),
         h('span', { class: 'cap' }, pic.title || 'untitled'))));
   }
   function showPic(i) {
     lbIndex = (i + pics.length) % pics.length;
     const pic = pics[lbIndex];
     const img = $('#lbImg');
-    img.src = pic.file; img.alt = pic.alt || pic.title || '';
-    const name = (pic.file.split('/').pop() || 'picture');
+    img.src = src(pic.file); img.alt = pic.alt || pic.title || '';
+    const name = decodeURIComponent(pic.file.split('/').pop() || 'picture');
     $('#lbTitle').textContent = (pic.title ? pic.title + ' - ' : '') + name;
     $('#lbNote').textContent = [pic.note, fmtDate(pic.date)].filter(Boolean).join(' · ');
     $('#lbCount').textContent = `${lbIndex + 1} / ${pics.length}`;
-    $('#lbFull').href = pic.file;
+    $('#lbFull').href = src(pic.file);
     const multi = pics.length > 1;
     $('#lbPrev').hidden = !multi; $('#lbNext').hidden = !multi;
   }
