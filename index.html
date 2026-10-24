@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="My corner of the internet. Games and experiments I made to learn things.">
 <style>
-/* Layout: a 2001-style personal homepage in green — gradient banner, scrolling news ticker, left nav column of Win98 panels, main column with welcome box, game window and a games table, 88x31 buttons at the bottom */
+/* Layout: a 2001-style personal homepage in green — gradient banner, left nav column of Win98 panels, main column with welcome box, game window and a games table, 88x31 buttons at the bottom */
 :root {
   --desk: #021A08;
   --silver: #C0C0C0;
@@ -128,14 +128,6 @@ a.btn, a.btn:visited { color: var(--text); }
 }
 .banner p { margin: 6px 0 0; color: var(--sky); font-style: italic; font-size: 13px; }
 
-/* Ticker */
-.ticker {
-  background: #000000; color: var(--lcd);
-  font-family: var(--f-mono); font-size: 13px; font-weight: bold;
-  overflow: hidden; white-space: nowrap; padding: 4px 0;
-}
-.ticker-track { display: inline-block; padding-left: 100%; animation: tick 28s linear infinite; }
-@keyframes tick { to { transform: translateX(-100%); } }
 
 /* Columns */
 .cols { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 10px; align-items: start; }
@@ -391,7 +383,6 @@ footer a, footer a:visited { color: var(--sky); }
 @media (max-width: 560px) { .zzz { left: auto; right: 18%; top: auto; bottom: 200px; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track { animation: none; padding-left: 8px; }
   .newtag { animation: none; }
   .dave.squish img { animation-duration: .25s; }
   .zzz span { animation: none; opacity: .8; }
@@ -411,8 +402,6 @@ footer a, footer a:visited { color: var(--sky); }
       <p id="tagline">Small games I made to learn one thing each.</p>
     </div>
   </header>
-
-  <div class="ticker sunken" aria-hidden="true"><span class="ticker-track" id="ticker">*** Welcome ***</span></div>
 
   <div class="cols">
     <aside class="side">
@@ -698,11 +687,6 @@ footer a, footer a:visited { color: var(--sky); }
     $('#footNote').textContent = `© ${(last || '2026').slice(0, 4)} ${s.owner || ''} · made by hand, not by a company · last updated ${last || 'never'}`;
 
     newest = games[0] || null;
-    const bits = [`welcome to ${s.title || 'my site'}!`];
-    if (newest) bits.push(`new: ${newest.title} (${fmtDate(newest.date)})`);
-    bits.push(`${games.length} thing${games.length === 1 ? '' : 's'} on the shelf`, 'no ads, no tracking, no accounts', 'click a game to play it', pics.length ? `${pics.length} picture${pics.length === 1 ? '' : 's'} in the gallery` : null, 'say hi to Dave at the bottom');
-    bits.splice(0, bits.length, ...bits.filter(Boolean));
-    $('#ticker').textContent = '*** ' + bits.join(' *** ') + ' ***';
   }
 
   function matches(g) {
