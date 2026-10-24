@@ -1,86 +1,118 @@
 # Lico's Archive
 
-A tiny static site for your own games. No backend, no database, no account. One file (`games.json`) controls everything on the shelf.
+My personal game shelf. Live at https://licoryte.github.io
+
+No backend, no database, no account. One file (`games.json`) controls everything on the shelf.
 
 ```
-lico-archive/
+licoryte.github.io/
 ├─ index.html        the site itself (you rarely touch this)
-├─ games.json        your list of games  ← edit this
+├─ games.json        the list of games  ← edit this
 ├─ games/<slug>/     one folder per browser game (must contain index.html)
-├─ downloads/        zips, exes, apks, whatever people should download
-└─ img/             Dave's pictures
+├─ downloads/        zips, exes, apks for people to download
+└─ img/              Dave's pictures
 ```
 
-## Try it locally
+## One-time setup
 
-Browsers block `games.json` if you double-click `index.html`. Run a tiny server instead:
+The GitHub website can't upload files over 25 MB, and a Godot web export's `.wasm` is around 37 MB. So use **GitHub Desktop** (free, no terminal).
 
-```
-cd lico-archive
-python -m http.server
-```
-
-Then open http://localhost:8000.
+1. Install GitHub Desktop from https://desktop.github.com and sign in as LicoRyte.
+2. File → Clone repository → pick `LicoRyte/licoryte.github.io` → Clone.
+   Remember the local path (e.g. `Documents\GitHub\licoryte.github.io`).
 
 ## Add a game
 
-1. Put the build in `games/my-game/` (it needs an `index.html` inside).
-2. If there's a download, drop it in `downloads/`.
-3. Add an entry to the `games` array in `games.json`:
+### 1. Export the game into the site folder
+
+**Godot 4**
+- Project → Export → Add… → **Web**.
+- Under **Variant**, turn **Thread Support OFF**. (GitHub Pages can't send the headers threaded builds need. Leaving it on gives a black screen or an error.)
+- Export Path: `games/<slug>/index.html` inside your cloned folder, e.g.
+  `Documents\GitHub\licoryte.github.io\games\spelighter\index.html`
+- Click **Export Project**, untick "Export With Debug".
+- Optional test before you go further: in the Godot editor, the "Run in browser" button (top right, next to Play) runs the web build locally. If it breaks there, it'll break on the site too.
+
+**Unity WebGL**
+- Player Settings → Publishing Settings → Compression Format: **Disabled** (or turn on Decompression Fallback).
+- Build into `games/<slug>/`.
+
+**Anything else** (plain JS, Phaser, PICO-8, GameMaker HTML5): put the export in `games/<slug>/` with its `index.html` at the top of that folder.
+
+`<slug>` = short name, lowercase, letters/numbers/dashes only. It's also the share link: `licoryte.github.io/#<slug>`.
+
+### 2. (Optional) Add download builds
+
+Drop zips into `downloads/`. Single files must be under 100 MB. For bigger builds, link to itch.io or a GitHub Release instead (see `url` below).
+
+### 3. Add the entry to games.json
+
+Open `games.json` in VS Code or Notepad. Paste this inside the `"games": [ ]` brackets and change the values:
 
 ```json
 {
-  "slug": "my-game",
-  "title": "My Game",
-  "date": "2026-11-02",
+  "slug": "spelighter",
+  "title": "Spelighter",
+  "date": "2026-10-24",
   "status": "prototype",
   "engine": "Godot 4",
-  "tags": ["platformer"],
-  "question": "What makes a jump feel good?",
-  "learned": "Coyote time and jump buffering matter more than jump height.",
-  "description": "One line about what it is.",
-  "controls": "Arrows to move, Z to jump.",
-  "play": "games/my-game/index.html",
+  "tags": ["platformer", "pixel art"],
+  "question": "what i wanted to figure out",
+  "learned": "what i figured out",
+  "description": "one or two lines about the game",
+  "controls": "WASD to move, Space to jump",
+  "play": "games/spelighter/index.html",
   "aspect": "16/9",
-  "thumb": "games/my-game/thumb.png",
   "downloads": [
-    { "label": "Windows (.zip)", "file": "downloads/my-game-win.zip", "size": "48 MB" },
-    { "label": "Linux build", "url": "https://github.com/you/repo/releases/download/v1/my-game-linux.zip", "size": "52 MB" }
+    { "label": "Windows (.zip)", "file": "downloads/spelighter-win.zip", "size": "59 MB" },
+    { "label": "Builds on itch.io", "url": "https://licothewhat.itch.io/spelighter" }
   ]
 }
 ```
 
-Field notes:
+- **More than one game:** put a comma between entries `{ ... }, { ... }`, but no comma after the last one. A wrong comma is the #1 way to break the site. Paste the file into https://jsonlint.com if unsure.
+- `status`: `done`, `prototype` or `parked`.
+- `play`: `""` for download-only games.
+- `downloads`: `[]` for none. Use `file` for things in `downloads/`, `url` for links elsewhere.
+- `question` / `learned` / `controls`: leave as `""` to hide that row.
+- `thumb`: optional, e.g. `"games/spelighter/thumb.png"`. Without it the site draws a pixel sprite.
+- Newest `date` shows first and gets the blinking NEW! tag.
 
-- `slug`: letters, numbers and dashes only. It's also the share link: `yoursite/#my-game`.
-- `status`: `done`, `prototype` or `parked`. Parked means "learned what I came for".
-- `play`: leave empty (`""`) for download-only games.
-- `thumb`: optional. Without it the site draws a pixel sprite from the slug.
-- `downloads`: use `file` for things in your repo, `url` for files hosted elsewhere.
-- Delete the three `"example": true` entries once you have your own.
+### 4. (Optional) Test the whole site locally
 
-## Engine exports
+Double-clicking `index.html` won't work (the browser blocks it from reading `games.json`). In the site folder, open a terminal and run:
 
-- **Unity WebGL**: in Player Settings → Publishing Settings, set Compression Format to **Disabled**, or turn on **Decompression Fallback**. Free static hosts like GitHub Pages don't send the headers Unity's compressed builds expect, and you'll get a blank screen.
-- **Godot 4 Web**: needs SharedArrayBuffer unless you export with threads off. Turn off **Thread Support** in the Web export preset so it runs on plain static hosting.
-- **Plain JS / Phaser / PICO-8 / anything else**: drop the export folder in and point `play` at its `index.html`.
+```
+py -m http.server
+```
 
-## Put it online (free)
+Then open http://localhost:8000. Ctrl+C to stop.
 
-**GitHub Pages** (easiest if you already use Git)
+### 5. Publish
 
-1. Make a repo, push the contents of `lico-archive/` to it.
-2. Repo → Settings → Pages → Source: deploy from branch → `main`, folder `/ (root)`.
-3. Your site is at `https://<username>.github.io/<repo>/`.
+1. Open GitHub Desktop. Your changes are listed on the left.
+2. Type a summary at the bottom left (e.g. "add spelighter") → **Commit to main**.
+3. Click **Push origin** at the top.
+4. Wait 1–2 minutes, then refresh https://licoryte.github.io (Ctrl+F5).
+   Progress: github.com/LicoRyte/licoryte.github.io → **Actions** tab. Green check = live.
 
-Limits: single files over 100 MB are rejected. Put big builds in **GitHub Releases** and use a `url` download instead.
+## Remove or update a game
 
-**Netlify Drop / Cloudflare Pages** also work. Drag the `lico-archive` folder in and you're done.
+- **Remove:** delete its `games/<slug>/` folder and its entry in `games.json` → commit → push.
+- **Update:** export over the same folder → commit → push.
+
+## If it breaks
+
+- **"Couldn't load games.json"** on the site: a typo in `games.json`. Check commas and quotes.
+- **Black screen / "SharedArrayBuffer" or "Cross-Origin Isolation" error** in a Godot game: Thread Support is still on. Turn it off and re-export.
+- **Blank Unity game**: compression is on. Set it to Disabled.
+- **Push rejected for a big file**: a file is over 100 MB. Move it out and link it with `url` instead.
+- **Changes don't show**: wait 2 minutes, then Ctrl+F5.
 
 ## Change the look
 
-Colors and fonts live at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray. It only uses fonts already on people's computers (Verdana, Tahoma, Arial Black), like sites did back then.
+Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` is the starry background, `--navy` and `--blue` are the title bar greens, `--silver` is the window gray.
 
 ## Dave
 
-Dave's pictures are `img/dave-half.webp` (bottom of the page) and `img/dave-face.webp` (the hexagon in the header). His lines are in `index.html`: search for `DAVE_LINES` to add or change what he says, and `DAVE_MILESTONES` for the special lines after 10, 25, 50 and 100 pokes.
+`img/dave-half.webp` (bottom of the page) and `img/dave-face.webp` (header hexagon). His lines are in `index.html`: search for `DAVE_LINES`, and `DAVE_MILESTONES` for the special lines after 10, 25, 50 and 100 pokes.
