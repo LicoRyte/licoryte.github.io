@@ -491,7 +491,6 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   </div>
 
   <footer>
-    <p id="footNote">Hand-made static site.</p>
     <p><a href="#top">back to top ↑</a></p>
     <div class="dave-spot" id="dave" data-mood="working">
       <div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
@@ -683,7 +682,6 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     $('#counter').textContent = String(games.length).padStart(6, '0');
     $('#stSave').textContent = last || '----';
     $('#stPics').textContent = pics.length;
-    $('#footNote').textContent = `© ${(last || '2026').slice(0, 4)} ${s.owner || ''} · made by hand, not by a company · last updated ${last || 'never'}`;
 
   }
 
