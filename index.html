@@ -550,7 +550,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     <li><button type="button" role="menuitem" data-act="gallery"><span class="ico" style="background:#2462D8">P</span>Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="dave"><span class="ico" style="background:#7FBF2A;color:#000">D</span>Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
-    <li><button type="button" role="menuitem" data-act="buddy" data-buddy="lantern"><span class="ico" style="background:#3A3561">L</span><span data-label="lantern">Hide Lantern Girl</span></button></li>
+    <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="restore"><span class="ico" style="background:#808080">W</span>Restore all windows</button></li>
     <li><button type="button" role="menuitem" data-act="sparkles"><span class="ico" style="background:#F2C200;color:#000">*</span><span id="sparkLabel">Sparkles: on</span></button></li>
@@ -1153,11 +1153,12 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: coffee, dave, clancies, lantern, pancake, notepad, minesweeper, rain, quit, sudo',
+    help: 'Programs: coffee, dave, clancies, mon, pancake, notepad, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { goTo('#dave'); return 'Dave is already running. He never stops running. Help him.'; },
     clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
-    lantern: () => { buddies.lantern.summon(); return 'She dropped in. Quietly. Like she was always there.'; },
+    mon: () => { buddies.mon.summon(); return 'Mon dropped in. Quietly. Like she was always there.'; },
+    monochrome: () => RUN.mon(),
     pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
     notepad: 'Notepad is busy being a sticky note on Dave\'s monitor.',
     minesweeper: 'You clicked a mine. Game over. That was fast.',
@@ -1189,7 +1190,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   }
   tickClock(); setInterval(tickClock, 15000);
 
-  /* ---------- Desktop buddies (Clancies + Lantern Girl) ----------
+  /* ---------- Desktop buddies (Clancies + Mon) ----------
      Each buddy walks on the taskbar, can be dragged and thrown, and squishes when landing.
      Sprite sheets live in img/. Two layouts are supported:
        strip: one row of frames per animation (idle / walk / air / land), flipped to face left/right
@@ -1205,16 +1206,16 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
         land: { src: 'img/clancies/land.png', frames: 2,  fps: 8 }
       }
     },
-    lantern: {
-      name: 'Lantern Girl', scale: 3, start: 0.7, speed: [22, 38],
-      layout: 'grid', frameW: 32, frameH: 32, src: 'img/friends/lantern-girl.png',
+    mon: {
+      name: 'Mon', fullName: 'Monochrome', scale: 3, start: 0.7, speed: [22, 38],
+      layout: 'grid', frameW: 32, frameH: 32, src: 'img/friends/mon.png',
       rows: { down: 0, left: 1, right: 2, up: 3 }, walkCycle: [0, 1, 2, 1], idleCol: 1, fps: 7
     }
   };
   const ground = () => innerHeight - $('#taskbar').offsetHeight;
 
   function makeBuddy(id, cfg) {
-    const el = h('div', { class: 'buddy', role: 'img', 'aria-label': `${cfg.name}. You can drag and throw her.` });
+    const el = h('div', { class: 'buddy', role: 'img', title: cfg.fullName || cfg.name, 'aria-label': `${cfg.fullName || cfg.name}. You can drag and throw her.` });
     const cv = document.createElement('canvas'), cx = cv.getContext('2d');
     cv.width = cfg.frameW; cv.height = cfg.frameH;
     const W = cfg.frameW * cfg.scale, H = cfg.frameH * cfg.scale;
