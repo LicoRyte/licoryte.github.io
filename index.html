@@ -10,7 +10,9 @@
 /* Fonts: VT323 (LCD counter) and Comic Neue (Dave's bubble) are self-hosted in /fonts, SIL Open Font License. The rest are classic system fonts. */
 @font-face { font-family: "VT323"; font-weight: 400; font-display: swap; src: url("fonts/vt323-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Comic Neue"; font-weight: 700; font-display: swap; src: url("fonts/comic-neue-latin-700-normal.woff2") format("woff2"); }
-/* Layout: a 2001-style personal homepage in green — gradient banner, left nav column of Win98 panels, main column with welcome box, game window and a games table, 88x31 buttons at the bottom */
+/* Icons: SerenityOS icon set (BSD 2-Clause), see img/icons/LICENSE-serenityos.txt */
+
+/* Layout: a late-90s desktop — wallpaper, a column of desktop icons, fixed draggable windows, Dave in the bottom-right corner, taskbar with Start menu */
 :root {
   --desk: #021A08;
   --silver: #C0C0C0;
@@ -20,16 +22,17 @@
   --dark: #0A0A0A;
   --navy: #0B4A12;
   --blue: #2E8B22;
+  --inactive-a: #808080;
+  --inactive-b: #B5B5B5;
+  --select: #0B4A12;
   --text: #000000;
   --paper: #FFFFFF;
   --link: #006E00;
   --visited: #4B3A7A;
-  --new: #FF0000;
-  --ok: #007700;
-  --warn: #A04A00;
   --lcd-bg: #001A00;
   --lcd: #33FF33;
   --sky: #CFF5A0;
+  --tb-h: 32px;
 
   --f-ui: Tahoma, Verdana, "Segoe UI", Geneva, "DejaVu Sans", sans-serif;
   --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
@@ -42,52 +45,32 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 img { max-width: 100%; }
-body { margin: 0; }
+html, body { height: 100%; }
 body {
-  background-color: var(--desk);
-  color: var(--text);
-  font-family: var(--f-body);
-  font-size: 13px;
-  line-height: 1.5;
-}
-.bg {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(2, 26, 8, .20) 0%, rgba(2, 26, 8, .35) 60%, rgba(2, 26, 8, .65) 100%),
-    var(--bg-img, none) center 30% / cover no-repeat,
-    var(--desk);
+  margin: 0; overflow: hidden;
+  background-color: var(--desk); color: var(--text);
+  font-family: var(--f-body); font-size: 13px; line-height: 1.5;
 }
 a { color: var(--link); }
 a:visited { color: var(--visited); }
-a:hover { color: var(--new); }
 :focus-visible { outline: 1px dotted var(--text); outline-offset: 2px; }
 
-.page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding-left: max(12px, env(safe-area-inset-left, 0px));
-  padding-right: max(12px, env(safe-area-inset-right, 0px));
-  padding-block: 16px 40px;
-  display: grid;
-  gap: 10px;
-}
-@media (min-width: 400px) {
-  .page {
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-  }
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(2, 26, 8, .10) 0%, rgba(2, 26, 8, .25) 70%, rgba(2, 26, 8, .45) 100%),
+    var(--bg-img, none) center 30% / cover no-repeat,
+    var(--desk);
 }
 
 /* Bevels */
 .raised {
   background: var(--silver);
-  border: 2px solid;
-  border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
   box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
 }
 .sunken {
-  border: 2px solid;
-  border-color: var(--shade) var(--hi) var(--hi) var(--shade);
+  border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade);
   box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--silver-lt);
 }
 .btn {
@@ -96,213 +79,124 @@ a:hover { color: var(--new); }
   border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
   box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
   padding: 3px 12px; min-height: 26px; cursor: pointer; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 a.btn, a.btn:visited { color: var(--text); }
-.btn:active { border-color: var(--dark) var(--hi) var(--hi) var(--dark); box-shadow: inset 1px 1px 0 var(--shade); padding: 4px 11px 2px 13px; }
-.btn[disabled] { color: var(--shade); text-shadow: 1px 1px 0 var(--hi); cursor: default; }
+.btn:active, .btn.down { border-color: var(--dark) var(--hi) var(--hi) var(--dark); box-shadow: inset 1px 1px 0 var(--shade); }
+.btn.down { background: repeating-conic-gradient(var(--silver) 0 25%, var(--hi) 0 50%) 0 0 / 2px 2px; font-weight: bold; }
 
-/* Banner */
-.banner {
-  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
-  background: linear-gradient(180deg, #052A0A 0%, var(--navy) 50%, #3FA82E 100%);
-  padding: 18px 20px 14px;
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+/* Desktop icons */
+.desktop {
+  position: fixed; left: 0; right: 0; top: 0; bottom: calc(var(--tb-h) + env(safe-area-inset-bottom, 0px)); z-index: 1;
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) 8px max(8px, env(safe-area-inset-left, 0px));
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, 84px); grid-auto-columns: 84px;
+  align-content: start; justify-content: start; gap: 4px;
 }
-.hex {
-  --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  width: 92px; height: 106px; flex-shrink: 0; display: block;
-  clip-path: var(--hex); background: #B6E33B; padding: 4px;
+.dicon {
+  width: 84px; height: 84px; display: grid; grid-template-rows: 36px auto; justify-items: center; align-content: start; gap: 4px;
+  padding: 6px 2px 0; background: none; border: 0; cursor: pointer; color: #FFFFFF;
+  font: 12px/1.2 var(--f-ui); text-align: center; -webkit-tap-highlight-color: transparent;
 }
-.hex-in {
-  display: block; width: 100%; height: 100%; overflow: hidden; clip-path: var(--hex);
-  background: radial-gradient(circle at 50% 40%, #2E8B22, #052A0A 75%);
-}
-.hex-in img { width: 100%; height: 100%; max-width: none; display: block; object-fit: cover; object-position: 50% 30%; }
-.hex-wrap { display: block; flex-shrink: 0; width: 92px; height: 106px; filter: drop-shadow(3px 3px 0 #011005); }
-.hex-wrap:hover .hex { background: #FFFF66; }
-.banner-text { min-width: 0; flex: 1; }
-.banner h1 {
-  margin: 0; font-family: var(--f-head); font-weight: 700;
-  font-size: clamp(30px, 7vw, 54px); line-height: 1; letter-spacing: .01em;
-  background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 45%, #E2FFA0 55%, #A6E83B 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(3px 3px 0 #011005);
-  text-wrap: balance;
-}
-.banner p { margin: 6px 0 0; color: var(--sky); font-style: italic; font-size: 13px; }
-
-
-/* Columns */
-.cols { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 10px; align-items: start; }
-.side, .main { display: grid; gap: 10px; min-width: 0; }
-@media (max-width: 720px) {
-  .cols { grid-template-columns: 1fr; }
-  .side { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
-}
+.dicon img { width: 32px; height: 32px; image-rendering: pixelated; }
+.dicon span { padding: 1px 3px; text-shadow: 1px 1px 0 #000000, 0 0 3px #000000; overflow-wrap: anywhere; }
+.dicon.sel img { filter: brightness(.6) sepia(1) hue-rotate(60deg) saturate(3); }
+.dicon.sel span { background: var(--select); text-shadow: none; outline: 1px dotted #FFFFFF; }
+.dicon:focus-visible { outline: none; }
+.dicon:focus-visible span { outline: 1px dotted #FFFFFF; }
+.dicon .face { width: 32px; height: 32px; object-fit: cover; object-position: 50% 20%; border: 1px solid #000000; image-rendering: auto; }
 
 /* Windows */
 .win { padding: 3px; min-width: 0; }
-.tbar {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  background: linear-gradient(90deg, var(--navy), var(--blue));
-  color: var(--hi); font-family: var(--f-ui); font-weight: bold; font-size: 12px;
-  padding: 3px 3px 3px 6px; min-height: 22px;
+.app {
+  position: fixed; z-index: 10; display: flex; flex-direction: column;
+  max-width: calc(100vw - 8px); max-height: calc(100% - var(--tb-h) - 8px - env(safe-area-inset-bottom, 0px));
 }
-.tbar .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.app.max { left: 0 !important; top: 0 !important; width: 100% !important; max-width: none; height: calc(100% - var(--tb-h) - env(safe-area-inset-bottom, 0px)) !important; max-height: none; }
+.tbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--inactive-a), var(--inactive-b));
+  color: var(--silver-lt); font-family: var(--f-ui); font-weight: bold; font-size: 12px;
+  padding: 2px 2px 2px 3px; min-height: 22px;
+}
+.app.active .tbar, .run-box .tbar, #lb .tbar { background: linear-gradient(90deg, var(--navy), var(--blue)); color: var(--hi); }
+.app .tbar { cursor: default; user-select: none; -webkit-user-select: none; touch-action: none; }
+.tbar .name { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; min-width: 0; }
+.tbar .name img { width: 16px; height: 16px; flex-shrink: 0; image-rendering: pixelated; }
+.tbar .name span { overflow: hidden; text-overflow: ellipsis; }
 .tbtns { display: flex; gap: 2px; flex-shrink: 0; }
 .tbtns > * {
   width: 18px; height: 16px; padding: 0; display: grid; place-items: center;
   font: bold 11px/1 var(--f-ui); color: var(--text); background: var(--silver);
-  border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: pointer;
 }
-.tbtns button { cursor: pointer; }
-.wbody { padding: 10px 10px 12px; }
-.wbody h2 { margin: 0 0 6px; font-family: var(--f-ui); font-size: 14px; }
+.tbtns > .x { margin-left: 2px; }
+.menubar { display: flex; gap: 2px; padding: 1px 0 2px; font: 12px var(--f-ui); flex-shrink: 0; }
+.menubar button { background: none; border: 1px solid transparent; padding: 1px 6px; font: inherit; cursor: pointer; color: var(--text); }
+.menubar button:hover { border-color: var(--hi) var(--shade) var(--shade) var(--hi); }
+.menubar u { text-decoration: underline; }
+.wbody { flex: 1; min-height: 0; overflow: auto; background: var(--paper); container-type: inline-size; }
+.wbody.plain { background: var(--silver); }
+.statusbar { display: flex; gap: 3px; margin-top: 3px; font: 11px var(--f-ui); flex-shrink: 0; }
+.statusbar span { flex: 1; padding: 1px 5px; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.statusbar span:last-child { flex: 0 0 auto; }
 
-/* Sidebar */
-.nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.nav a { display: block; padding: 2px 4px; font-family: var(--f-ui); font-size: 13px; font-weight: bold; }
-.nav a::before { content: "» "; color: var(--navy); }
-.counter {
-  display: inline-block; background: var(--lcd-bg); color: var(--lcd);
-  font-family: var(--f-mono); font-size: 30px; line-height: 1; letter-spacing: .1em;
-  padding: 2px 6px; font-variant-numeric: tabular-nums;
-}
-.info { display: grid; gap: 6px; font-family: var(--f-ui); font-size: 12px; }
-.info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; }
-.info dt { color: #333333; }
-.info dd { margin: 0; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
-.uc { font-size: 11px; color: #333333; border-top: 1px solid var(--shade); padding-top: 6px; margin: 0; }
-.uc b { color: var(--warn); }
-
-/* Welcome */
-.welcome { background: var(--paper); padding: 12px 14px; }
+/* About */
+.welcome { padding: 12px 14px; }
 .welcome p { margin: 0 0 8px; max-width: 64ch; }
 .welcome .sig { font-style: italic; color: #333333; margin: 0; }
 
+/* Internet / links */
+.links { list-style: none; margin: 0; padding: 8px; display: grid; gap: 2px; }
+.links a { display: flex; gap: 8px; align-items: center; padding: 4px 6px; font: 12px var(--f-ui); text-decoration: none; color: var(--text); }
+.links a::before { content: ""; width: 16px; height: 16px; background: url("img/icons/app-browser-16.png") center / 16px no-repeat; image-rendering: pixelated; flex-shrink: 0; }
+.links a:hover, .links a:focus-visible { background: var(--select); color: #FFFFFF; outline: none; }
+
+/* Control panel */
+.panel { padding: 10px; display: grid; gap: 10px; font: 12px var(--f-ui); }
+.panel fieldset { margin: 0; padding: 8px 10px 10px; border: 2px groove var(--hi); display: grid; gap: 6px; }
+.panel legend { padding: 0 4px; }
+.panel dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+.panel dd { margin: 0; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
+.counter { display: inline-block; justify-self: start; background: var(--lcd-bg); color: var(--lcd); font-family: var(--f-mono); font-size: 30px; line-height: 1; letter-spacing: .1em; padding: 2px 6px; font-variant-numeric: tabular-nums; }
+.toggle { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.toggle input { margin: 0; }
+
+/* Recycle bin + dialogs */
+.empty-bin { padding: 24px 14px; text-align: center; font: 12px var(--f-ui); color: #333333; display: grid; gap: 8px; justify-items: center; }
+.empty-bin img { width: 32px; height: 32px; image-rendering: pixelated; opacity: .6; }
+
 /* Game cards */
-.shelf { background: var(--paper); padding: 14px; }
-.carts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-@media (max-width: 860px) { .carts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 400px) { .carts { grid-template-columns: minmax(0, 1fr); } }
-.card {
-  display: grid; grid-template-rows: auto auto 1fr auto auto; gap: 8px; padding: 6px 6px 8px; min-width: 0;
-  text-decoration: none; color: var(--text);
-}
+.shelf { padding: 12px; }
+.carts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@container (max-width: 560px) { .carts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (max-width: 340px) { .carts { grid-template-columns: minmax(0, 1fr); } }
+.card { display: grid; grid-template-rows: auto auto 1fr auto auto; gap: 8px; padding: 6px 6px 8px; min-width: 0; text-decoration: none; color: var(--text); }
 a.card:visited { color: var(--text); }
 .card:hover .gtitle { color: var(--blue); text-decoration: underline; }
-.card:focus-visible { outline: 2px dotted var(--text); outline-offset: 2px; }
 .art { display: block; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; background: #000000; }
 .art img, .art canvas { width: 100%; height: 100%; display: block; object-fit: cover; image-rendering: pixelated; }
-.gtitle { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 17px; line-height: 1.1; text-wrap: balance; overflow-wrap: anywhere; }
+.gtitle { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 16px; line-height: 1.1; text-wrap: balance; overflow-wrap: anywhere; }
 .gdesc { margin: 0; font-size: 12px; line-height: 1.45; }
 .gfacts { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; font-size: 12px; background: #F1FAEA; border: 1px solid var(--silver); padding: 5px 7px; }
 .gfacts dt { font-family: var(--f-ui); font-weight: bold; color: #333333; }
 .gfacts dd { margin: 0; overflow-wrap: anywhere; }
 .card .btn { justify-content: center; }
-.listbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 2px 2px 8px; font-family: var(--f-ui); font-size: 12px; }
 .empty, .load-error { padding: 16px; font-size: 13px; }
 .carts .empty, .carts .load-error { grid-column: 1 / -1; }
 .load-error code { font-family: var(--f-mono); font-size: 16px; background: #EFEFEF; padding: 0 4px; }
 
-/* Footer */
-footer { display: grid; gap: 10px; justify-items: center; text-align: center; padding-top: 6px; color: #A8D890; font-size: 11px; }
-footer p { margin: 0; text-shadow: 1px 1px 0 #000000, 0 0 6px #000000; }
-footer a, footer a:visited { color: var(--sky); }
-
-
-/* Dave */
-.dave-spot {
-  width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 6px;
-  padding-top: 18px; position: relative; isolation: isolate;
-}
-.bubble {
-  position: relative; z-index: 3; align-self: center; margin: 0 0 76px;
-  max-width: 270px; background: #FFFFFF; color: #000000; text-align: left;
-  font-family: var(--f-comic); font-size: 15px; font-weight: 700; line-height: 1.35;
-  border: 2px solid #000000; border-radius: 14px; padding: 10px 12px;
-  box-shadow: 3px 3px 0 #000000; text-shadow: none;
-}
-.bubble::after {
-  content: ""; position: absolute; right: -12px; top: 50%; margin-top: -8px;
-  border-width: 8px 0 8px 12px; border-style: solid; border-color: transparent transparent transparent #000000;
-}
-.bubble::before {
-  content: ""; position: absolute; right: -8px; top: 50%; margin-top: -6px; z-index: 1;
-  border-width: 6px 0 6px 9px; border-style: solid; border-color: transparent transparent transparent #FFFFFF;
-}
-.bubble .who { display: block; font-family: var(--f-ui); font-weight: bold; font-size: 11px; color: var(--navy); margin-bottom: 2px; }
-.dave {
-  background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 1; min-width: 0;
-  -webkit-tap-highlight-color: transparent; position: relative; z-index: 1;
-}
-.dave img {
-  display: block; height: 290px; width: auto; max-width: 100%; object-fit: contain;
-  transform-origin: 50% 100%;
-  user-select: none; -webkit-user-drag: none;
-}
-.dave:hover img { filter: brightness(1.06); }
-.dave.squish img { animation: squish .5s cubic-bezier(.3, 1.6, .5, 1); }
-@keyframes squish {
-  0% { transform: scale(1, 1); }
-  25% { transform: scale(1.16, .76); }
-  50% { transform: scale(.92, 1.08); }
-  72% { transform: scale(1.04, .97); }
-  100% { transform: scale(1, 1); }
-}
-.desk {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 46px; z-index: 2; pointer-events: none;
-  background: var(--silver);
-  border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
-  box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade), 0 6px 0 #011005;
-}
-.desk::before {
-  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--shade);
-  box-shadow: 0 1px 0 var(--hi);
-}
-.desk-note {
-  position: absolute; bottom: 8px; left: calc(50% + 60px); transform: rotate(-4deg);
-  background: #FFFF66; color: #000000; font-family: var(--f-comic); font-size: 13px; font-weight: 700;
-  padding: 2px 6px; box-shadow: 1px 1px 0 rgba(0, 0, 0, .4);
-}
-.pokes { font-size: 11px; color: #CFF5A0; margin: 0; text-shadow: 1px 1px 0 #000000, 0 0 6px #000000; }
-@media (max-width: 560px) {
-  .dave-spot { flex-direction: column; align-items: center; gap: 12px; }
-  .bubble { margin: 0; max-width: 100%; }
-  .bubble::after { right: auto; left: 50%; top: auto; bottom: -12px; margin: 0 0 0 -8px; border-width: 12px 8px 0 8px; border-color: #000000 transparent transparent transparent; }
-  .bubble::before { right: auto; left: 50%; top: auto; bottom: -8px; margin: 0 0 0 -6px; border-width: 9px 6px 0 6px; border-color: #FFFFFF transparent transparent transparent; }
-  .dave img { height: 230px; }
-  .desk { height: 40px; }
-  .desk-note { left: auto; right: 12px; }
-  .hex-wrap, .hex { width: 72px; height: 83px; }
-}
-
-
 /* Gallery */
-.gal {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 128px), 1fr)); gap: 12px;
-  padding: 10px; background: var(--paper);
-}
-.gitem {
-  display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0;
-  cursor: pointer; font: inherit; color: inherit; text-align: center; min-width: 0;
-}
-.gitem .ph {
-  display: block; aspect-ratio: 1; max-width: 100%; overflow: hidden; background: #EFEFEF;
-  border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade);
-}
+.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)); gap: 12px; padding: 12px; }
+.gitem { display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; font: inherit; color: inherit; text-align: center; min-width: 0; }
+.gitem .ph { display: block; aspect-ratio: 1; max-width: 100%; overflow: hidden; background: #EFEFEF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
 .gitem img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gitem .cap { font-family: var(--f-ui); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gitem:hover .ph, .gitem:focus-visible .ph { outline: 2px solid var(--blue); outline-offset: 1px; }
 .gal .empty { grid-column: 1 / -1; }
 
 /* Picture viewer */
-.lb {
-  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
-  background: rgba(1, 16, 5, .78);
-  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
-}
+.lb { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: rgba(1, 16, 5, .7);
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
 .lb .win { width: min(100%, 880px); max-height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
 .lb-view { background: #000000; display: grid; place-items: center; min-height: 0; overflow: hidden; margin: 3px 0; }
 .lb-view img { max-width: 100%; max-height: min(72vh, 900px); width: auto; height: auto; display: block; object-fit: contain; }
@@ -310,50 +204,52 @@ footer a, footer a:visited { color: var(--sky); }
 .lb-note { flex: 1 1 200px; min-width: 0; font-size: 12px; margin: 0; }
 .lb-count { font-family: var(--f-ui); font-size: 11px; color: #333333; }
 
-/* Sparkle toggle */
-.toggle { display: flex; gap: 6px; align-items: center; font-family: var(--f-ui); font-size: 12px; cursor: pointer; border-top: 1px solid var(--shade); padding-top: 6px; }
-.toggle input { margin: 0; }
-#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
-
-/* Dave moods */
-.dave { transition: filter .6s; }
+/* Dave (bottom-right of the desktop) */
+.dave-spot {
+  position: fixed; z-index: 2; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--tb-h) + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: flex-end; gap: 6px; pointer-events: none;
+}
+.dave-spot > * { pointer-events: auto; }
+.bubble {
+  position: relative; z-index: 3; align-self: center; margin: 0 0 70px;
+  max-width: 240px; background: #FFFFFF; color: #000000; text-align: left;
+  font-family: var(--f-comic); font-size: 14px; font-weight: 700; line-height: 1.35;
+  border: 2px solid #000000; border-radius: 14px; padding: 9px 11px; box-shadow: 3px 3px 0 #000000;
+}
+.bubble::after { content: ""; position: absolute; right: -12px; top: 50%; margin-top: -8px; border-width: 8px 0 8px 12px; border-style: solid; border-color: transparent transparent transparent #000000; }
+.bubble::before { content: ""; position: absolute; right: -8px; top: 50%; margin-top: -6px; z-index: 1; border-width: 6px 0 6px 9px; border-style: solid; border-color: transparent transparent transparent #FFFFFF; }
+.bubble .who { display: block; font-family: var(--f-ui); font-weight: bold; font-size: 11px; color: var(--navy); margin-bottom: 2px; }
+.mood-tag { font-weight: normal; color: #555555; }
+.dave-body { position: relative; }
+.dave { background: none; border: 0; padding: 0; cursor: pointer; display: block; position: relative; z-index: 1; -webkit-tap-highlight-color: transparent; transition: filter .6s; }
+.dave img { display: block; height: 220px; width: auto; max-width: none; transform-origin: 50% 100%; user-select: none; -webkit-user-drag: none; }
+.dave:hover img { filter: brightness(1.06); }
+.dave.squish img { animation: squish .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes squish { 0% { transform: scale(1, 1); } 25% { transform: scale(1.16, .76); } 50% { transform: scale(.92, 1.08); } 72% { transform: scale(1.04, .97); } 100% { transform: scale(1, 1); } }
+.desk {
+  position: absolute; left: -14px; right: -14px; bottom: 0; height: 34px; z-index: 2; pointer-events: none;
+  background: var(--silver); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
+  box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
+}
+.desk::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 2px; background: var(--shade); box-shadow: 0 1px 0 var(--hi); }
+.desk-note { position: absolute; bottom: 5px; right: 18px; transform: rotate(-4deg); background: #FFFF66; color: #000000; font-family: var(--f-comic); font-size: 12px; font-weight: 700; padding: 1px 6px; box-shadow: 1px 1px 0 rgba(0, 0, 0, .4); }
 .dave-spot[data-mood="asleep"] .dave { filter: brightness(.5) saturate(.45); }
 .dave-spot[data-mood="asleep"].woken .dave { filter: brightness(.85) saturate(.8); }
 .dave-spot[data-mood="slump"] .dave { filter: brightness(.88) saturate(.8); }
 .dave-spot[data-mood="happy"] .dave { filter: saturate(1.3) brightness(1.06); }
 .dave-spot[data-mood="annoyed"] .dave { animation: glitch .18s steps(2) infinite; }
-@keyframes glitch {
-  0% { filter: hue-rotate(0deg); transform: translateX(0); }
-  50% { filter: hue-rotate(260deg) saturate(2.2); transform: translateX(3px); }
-  100% { filter: hue-rotate(0deg); transform: translateX(-2px); }
-}
-.zzz {
-  position: absolute; z-index: 3; left: calc(50% + 40px); top: 22px; display: none; pointer-events: none;
-  font-family: var(--f-head); color: #CFF5A0; font-size: 22px; text-shadow: 2px 2px 0 #011005;
-}
+@keyframes glitch { 0% { filter: hue-rotate(0deg); transform: translateX(0); } 50% { filter: hue-rotate(260deg) saturate(2.2); transform: translateX(3px); } 100% { filter: hue-rotate(0deg); transform: translateX(-2px); } }
+.zzz { position: absolute; z-index: 3; right: 10px; top: -6px; display: none; pointer-events: none; font-family: var(--f-head); font-weight: bold; color: #CFF5A0; font-size: 22px; text-shadow: 2px 2px 0 #011005; }
 .zzz span { display: inline-block; animation: zz 2.4s ease-in-out infinite; }
 .zzz span:nth-child(2) { font-size: .8em; animation-delay: .4s; }
 .zzz span:nth-child(3) { font-size: .6em; animation-delay: .8s; }
 @keyframes zz { 0%, 100% { transform: translateY(0); opacity: .3; } 50% { transform: translateY(-10px); opacity: 1; } }
 .dave-spot[data-mood="asleep"]:not(.woken) .zzz { display: block; }
-.mood-tag { font-weight: normal; color: #555555; }
-@media (max-width: 560px) { .zzz { left: auto; right: 18%; top: auto; bottom: 200px; } }
-
-
-/* Draggable windows */
-.page .win { position: relative; }
-.page .win.dragging { z-index: 30; box-shadow: 6px 6px 0 rgba(0, 0, 0, .45); }
-.page .win.lifted { z-index: 20; }
-.page .win .tbar { cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
-.page .win.dragging .tbar { cursor: grabbing; }
-.page .win.rolled > :not(.tbar) { display: none; }
-.page .win.closed { display: none; }
 
 /* Taskbar */
-body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 .taskbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-  height: calc(32px + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--tb-h) + env(safe-area-inset-bottom, 0px));
   padding: 3px max(4px, env(safe-area-inset-right, 0px)) calc(3px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
   display: flex; gap: 4px; align-items: stretch;
   background: var(--silver); border-top: 2px solid var(--hi); box-shadow: 0 -1px 0 var(--silver-lt);
@@ -366,50 +262,72 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 .start .logo4 i:nth-child(1) { background: #E8352A; } .start .logo4 i:nth-child(2) { background: #3FA82E; }
 .start .logo4 i:nth-child(3) { background: #2462D8; } .start .logo4 i:nth-child(4) { background: #F2C200; }
 .tasks { flex: 1; min-width: 0; display: flex; gap: 3px; overflow: hidden; }
-.tasks .btn { min-height: 0; max-width: 150px; min-width: 0; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 20px; padding: 0 8px; font-size: 11px; }
-.tray {
-  display: flex; align-items: center; gap: 8px; padding: 0 10px; white-space: nowrap;
-  border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font-variant-numeric: tabular-nums;
-}
+.tasks .btn { min-height: 0; flex: 0 1 160px; min-width: 32px; overflow: hidden; padding: 0 6px; font-size: 11px; justify-content: flex-start; }
+.tasks .btn img { width: 16px; height: 16px; image-rendering: pixelated; flex-shrink: 0; }
+.tasks .btn span { overflow: hidden; text-overflow: ellipsis; }
+.tray { display: flex; align-items: center; gap: 8px; padding: 0 10px; white-space: nowrap; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font-variant-numeric: tabular-nums; }
+
+/* Start menu */
 .start-menu {
-  position: fixed; z-index: 55; left: max(4px, env(safe-area-inset-left, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px));
-  display: flex; min-width: 220px; max-width: calc(100vw - 8px);
+  position: fixed; z-index: 55; left: max(4px, env(safe-area-inset-left, 0px)); bottom: calc(var(--tb-h) - 2px + env(safe-area-inset-bottom, 0px));
+  width: min(300px, calc(100vw - 8px)); display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto 1fr;
 }
+.profile {
+  grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 10px;
+  background: linear-gradient(180deg, #052A0A 0%, var(--navy) 50%, #3FA82E 100%); color: #FFFFFF;
+}
+.profile h1 { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 17px; line-height: 1.1; color: #E2FFA0; text-shadow: 2px 2px 0 #011005; text-wrap: balance; }
+.profile p { margin: 3px 0 0; font-size: 11px; line-height: 1.35; color: var(--sky); font-style: italic; }
+.hex {
+  --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  width: 56px; height: 64px; flex-shrink: 0; display: block; clip-path: var(--hex); background: #B6E33B; padding: 3px;
+}
+.hex-in { display: block; width: 100%; height: 100%; overflow: hidden; clip-path: var(--hex); background: radial-gradient(circle at 50% 40%, #2E8B22, #052A0A 75%); }
+.hex-in img { width: 100%; height: 100%; max-width: none; display: block; object-fit: cover; object-position: 50% 30%; }
 .start-menu .side-band {
-  writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 4px; width: 26px;
+  writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 4px;
   background: linear-gradient(0deg, var(--navy), var(--blue)); color: #FFFFFF;
   font-family: var(--f-head); font-weight: bold; font-size: 18px; letter-spacing: .04em;
 }
 .start-menu .side-band span { color: #CFF5A0; font-weight: normal; }
-.start-menu ul { list-style: none; margin: 0; padding: 2px; flex: 1; min-width: 0; }
+.start-menu ul { list-style: none; margin: 0; padding: 2px; min-width: 0; }
 .start-menu li.sep { height: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 3px 2px; }
 .start-menu button {
-  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 5px 10px 5px 6px;
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 4px 10px 4px 6px;
   background: none; border: 0; font: 12px var(--f-ui); color: var(--text); cursor: pointer;
 }
-.start-menu button:hover, .start-menu button:focus-visible { background: var(--navy); color: #FFFFFF; outline: none; }
-.ico { width: 20px; height: 20px; flex-shrink: 0; display: grid; place-items: center; font: bold 11px/1 var(--f-ui); color: #FFFFFF; border: 1px solid #000000; }
-.run-box { position: fixed; z-index: 70; left: 50%; top: 30%; transform: translateX(-50%); width: min(360px, calc(100vw - 24px)); }
+.start-menu button img { width: 24px; height: 24px; image-rendering: pixelated; flex-shrink: 0; }
+.start-menu button .face { object-fit: cover; object-position: 50% 20%; border: 1px solid #000000; image-rendering: auto; }
+.start-menu button .ico { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; font: bold 12px/1 var(--f-ui); color: #FFFFFF; border: 1px solid #000000; }
+.start-menu button:hover, .start-menu button:focus-visible { background: var(--select); color: #FFFFFF; outline: none; }
+
+.run-box { position: fixed; z-index: 70; left: 50%; top: 30%; transform: translateX(-50%); width: min(380px, calc(100vw - 24px)); }
 .run-box form { display: grid; gap: 8px; padding: 10px; font-family: var(--f-ui); font-size: 12px; }
+.run-box .run-top { display: flex; gap: 10px; align-items: flex-start; }
+.run-box .run-top img { width: 32px; height: 32px; image-rendering: pixelated; }
 .run-box input { font: 13px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; width: 100%; }
 .run-box .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
 .run-out { margin: 0; min-height: 1.4em; color: #333333; }
-.shutdown {
-  position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: pointer;
-  font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px;
-}
+.shutdown { position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: pointer; font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px; }
 .shutdown .sad { display: block; font-size: 22px; margin-bottom: 8px; }
 
-/* Clancies */
-.buddy {
-  position: fixed; left: 0; top: 0; z-index: 45; cursor: grab; touch-action: none;
-  transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
-}
+/* Desktop buddies + sparkles */
+.buddy { position: fixed; left: 0; top: 0; z-index: 45; cursor: grab; touch-action: none; transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 .buddy canvas { display: block; image-rendering: pixelated; pointer-events: none; }
 .buddy.held { cursor: grabbing; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+
+/* Phones: windows open full-screen, Dave gets smaller */
+@media (max-width: 600px) {
+  .dave img { height: 140px; }
+  .bubble { position: fixed; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--tb-h) + 150px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: min(260px, calc(100vw - 20px)); font-size: 13px; }
+  .bubble::after { right: 40px; top: auto; bottom: -12px; margin: 0; border-width: 12px 8px 0 8px; border-color: #000000 transparent transparent transparent; }
+  .bubble::before { right: 42px; top: auto; bottom: -8px; margin: 0; border-width: 9px 6px 0 6px; border-color: #FFFFFF transparent transparent transparent; }
+  .desk { height: 26px; }
+  .desk-note { font-size: 11px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .newtag { animation: none; }
   .dave.squish img { animation-duration: .25s; }
   .zzz span { animation: none; opacity: .8; }
   .dave-spot[data-mood="annoyed"] .dave { animation: none; filter: hue-rotate(260deg) saturate(2); }
@@ -420,93 +338,90 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 
 <div class="bg" aria-hidden="true"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
-<div class="page" id="top">
-  <header class="banner">
-    <a class="hex-wrap" href="#dave" aria-label="Go say hi to Dave"><span class="hex"><span class="hex-in"><img src="img/dave-face.webp" width="240" height="240" alt=""></span></span></a>
-    <div class="banner-text">
-      <h1 id="heroTitle">Lico's Lab</h1>
-      <p id="tagline">Small games I made to learn one thing each.</p>
-    </div>
-  </header>
 
-  <div class="cols">
-    <aside class="side">
-      <div class="win raised">
-        <div class="tbar"><span class="name">where to?</span></div>
-        <div class="wbody">
-          <ul class="nav">
-            <li><a href="#top">home</a></li>
-            <li><a href="#games">stuff i made</a></li>
-            <li><a href="#gallery">gallery</a></li>
-            <li><a href="#welcome">about me</a></li>
-            <li><a href="#links">links</a></li>
-            <li><a href="#dave">bother Dave</a></li>
-          </ul>
-        </div>
-      </div>
+<nav class="desktop" id="desktop" aria-label="Desktop">
+  <button type="button" class="dicon" data-open="about"><img src="img/icons/filetype-text.png" alt=""><span>about_me.txt</span></button>
+  <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
+  <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
+  <button type="button" class="dicon" data-open="links"><img src="img/icons/app-browser.png" alt=""><span>Internet</span></button>
+  <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
+  <button type="button" class="dicon" data-open="bin"><img src="img/icons/recycle-bin.png" alt=""><span>Recycle Bin</span></button>
+  <button type="button" class="dicon" data-open="dave"><img class="face" src="img/dave-face.webp" alt=""><span>Dave.exe</span></button>
+</nav>
 
-      <div class="win raised">
-        <div class="tbar"><span class="name">stats</span></div>
-        <div class="wbody info">
-          <div>games on the shelf:</div>
-          <div><span class="counter sunken" id="counter">000000</span></div>
-          <dl>
-            <dt>pictures</dt><dd id="stPics">0</dd>
-            <dt>updated</dt><dd id="stSave">----</dd>
-          </dl>
-          <p class="uc"><b>under construction</b> forever. that's kind of the point.</p>
-          <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
-        </div>
-      </div>
-
-      <div class="win raised" id="links">
-        <div class="tbar"><span class="name">elsewhere</span></div>
-        <div class="wbody"><ul class="nav" id="linkList"></ul></div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <section class="win raised" id="welcome" aria-labelledby="wTitle">
-        <div class="tbar"><span class="name" id="wTitle">hi there!</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
-        <div class="wbody">
-          <div class="welcome sunken" id="about"></div>
-        </div>
-      </section>
-
-      <section class="win raised" id="games" aria-labelledby="gTitle">
-        <div class="tbar"><span class="name" id="gTitle">stuff i made</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
-        <div class="wbody">
-          <div class="listbar"><span>click a game to open where it lives.</span><span id="gCount">0 games</span></div>
-          <div class="shelf sunken"><div class="carts" id="grid"></div></div>
-        </div>
-      </section>
-
-      <section class="win raised" id="gallery" aria-labelledby="galTitle">
-        <div class="tbar"><span class="name" id="galTitle">gallery</span><div class="tbtns" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div></div>
-        <div class="wbody">
-          <div class="gal sunken" id="galGrid"></div>
-        </div>
-      </section>
-    </main>
+<div class="dave-spot" id="dave" data-mood="working">
+  <p class="bubble" id="daveSay" role="status" aria-live="polite"><span class="who">Dave <span class="mood-tag" id="daveMood"></span></span><span id="daveLine">*sigh* oh. a visitor. double-click something.</span></p>
+  <div class="dave-body">
+    <div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
+    <button class="dave" id="daveBtn" type="button" aria-label="Poke Dave">
+      <img src="img/dave-half.webp" width="608" height="560" alt="Dave, a tired office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers" draggable="false">
+    </button>
+    <div class="desk" aria-hidden="true"><span class="desk-note">poke him</span></div>
   </div>
-
-  <footer>
-    <p><a href="#top">back to top ↑</a></p>
-    <div class="dave-spot" id="dave" data-mood="working">
-      <div class="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
-      <p class="bubble" id="daveSay" role="status" aria-live="polite"><span class="who">Dave <span class="mood-tag" id="daveMood"></span></span><span id="daveLine">*sigh* oh. a visitor. poke me if you need something.</span></p>
-      <button class="dave" id="daveBtn" type="button" aria-label="Poke Dave">
-        <img src="img/dave-half.webp" width="608" height="560" alt="Dave, a tired office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers" draggable="false">
-      </button>
-      <div class="desk" aria-hidden="true"><span class="desk-note">poke him</span></div>
-    </div>
-    <p class="pokes" id="pokes" hidden></p>
-  </footer>
 </div>
+
+<section class="win raised app" id="w-about" data-app="about" data-title="about_me.txt - Notepad" data-icon="img/icons/filetype-text-16.png" data-w="480" data-h="380" hidden aria-labelledby="t-about">
+  <div class="tbar"><span class="name" id="t-about"></span></div>
+  <div class="menubar" aria-hidden="true"><button type="button" tabindex="-1"><u>F</u>ile</button><button type="button" tabindex="-1"><u>E</u>dit</button><button type="button" tabindex="-1"><u>S</u>earch</button><button type="button" tabindex="-1"><u>H</u>elp</button></div>
+  <div class="wbody sunken"><div class="welcome" id="about"></div></div>
+</section>
+
+<section class="win raised app" id="w-games" data-app="games" data-title="My Games" data-icon="img/icons/games-16.png" data-w="720" data-h="560" hidden aria-labelledby="t-games">
+  <div class="tbar"><span class="name" id="t-games"></span></div>
+  <div class="menubar" aria-hidden="true"><button type="button" tabindex="-1"><u>F</u>ile</button><button type="button" tabindex="-1"><u>E</u>dit</button><button type="button" tabindex="-1"><u>V</u>iew</button><button type="button" tabindex="-1"><u>H</u>elp</button></div>
+  <div class="wbody sunken"><div class="shelf"><div class="carts" id="grid"></div></div></div>
+  <div class="statusbar"><span id="gCount">0 object(s)</span><span>click a game to open where it lives</span></div>
+</section>
+
+<section class="win raised app" id="w-gallery" data-app="gallery" data-title="Gallery" data-icon="img/icons/app-image-viewer-16.png" data-w="580" data-h="460" hidden aria-labelledby="t-gallery">
+  <div class="tbar"><span class="name" id="t-gallery"></span></div>
+  <div class="menubar" aria-hidden="true"><button type="button" tabindex="-1"><u>F</u>ile</button><button type="button" tabindex="-1"><u>E</u>dit</button><button type="button" tabindex="-1"><u>V</u>iew</button><button type="button" tabindex="-1"><u>H</u>elp</button></div>
+  <div class="wbody sunken"><div class="gal" id="galGrid"></div></div>
+  <div class="statusbar"><span id="galTitle">0 picture(s)</span><span>double-click... or just click</span></div>
+</section>
+
+<section class="win raised app" id="w-links" data-app="links" data-title="Internet" data-icon="img/icons/app-browser-16.png" data-w="320" data-h="260" hidden aria-labelledby="t-links">
+  <div class="tbar"><span class="name" id="t-links"></span></div>
+  <div class="wbody sunken"><ul class="links" id="linkList"></ul></div>
+  <div class="statusbar"><span>Connected at 56 kbps</span></div>
+</section>
+
+<section class="win raised app" id="w-control" data-app="control" data-title="Control Panel" data-icon="img/icons/app-settings-16.png" data-w="320" data-h="420" hidden aria-labelledby="t-control">
+  <div class="tbar"><span class="name" id="t-control"></span></div>
+  <div class="wbody plain">
+    <div class="panel">
+      <fieldset>
+        <legend>System</legend>
+        <span>games on the shelf:</span>
+        <span class="counter sunken" id="counter">000000</span>
+        <dl>
+          <dt>pictures</dt><dd id="stPics">0</dd>
+          <dt>updated</dt><dd id="stSave">----</dd>
+          <dt>Dave pokes</dt><dd id="stPokes">0</dd>
+        </dl>
+      </fieldset>
+      <fieldset>
+        <legend>Effects</legend>
+        <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
+      </fieldset>
+      <fieldset>
+        <legend>Desktop friends</legend>
+        <label class="toggle"><input type="checkbox" data-buddy-toggle="clancies"> Clancies</label>
+        <label class="toggle"><input type="checkbox" data-buddy-toggle="mon"> Mon</label>
+      </fieldset>
+    </div>
+  </div>
+</section>
+
+<section class="win raised app" id="w-bin" data-app="bin" data-title="Recycle Bin" data-icon="img/icons/recycle-bin-16.png" data-w="320" data-h="240" hidden aria-labelledby="t-bin">
+  <div class="tbar"><span class="name" id="t-bin"></span></div>
+  <div class="wbody sunken"><div class="empty-bin"><img src="img/icons/recycle-bin.png" alt=""><span id="binText">The Recycle Bin is empty.</span></div></div>
+  <div class="statusbar"><span>0 object(s)</span><span>0 bytes</span></div>
+</section>
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="win raised">
-    <div class="tbar"><span class="name" id="lbTitle">picture.bmp</span><div class="tbtns"><button type="button" id="lbClose" aria-label="Close picture">×</button></div></div>
+    <div class="tbar"><span class="name" id="lbTitle">picture.bmp</span><div class="tbtns"><button type="button" class="x" id="lbClose" aria-label="Close picture">×</button></div></div>
     <div class="lb-view sunken"><img id="lbImg" src="data:," alt=""></div>
     <div class="lb-foot">
       <button type="button" class="btn" id="lbPrev">◀ Prev</button>
@@ -524,25 +439,30 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   <div class="tray"><span id="trayClock">--:--</span></div>
 </div>
 <div class="start-menu raised" id="startMenu" hidden role="menu">
+  <div class="profile">
+    <span class="hex"><span class="hex-in"><img src="img/dave-face.webp" width="240" height="240" alt=""></span></span>
+    <div><h1 id="heroTitle">Lico's Awesome Archive</h1><p id="tagline"></p></div>
+  </div>
   <div class="side-band" aria-hidden="true">Lico<span>98</span></div>
   <ul>
-    <li><button type="button" role="menuitem" data-act="games"><span class="ico" style="background:#2E8B22">G</span>My Games</button></li>
-    <li><button type="button" role="menuitem" data-act="gallery"><span class="ico" style="background:#2462D8">P</span>Gallery</button></li>
-    <li><button type="button" role="menuitem" data-act="dave"><span class="ico" style="background:#7FBF2A;color:#000">D</span>Dave.exe</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="games"><img src="img/icons/games.png" alt="">My Games</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="about"><img src="img/icons/filetype-text.png" alt="">About me</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="links"><img src="img/icons/app-browser.png" alt="">Internet</button></li>
+    <li class="sep" role="separator"></li>
+    <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="control"><img src="img/icons/app-settings.png" alt="">Control Panel</button></li>
     <li class="sep" role="separator"></li>
-    <li><button type="button" role="menuitem" data-act="restore"><span class="ico" style="background:#808080">W</span>Restore all windows</button></li>
-    <li><button type="button" role="menuitem" data-act="sparkles"><span class="ico" style="background:#F2C200;color:#000">*</span><span id="sparkLabel">Sparkles: on</span></button></li>
-    <li><button type="button" role="menuitem" data-act="run"><span class="ico" style="background:#000">&gt;</span>Run...</button></li>
-    <li class="sep" role="separator"></li>
-    <li><button type="button" role="menuitem" data-act="shutdown"><span class="ico" style="background:#E8352A">O</span>Shut Down...</button></li>
+    <li><button type="button" role="menuitem" data-act="run"><img src="img/icons/app-run.png" alt="">Run...</button></li>
+    <li><button type="button" role="menuitem" data-act="shutdown"><img src="img/icons/shutdown.png" alt="">Shut Down...</button></li>
   </ul>
 </div>
 <div class="run-box raised" id="runBox" hidden role="dialog" aria-labelledby="runTitle">
-  <div class="tbar"><span class="name" id="runTitle">Run</span><div class="tbtns"><button type="button" id="runClose" aria-label="Close">×</button></div></div>
+  <div class="tbar"><span class="name" id="runTitle">Run</span><div class="tbtns"><button type="button" class="x" id="runClose" aria-label="Close">×</button></div></div>
   <form id="runForm">
-    <label for="runInput">Type the name of a program, and Dave will (maybe) open it for you.</label>
+    <div class="run-top"><img src="img/icons/app-run.png" alt=""><label for="runInput">Type the name of a program, and Dave will (maybe) open it for you.</label></div>
     <input id="runInput" autocomplete="off" spellcheck="false" placeholder="try: coffee">
     <p class="run-out" id="runOut" aria-live="polite"></p>
     <div class="row-btns"><button type="submit" class="btn">OK</button><button type="button" class="btn" id="runCancel">Cancel</button></div>
@@ -715,7 +635,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   }
 
   function renderGrid() {
-    $('#gCount').textContent = `${games.length} game${games.length === 1 ? '' : 's'}`;
+    $('#gCount').textContent = `${games.length} object(s)`;
     $('#grid').replaceChildren(...(games.length ? games.map(cart) : [h('p', { class: 'empty' }, 'nothing on the shelf yet.')]));
     drawThumbs();
   }
@@ -760,7 +680,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   let lbIndex = 0, lbReturn = null;
   function renderGallery() {
     const grid = $('#galGrid');
-    $('#galTitle').textContent = `gallery — ${pics.length} picture${pics.length === 1 ? '' : 's'}`;
+    $('#galTitle').textContent = `${pics.length} picture(s)`;
     if (!pics.length) { grid.replaceChildren(h('p', { class: 'empty' }, 'no pictures yet.')); return; }
     grid.replaceChildren(...pics.map((pic, i) =>
       h('button', { type: 'button', class: 'gitem', onclick: () => openPic(i), 'aria-label': 'Open picture: ' + (pic.title || 'untitled') },
@@ -980,9 +900,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
       wokenTimer = setTimeout(() => spot.classList.remove('woken'), 6000);
     }
     say(DAVE_MILESTONES[pokes] || moodLine());
-    const pk = $('#pokes');
-    pk.hidden = false;
-    pk.textContent = `times Dave has been poked this visit: ${pokes}`;
+    $('#stPokes').textContent = pokes;
     sparkleAt(daveBtn);
   });
   daveBtn.addEventListener('animationend', e => { if (e.target.tagName === 'IMG') daveBtn.classList.remove('squish'); });
@@ -1061,49 +979,122 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   addEventListener('pointerdown', e => { if (e.target !== daveBtn && !daveBtn.contains(e.target)) burst(e.clientX, e.clientY, 12); }, { passive: true });
 
 
-  /* ---------- Draggable windows + taskbar ---------- */
-  const wins = [...document.querySelectorAll('.page .win')];
+  /* ---------- Windows ---------- */
+  const APPS = {};
+  document.querySelectorAll('.app').forEach(w => { APPS[w.dataset.app] = w; });
   const tasksEl = $('#tasks');
-  let zTop = 20;
-  function winName(w) { const n = w.querySelector('.tbar .name'); return n ? n.textContent.replace(/ — .*/, '') : 'window'; }
-  function renderTasks() {
-    tasksEl.replaceChildren(...wins.filter(w => w.classList.contains('rolled') || w.classList.contains('closed')).map(w =>
-      h('button', { type: 'button', class: 'btn', title: 'Restore ' + winName(w), onclick: () => restoreWin(w) }, winName(w))));
+  const isPhone = () => innerWidth <= 600;
+  const tbH = () => $('#taskbar').offsetHeight;
+  let zTop = 10, cascade = 0, activeApp = null;
+  const openOrder = [], minimized = new Set();
+
+  function place(w, x, y) {
+    const maxY = innerHeight - tbH() - 26;
+    x = Math.max(60 - w.offsetWidth, Math.min(innerWidth - 60, x));
+    y = Math.max(0, Math.min(maxY, y));
+    w.style.left = Math.round(x) + 'px'; w.style.top = Math.round(y) + 'px';
   }
-  function restoreWin(w) { w.classList.remove('rolled', 'closed'); w.classList.add('lifted'); w.style.zIndex = ++zTop; renderTasks(); }
-  function resetWin(w) { w.dataset.x = 0; w.dataset.y = 0; w.style.transform = ''; w.classList.remove('rolled', 'closed', 'lifted'); w.style.zIndex = ''; }
-  wins.forEach(w => {
-    const bar = w.querySelector('.tbar'); if (!bar) return;
-    let box = bar.querySelector('.tbtns');
-    if (!box) { box = h('div', { class: 'tbtns' }); bar.append(box); }
-    box.removeAttribute('aria-hidden');
-    box.replaceChildren(
-      h('button', { type: 'button', 'aria-label': 'Minimize', title: 'Minimize', onclick: () => { w.classList.toggle('rolled'); renderTasks(); } }, '_'),
-      h('button', { type: 'button', 'aria-label': 'Put back', title: 'Put back where it was', onclick: () => { resetWin(w); renderTasks(); } }, '□'),
-      h('button', { type: 'button', 'aria-label': 'Close', title: 'Close', onclick: () => { w.classList.add('closed'); renderTasks(); say(pick(["Closed it. It's in the taskbar if you miss it.", 'Out of sight, out of mind. Like my paycheck.', 'Window closed. Fresh air not included.'])); } }, '×'));
-    let start = null;
+  function sizeFor(w) {
+    w.style.width = Math.min(+w.dataset.w, innerWidth - 16) + 'px';
+    w.style.height = Math.min(+w.dataset.h, innerHeight - tbH() - 16) + 'px';
+  }
+  function renderTasks() {
+    tasksEl.replaceChildren(...openOrder.map(id => {
+      const w = APPS[id], on = id === activeApp && !minimized.has(id);
+      return h('button', { type: 'button', class: 'btn' + (on ? ' down' : ''), title: w.dataset.title, 'aria-pressed': String(on),
+        onclick: () => { if (on) minimize(id); else openApp(id); } },
+        h('img', { src: w.dataset.icon, alt: '' }), h('span', {}, w.dataset.title));
+    }));
+  }
+  function focusApp(id) {
+    const w = APPS[id]; if (!w || w.hidden) return;
+    w.style.zIndex = ++zTop; activeApp = id;
+    Object.values(APPS).forEach(x => x.classList.toggle('active', x === w));
+    renderTasks();
+  }
+  function topVisible() {
+    return openOrder.filter(id => !minimized.has(id)).sort((p, q) => (+APPS[q].style.zIndex || 0) - (+APPS[p].style.zIndex || 0))[0] || null;
+  }
+  function openApp(id) {
+    if (id === 'dave') { pokeDaveFromMenu(); return; }
+    const w = APPS[id]; if (!w) return;
+    if (!openOrder.includes(id)) openOrder.push(id);
+    minimized.delete(id);
+    if (w.hidden) {
+      w.hidden = false;
+      if (!w.dataset.placed) {
+        sizeFor(w);
+        const step = cascade++ % 6;
+        place(w, Math.min(108 + step * 26, innerWidth - w.offsetWidth - 8), 12 + step * 24);
+        w.dataset.placed = '1';
+      }
+      w.classList.toggle('max', isPhone() || w.classList.contains('max'));
+    }
+    focusApp(id);
+    if (id === 'bin') say(pick(["Nothing in there. I emptied it. Twice.", 'The Recycle Bin is empty. Like my coffee mug.', 'Where old games go to rest. None yet. Good.']));
+  }
+  function minimize(id) {
+    const w = APPS[id]; if (!w) return;
+    minimized.add(id); w.hidden = true; w.classList.remove('active');
+    activeApp = topVisible(); if (activeApp) focusApp(activeApp); else renderTasks();
+  }
+  function closeApp(id) {
+    const w = APPS[id]; if (!w) return;
+    w.hidden = true; w.classList.remove('active');
+    minimized.delete(id);
+    const i = openOrder.indexOf(id); if (i >= 0) openOrder.splice(i, 1);
+    activeApp = topVisible(); if (activeApp) focusApp(activeApp); else renderTasks();
+  }
+  function toggleMax(id) { const w = APPS[id]; if (!w || isPhone()) return; w.classList.toggle('max'); focusApp(id); }
+
+  Object.entries(APPS).forEach(([id, w]) => {
+    const bar = w.querySelector('.tbar');
+    bar.querySelector('.name').replaceChildren(h('img', { src: w.dataset.icon, alt: '' }), h('span', {}, w.dataset.title));
+    bar.append(h('div', { class: 'tbtns' },
+      h('button', { type: 'button', 'aria-label': 'Minimize', title: 'Minimize', onclick: () => minimize(id) }, '_'),
+      h('button', { type: 'button', 'aria-label': 'Maximize', title: 'Maximize', onclick: () => toggleMax(id) }, '□'),
+      h('button', { type: 'button', class: 'x', 'aria-label': 'Close', title: 'Close', onclick: () => closeApp(id) }, '×')));
+    w.addEventListener('pointerdown', () => focusApp(id), true);
+    w.addEventListener('focusin', () => { if (activeApp !== id) focusApp(id); });
+    let st = null;
     bar.addEventListener('pointerdown', e => {
-      if (e.button !== 0 || e.target.closest('button')) return;
-      start = { px: e.clientX, py: e.clientY, x: +(w.dataset.x || 0), y: +(w.dataset.y || 0) };
+      if (e.button !== 0 || e.target.closest('button') || w.classList.contains('max') || isPhone()) return;
+      const r = w.getBoundingClientRect();
+      st = { px: e.clientX, py: e.clientY, x: r.left, y: r.top };
       bar.setPointerCapture(e.pointerId);
-      w.classList.add('dragging'); w.style.zIndex = ++zTop;
     });
-    bar.addEventListener('pointermove', e => {
-      if (!start) return;
-      const x = start.x + e.clientX - start.px, y = start.y + e.clientY - start.py;
-      w.dataset.x = x; w.dataset.y = y;
-      w.style.transform = `translate(${x}px, ${y}px)`;
-    });
-    const end = () => { if (!start) return; start = null; w.classList.remove('dragging'); w.classList.add('lifted'); };
+    bar.addEventListener('pointermove', e => { if (st) place(w, st.x + e.clientX - st.px, st.y + e.clientY - st.py); });
+    const end = () => { st = null; };
     bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
-    bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) { w.classList.toggle('rolled'); renderTasks(); } });
+    bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) toggleMax(id); });
   });
+  addEventListener('resize', () => Object.values(APPS).forEach(w => {
+    if (w.hidden) return;
+    if (isPhone()) w.classList.add('max');
+    const r = w.getBoundingClientRect(); place(w, r.left, r.top);
+  }));
+
+  /* Desktop icons: click selects, double-click opens (one tap on touch screens) */
+  const coarse = matchMedia('(pointer: coarse)');
+  const icons = [...document.querySelectorAll('.dicon')];
+  icons.forEach(ic => {
+    ic.addEventListener('click', e => {
+      icons.forEach(x => x.classList.toggle('sel', x === ic));
+      if (coarse.matches || e.detail === 0) openApp(ic.dataset.open);
+    });
+    ic.addEventListener('dblclick', () => openApp(ic.dataset.open));
+  });
+  $('#desktop').addEventListener('pointerdown', e => { if (e.target.id === 'desktop') icons.forEach(x => x.classList.remove('sel')); });
+  function pokeDaveFromMenu() {
+    daveBtn.classList.remove('squish'); void daveBtn.offsetWidth; daveBtn.classList.add('squish');
+    say(pick(['You opened Dave.exe. Dave.exe is tired.', 'Dave.exe is running. Slowly.', 'Loading Dave... 3%... please hold.', "I'm already open. I'm always open. That's the problem."]));
+  }
 
   /* ---------- Start menu ---------- */
   const startBtn = $('#startBtn'), startMenu = $('#startMenu');
   function setMenu(open) {
     startMenu.hidden = !open; startBtn.setAttribute('aria-expanded', String(open));
-    if (open) { $('#sparkLabel').textContent = 'Sparkles: ' + (fxOn ? 'on' : 'off'); startMenu.querySelector('button').focus(); }
+    if (open) startMenu.querySelector('button').focus();
   }
   startBtn.addEventListener('click', () => setMenu(startMenu.hidden));
   document.addEventListener('pointerdown', e => { if (!startMenu.hidden && !startMenu.contains(e.target) && !startBtn.contains(e.target)) setMenu(false); });
@@ -1112,16 +1103,12 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     if (!startMenu.hidden) { setMenu(false); startBtn.focus(); }
     if (!$('#runBox').hidden) closeRun();
   });
-  const goTo = id => { const el = $(id); if (!el) return; el.classList.remove('rolled', 'closed'); renderTasks(); el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }); };
   startMenu.addEventListener('click', e => {
     const b = e.target.closest('button[data-act]'); if (!b) return;
     const act = b.dataset.act; setMenu(false);
-    if (act === 'games') goTo('#games');
-    else if (act === 'gallery') goTo('#gallery');
-    else if (act === 'dave') { goTo('#dave'); say(pick(['You opened Dave.exe. Dave.exe is tired.', 'Dave.exe is running. Slowly.', 'Loading Dave... 3%... please hold.'])); }
+    if (act === 'open') openApp(b.dataset.app);
+    else if (act === 'dave') pokeDaveFromMenu();
     else if (act === 'buddy') buddies[b.dataset.buddy].toggle();
-    else if (act === 'restore') { wins.forEach(resetWin); renderTasks(); say('Put everything back. You\'re welcome. I\'m HR now, and also IT.'); }
-    else if (act === 'sparkles') { fxToggle.checked = !fxToggle.checked; fxToggle.dispatchEvent(new Event('change')); }
     else if (act === 'run') openRun();
     else if (act === 'shutdown') { $('#shutdown').hidden = false; }
   });
@@ -1132,14 +1119,17 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: coffee, dave, clancies, mon, pancake, notepad, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
-    dave: () => { goTo('#dave'); return 'Dave is already running. He never stops running. Help him.'; },
+    dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
+    explorer: () => { openApp('games'); return 'Opened My Games.'; },
+    mspaint: () => { openApp('gallery'); return 'Paint is broken. Opened the Gallery instead.'; },
+    control: () => { openApp('control'); return 'Opened Control Panel.'; },
     clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
     mon: () => { buddies.mon.summon(); return 'Mon dropped in. Quietly. Like she was always there.'; },
     monochrome: () => RUN.mon(),
     pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
-    notepad: 'Notepad is busy being a sticky note on Dave\'s monitor.',
+    notepad: () => { openApp('about'); return 'Opened about_me.txt.'; },
     minesweeper: 'You clicked a mine. Game over. That was fast.',
     rain: () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * innerWidth, 0, 14), i * 120); return 'It is now raining sparkles. Indoors.'; },
     quit: 'Quit what? Your job? Same.',
@@ -1292,6 +1282,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
       b.off = off; el.hidden = off;
       try { localStorage.setItem('lico-buddy-' + id, off ? 'off' : 'on'); } catch (e) {}
       const l = label(); if (l) l.textContent = (off ? 'Summon ' : 'Hide ') + cfg.name;
+      const cb = document.querySelector(`[data-buddy-toggle="${id}"]`); if (cb) cb.checked = !off;
     };
     b.toggle = () => { b.setOff(!b.off); if (!b.off) b.drop(); };
     b.summon = () => { if (b.off) b.setOff(false); b.drop(); };
@@ -1302,6 +1293,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     return b;
   }
   const buddies = Object.fromEntries(Object.entries(BUDDIES).map(([id, cfg]) => [id, makeBuddy(id, cfg)]));
+  document.querySelectorAll('[data-buddy-toggle]').forEach(cb => cb.addEventListener('change', () => { const bd = buddies[cb.dataset.buddyToggle]; if (cb.checked === bd.off) bd.toggle(); }));
   let buddyLast = performance.now();
   function buddyTick(now) {
     const dt = Math.min(0.05, (now - buddyLast) / 1000); buddyLast = now;
@@ -1310,6 +1302,12 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   }
   requestAnimationFrame(buddyTick);
   addEventListener('resize', () => Object.values(buddies).forEach(b => b.fit()));
+
+  /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
+  const startApp = decodeURIComponent(location.hash.slice(1));
+  if (APPS[startApp]) openApp(startApp);
+  else if (isPhone()) openApp('about');
+  else { openApp('games'); openApp('about'); }
 
   boot();
 })();
