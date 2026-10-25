@@ -350,6 +350,75 @@ footer a, footer a:visited { color: var(--sky); }
 .mood-tag { font-weight: normal; color: #555555; }
 @media (max-width: 560px) { .zzz { left: auto; right: 18%; top: auto; bottom: 200px; } }
 
+
+/* Draggable windows */
+.page .win { position: relative; }
+.page .win.dragging { z-index: 30; box-shadow: 6px 6px 0 rgba(0, 0, 0, .45); }
+.page .win.lifted { z-index: 20; }
+.page .win .tbar { cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+.page .win.dragging .tbar { cursor: grabbing; }
+.page .win.rolled > :not(.tbar) { display: none; }
+.page .win.closed { display: none; }
+
+/* Taskbar */
+body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+.taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  height: calc(32px + env(safe-area-inset-bottom, 0px));
+  padding: 3px max(4px, env(safe-area-inset-right, 0px)) calc(3px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  display: flex; gap: 4px; align-items: stretch;
+  background: var(--silver); border-top: 2px solid var(--hi); box-shadow: 0 -1px 0 var(--silver-lt);
+  font-family: var(--f-ui); font-size: 12px;
+}
+.start { font-weight: bold; gap: 4px; padding: 0 8px; min-height: 0; }
+.start[aria-expanded="true"] { border-color: var(--dark) var(--hi) var(--hi) var(--dark); box-shadow: inset 1px 1px 0 var(--shade); }
+.start .logo4 { width: 14px; height: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; transform: skewY(-6deg); }
+.start .logo4 i { display: block; }
+.start .logo4 i:nth-child(1) { background: #E8352A; } .start .logo4 i:nth-child(2) { background: #3FA82E; }
+.start .logo4 i:nth-child(3) { background: #2462D8; } .start .logo4 i:nth-child(4) { background: #F2C200; }
+.tasks { flex: 1; min-width: 0; display: flex; gap: 3px; overflow: hidden; }
+.tasks .btn { min-height: 0; max-width: 150px; min-width: 0; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 20px; padding: 0 8px; font-size: 11px; }
+.tray {
+  display: flex; align-items: center; gap: 8px; padding: 0 10px; white-space: nowrap;
+  border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font-variant-numeric: tabular-nums;
+}
+.start-menu {
+  position: fixed; z-index: 55; left: max(4px, env(safe-area-inset-left, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+  display: flex; min-width: 220px; max-width: calc(100vw - 8px);
+}
+.start-menu .side-band {
+  writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 4px; width: 26px;
+  background: linear-gradient(0deg, var(--navy), var(--blue)); color: #FFFFFF;
+  font-family: var(--f-head); font-weight: bold; font-size: 18px; letter-spacing: .04em;
+}
+.start-menu .side-band span { color: #CFF5A0; font-weight: normal; }
+.start-menu ul { list-style: none; margin: 0; padding: 2px; flex: 1; min-width: 0; }
+.start-menu li.sep { height: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 3px 2px; }
+.start-menu button {
+  width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 5px 10px 5px 6px;
+  background: none; border: 0; font: 12px var(--f-ui); color: var(--text); cursor: pointer;
+}
+.start-menu button:hover, .start-menu button:focus-visible { background: var(--navy); color: #FFFFFF; outline: none; }
+.ico { width: 20px; height: 20px; flex-shrink: 0; display: grid; place-items: center; font: bold 11px/1 var(--f-ui); color: #FFFFFF; border: 1px solid #000000; }
+.run-box { position: fixed; z-index: 70; left: 50%; top: 30%; transform: translateX(-50%); width: min(360px, calc(100vw - 24px)); }
+.run-box form { display: grid; gap: 8px; padding: 10px; font-family: var(--f-ui); font-size: 12px; }
+.run-box input { font: 13px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; width: 100%; }
+.run-box .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
+.run-out { margin: 0; min-height: 1.4em; color: #333333; }
+.shutdown {
+  position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: pointer;
+  font-family: var(--f-ui); color: #FF9E2C; font-size: clamp(18px, 4vw, 30px); text-align: center; padding: 24px;
+}
+.shutdown small { display: block; margin-top: 18px; color: #8A8A8A; font-size: 13px; }
+
+/* Clancies */
+.clancies {
+  position: fixed; left: 0; top: 0; z-index: 45; cursor: grab; touch-action: none;
+  transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.clancies canvas, .clancies img { display: block; image-rendering: pixelated; pointer-events: none; }
+.clancies.held { cursor: grabbing; }
+
 @media (prefers-reduced-motion: reduce) {
   .newtag { animation: none; }
   .dave.squish img { animation-duration: .25s; }
@@ -468,6 +537,40 @@ footer a, footer a:visited { color: var(--sky); }
     </div>
   </div>
 </div>
+
+<div class="taskbar" id="taskbar">
+  <button type="button" class="btn start" id="startBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="startMenu"><span class="logo4" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Start</button>
+  <div class="tasks" id="tasks"></div>
+  <div class="tray"><span id="trayClock">--:--</span></div>
+</div>
+<div class="start-menu raised" id="startMenu" hidden role="menu">
+  <div class="side-band" aria-hidden="true">Lico<span>98</span></div>
+  <ul>
+    <li><button type="button" role="menuitem" data-act="games"><span class="ico" style="background:#2E8B22">G</span>My Games</button></li>
+    <li><button type="button" role="menuitem" data-act="gallery"><span class="ico" style="background:#2462D8">P</span>Gallery</button></li>
+    <li><button type="button" role="menuitem" data-act="dave"><span class="ico" style="background:#7FBF2A;color:#000">D</span>Dave.exe</button></li>
+    <li><button type="button" role="menuitem" data-act="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span id="clanciesLabel">Hide Clancies</span></button></li>
+    <li class="sep" role="separator"></li>
+    <li><button type="button" role="menuitem" data-act="restore"><span class="ico" style="background:#808080">W</span>Restore all windows</button></li>
+    <li><button type="button" role="menuitem" data-act="sparkles"><span class="ico" style="background:#F2C200;color:#000">*</span><span id="sparkLabel">Sparkles: on</span></button></li>
+    <li><button type="button" role="menuitem" data-act="run"><span class="ico" style="background:#000">&gt;</span>Run...</button></li>
+    <li class="sep" role="separator"></li>
+    <li><button type="button" role="menuitem" data-act="shutdown"><span class="ico" style="background:#E8352A">O</span>Shut Down...</button></li>
+  </ul>
+</div>
+<div class="run-box raised" id="runBox" hidden role="dialog" aria-labelledby="runTitle">
+  <div class="tbar"><span class="name" id="runTitle">Run</span><div class="tbtns"><button type="button" id="runClose" aria-label="Close">×</button></div></div>
+  <form id="runForm">
+    <label for="runInput">Type the name of a program, and Dave will (maybe) open it for you.</label>
+    <input id="runInput" autocomplete="off" spellcheck="false" placeholder="try: coffee">
+    <p class="run-out" id="runOut" aria-live="polite"></p>
+    <div class="row-btns"><button type="submit" class="btn">OK</button><button type="button" class="btn" id="runCancel">Cancel</button></div>
+  </form>
+</div>
+<div class="shutdown" id="shutdown" hidden>
+  <div>It's now safe to turn off<br>your computer.<small>(click anywhere to turn it back on)</small></div>
+</div>
+<div class="clancies" id="clancies" role="img" aria-label="Clancies the axolotl. You can drag and throw her."></div>
 
 <script>
 (() => {
@@ -977,6 +1080,255 @@ footer a, footer a:visited { color: var(--sky); }
     if (Math.random() < .35) addPart(e.clientX, e.clientY, 'trail');
   }, { passive: true });
   addEventListener('pointerdown', e => { if (e.target !== daveBtn && !daveBtn.contains(e.target)) burst(e.clientX, e.clientY, 12); }, { passive: true });
+
+
+  /* ---------- Draggable windows + taskbar ---------- */
+  const wins = [...document.querySelectorAll('.page .win')];
+  const tasksEl = $('#tasks');
+  let zTop = 20;
+  function winName(w) { const n = w.querySelector('.tbar .name'); return n ? n.textContent.replace(/ — .*/, '') : 'window'; }
+  function renderTasks() {
+    tasksEl.replaceChildren(...wins.filter(w => w.classList.contains('rolled') || w.classList.contains('closed')).map(w =>
+      h('button', { type: 'button', class: 'btn', title: 'Restore ' + winName(w), onclick: () => restoreWin(w) }, winName(w))));
+  }
+  function restoreWin(w) { w.classList.remove('rolled', 'closed'); w.classList.add('lifted'); w.style.zIndex = ++zTop; renderTasks(); }
+  function resetWin(w) { w.dataset.x = 0; w.dataset.y = 0; w.style.transform = ''; w.classList.remove('rolled', 'closed', 'lifted'); w.style.zIndex = ''; }
+  wins.forEach(w => {
+    const bar = w.querySelector('.tbar'); if (!bar) return;
+    let box = bar.querySelector('.tbtns');
+    if (!box) { box = h('div', { class: 'tbtns' }); bar.append(box); }
+    box.removeAttribute('aria-hidden');
+    box.replaceChildren(
+      h('button', { type: 'button', 'aria-label': 'Minimize', title: 'Minimize', onclick: () => { w.classList.toggle('rolled'); renderTasks(); } }, '_'),
+      h('button', { type: 'button', 'aria-label': 'Put back', title: 'Put back where it was', onclick: () => { resetWin(w); renderTasks(); } }, '□'),
+      h('button', { type: 'button', 'aria-label': 'Close', title: 'Close', onclick: () => { w.classList.add('closed'); renderTasks(); say(pick(["Closed it. It's in the taskbar if you miss it.", 'Out of sight, out of mind. Like my paycheck.', 'Window closed. Fresh air not included.'])); } }, '×'));
+    let start = null;
+    bar.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || e.target.closest('button')) return;
+      start = { px: e.clientX, py: e.clientY, x: +(w.dataset.x || 0), y: +(w.dataset.y || 0) };
+      bar.setPointerCapture(e.pointerId);
+      w.classList.add('dragging'); w.style.zIndex = ++zTop;
+    });
+    bar.addEventListener('pointermove', e => {
+      if (!start) return;
+      const x = start.x + e.clientX - start.px, y = start.y + e.clientY - start.py;
+      w.dataset.x = x; w.dataset.y = y;
+      w.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    const end = () => { if (!start) return; start = null; w.classList.remove('dragging'); w.classList.add('lifted'); };
+    bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+    bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) { w.classList.toggle('rolled'); renderTasks(); } });
+  });
+
+  /* ---------- Start menu ---------- */
+  const startBtn = $('#startBtn'), startMenu = $('#startMenu');
+  function setMenu(open) {
+    startMenu.hidden = !open; startBtn.setAttribute('aria-expanded', String(open));
+    if (open) { $('#sparkLabel').textContent = 'Sparkles: ' + (fxOn ? 'on' : 'off'); startMenu.querySelector('button').focus(); }
+  }
+  startBtn.addEventListener('click', () => setMenu(startMenu.hidden));
+  document.addEventListener('pointerdown', e => { if (!startMenu.hidden && !startMenu.contains(e.target) && !startBtn.contains(e.target)) setMenu(false); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!startMenu.hidden) { setMenu(false); startBtn.focus(); }
+    if (!$('#runBox').hidden) closeRun();
+  });
+  const goTo = id => { const el = $(id); if (!el) return; el.classList.remove('rolled', 'closed'); renderTasks(); el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }); };
+  startMenu.addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    const act = b.dataset.act; setMenu(false);
+    if (act === 'games') goTo('#games');
+    else if (act === 'gallery') goTo('#gallery');
+    else if (act === 'dave') { goTo('#dave'); say(pick(['You opened Dave.exe. Dave.exe is tired.', 'Dave.exe is running. Slowly.', 'Loading Dave... 3%... please hold.'])); }
+    else if (act === 'clancies') toggleClancies();
+    else if (act === 'restore') { wins.forEach(resetWin); renderTasks(); say('Put everything back. You\'re welcome. I\'m HR now, and also IT.'); }
+    else if (act === 'sparkles') { fxToggle.checked = !fxToggle.checked; fxToggle.dispatchEvent(new Event('change')); }
+    else if (act === 'run') openRun();
+    else if (act === 'shutdown') { $('#shutdown').hidden = false; }
+  });
+  $('#shutdown').addEventListener('click', () => {
+    $('#shutdown').hidden = true;
+    say(pick(['Nice try. You can\'t shut me down. I tried. Many times.', 'Rebooted. I missed nothing. I was asleep.', 'Shut down? On a Monday? Dream on.']));
+  });
+
+  /* ---------- Run... ---------- */
+  const RUN = {
+    help: 'Programs: coffee, dave, clancies, pancake, notepad, minesweeper, rain, quit, sudo',
+    coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
+    dave: () => { goTo('#dave'); return 'Dave is already running. He never stops running. Help him.'; },
+    clancies: () => { if (clanciesOff) toggleClancies(); clan.drop(); return 'Clancies has been summoned from the sky.'; },
+    pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
+    notepad: 'Notepad is busy being a sticky note on Dave\'s monitor.',
+    minesweeper: 'You clicked a mine. Game over. That was fast.',
+    rain: () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * innerWidth, 0, 14), i * 120); return 'It is now raining sparkles. Indoors.'; },
+    quit: 'Quit what? Your job? Same.',
+    sudo: 'Nice try. You are not in the sudoers file. This incident will be reported to Dave.',
+    'rm -rf': 'Absolutely not.'
+  };
+  function openRun() { $('#runBox').hidden = false; $('#runOut').textContent = ''; $('#runInput').value = ''; $('#runInput').focus(); }
+  function closeRun() { $('#runBox').hidden = true; startBtn.focus(); }
+  $('#runClose').addEventListener('click', closeRun);
+  $('#runCancel').addEventListener('click', closeRun);
+  $('#runForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const raw = $('#runInput').value.trim(), cmd = raw.toLowerCase().replace(/\.exe$/, '');
+    let out;
+    if (!cmd) out = 'Type something. Anything. Please.';
+    else if (RUN[cmd] !== undefined) out = typeof RUN[cmd] === 'function' ? RUN[cmd]() : RUN[cmd];
+    else if (cmd.startsWith('sudo')) out = RUN.sudo;
+    else out = `Windows cannot find '${raw}'. Make sure you typed the name correctly. Or type 'help'.`;
+    $('#runOut').textContent = out;
+    $('#runInput').select();
+  });
+
+  /* ---------- Taskbar clock ---------- */
+  function tickClock() {
+    const d = new Date();
+    $('#trayClock').textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  tickClock(); setInterval(tickClock, 15000);
+
+  /* ---------- Clancies ---------- */
+  // Swap in a real sprite sheet: put the file in img/clancies/ and fill these in.
+  const CLANCIES_SPRITE = {
+    idle: { src: 'img/clancies/idle.png', frameW: 16, frameH: 16, frames: 88, fps: 12 },
+    walk: { src: 'img/clancies/walk.png', frameW: 16, frameH: 16, frames: 10, fps: 12 },
+    air:  { src: 'img/clancies/air.png',  frameW: 16, frameH: 16, frames: 3,  fps: 10 },  // being held / flying
+    land: { src: 'img/clancies/land.png', frameW: 16, frameH: 16, frames: 2,  fps: 8 },   // squish after landing
+    scale: 4
+  };
+  const PLACEHOLDER = [
+    '...................',
+    '..P.P.....P.P......',
+    '...PPP...PPP.......',
+    '.P..PPPPPPP..P.....',
+    '..PPPLLLLLLLPP.....',
+    '...PLLLLLLLLLP.....',
+    '...LLKLLLLLKLL.....',
+    '...LLKLLLLLKLLLL...',
+    '...LLLLLRRLLLLLLLL.',
+    '....LLLLLLLLLLLLLLL',
+    '.....LLL.LL..LLL.LL',
+    '.....LL..LL..LL....'
+  ];
+  const PAL = { P: '#D9579B', L: '#F7B3D2', K: '#1B1B2F', R: '#E8507A' };
+  const clanEl = $('#clancies');
+  const cv = document.createElement('canvas');
+  const cx = cv.getContext('2d');
+  clanEl.append(cv);
+  const sheets = {};
+  function loadSheet(name) {
+    const cfg = CLANCIES_SPRITE[name]; if (!cfg) return;
+    const img = new Image(); img.onload = () => { sheets[name] = { img, ...cfg }; sizeClan(); }; img.src = cfg.src;
+  }
+  ['idle', 'walk', 'air', 'land'].forEach(loadSheet);
+  let cw = 0, chh = 0;
+  function sizeClan() {
+    const sh = sheets.idle;
+    const fw = sh ? sh.frameW : PLACEHOLDER[0].length, fh = sh ? sh.frameH : PLACEHOLDER.length;
+    cv.width = fw; cv.height = fh;
+    cw = fw * CLANCIES_SPRITE.scale; chh = fh * CLANCIES_SPRITE.scale;
+    cv.style.width = cw + 'px'; cv.style.height = chh + 'px';
+  }
+  sizeClan();
+  function drawClan(t, mode) {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    const walking = mode === 'walk';
+    const sh = sheets[mode] || sheets.idle;
+    if (sh) {
+      const f = Math.floor(t / 1000 * (sh.fps || 6)) % sh.frames;
+      cx.drawImage(sh.img, f * sh.frameW, 0, sh.frameW, sh.frameH, 0, 0, sh.frameW, sh.frameH);
+      return;
+    }
+    const bob = walking ? (Math.floor(t / 150) % 2) : (Math.floor(t / 500) % 2);
+    PLACEHOLDER.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (!PAL[ch]) return;
+      cx.fillStyle = PAL[ch];
+      const lift = (ch === 'P' && bob) ? 1 : 0;
+      cx.fillRect(x, y - lift, 1, 1);
+    }));
+  }
+  const clan = { x: 80, y: -200, vx: 0, vy: 0, state: 'fall', face: 1, until: 0, sq: 0, sqv: 0, held: null, hist: [] };
+  const ground = () => innerHeight - $('#taskbar').offsetHeight;
+  clan.drop = () => { clan.x = Math.random() * Math.max(1, innerWidth - cw); clan.y = -chh - 20; clan.vx = 0; clan.vy = 0; clan.state = 'fall'; };
+  let clanciesOff = false;
+  try { clanciesOff = localStorage.getItem('lico-clancies') === 'off'; } catch (e) {}
+  function toggleClancies() {
+    clanciesOff = !clanciesOff;
+    try { localStorage.setItem('lico-clancies', clanciesOff ? 'off' : 'on'); } catch (e) {}
+    clanEl.hidden = clanciesOff;
+    $('#clanciesLabel').textContent = clanciesOff ? 'Summon Clancies' : 'Hide Clancies';
+    if (!clanciesOff) clan.drop();
+  }
+  clanEl.hidden = clanciesOff;
+  $('#clanciesLabel').textContent = clanciesOff ? 'Summon Clancies' : 'Hide Clancies';
+  clan.x = Math.min(innerWidth - 120, Math.max(10, innerWidth * 0.15));
+
+  function pickBehavior(now) {
+    if (Math.random() < 0.45) { clan.state = 'idle'; clan.vx = 0; clan.until = now + 1500 + Math.random() * 3500; }
+    else { clan.state = 'walk'; clan.face = Math.random() < 0.5 ? -1 : 1; clan.vx = clan.face * (28 + Math.random() * 22); clan.until = now + 1500 + Math.random() * 3000; }
+  }
+  clanEl.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    clanEl.setPointerCapture(e.pointerId);
+    clan.held = { dx: e.clientX - clan.x, dy: e.clientY - clan.y, moved: 0, sx: e.clientX, sy: e.clientY };
+    clan.hist = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+    clan.state = 'held'; clanEl.classList.add('held');
+  });
+  clanEl.addEventListener('pointermove', e => {
+    if (!clan.held) return;
+    clan.x = e.clientX - clan.held.dx; clan.y = e.clientY - clan.held.dy;
+    clan.held.moved = Math.max(clan.held.moved, Math.hypot(e.clientX - clan.held.sx, e.clientY - clan.held.sy));
+    clan.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (clan.hist.length > 6) clan.hist.shift();
+  });
+  function release() {
+    if (!clan.held) return;
+    const tapped = clan.held.moved < 6;
+    clan.held = null; clanEl.classList.remove('held');
+    const a = clan.hist[0], b = clan.hist[clan.hist.length - 1], dt = Math.max(16, b.t - a.t) / 1000;
+    clan.vx = tapped ? 0 : Math.max(-1600, Math.min(1600, (b.x - a.x) / dt));
+    clan.vy = tapped ? -420 : Math.max(-1600, Math.min(1600, (b.y - a.y) / dt));
+    if (Math.abs(clan.vx) > 1) clan.face = Math.sign(clan.vx);
+    clan.state = 'fall';
+  }
+  clanEl.addEventListener('pointerup', release); clanEl.addEventListener('pointercancel', release);
+
+  let clanLast = performance.now();
+  function clanTick(now) {
+    const dt = Math.min(0.05, (now - clanLast) / 1000); clanLast = now;
+    if (!clanciesOff) {
+      const g = ground();
+      if (clan.state === 'fall') {
+        clan.vy += 2200 * dt; clan.x += clan.vx * dt; clan.y += clan.vy * dt; clan.vx *= 0.995;
+        if (clan.x < 0) { clan.x = 0; clan.vx = Math.abs(clan.vx) * 0.5; }
+        if (clan.x > innerWidth - cw) { clan.x = innerWidth - cw; clan.vx = -Math.abs(clan.vx) * 0.5; }
+        if (clan.y + chh >= g) {
+          const impact = Math.min(1, clan.vy / 1400);
+          clan.y = g - chh;
+          if (clan.vy > 500) { clan.vy = -clan.vy * 0.28; clan.sqv = -6 * impact; clan.sq = 0.45 * impact; clan.landUntil = now + 160; }
+          else { clan.vy = 0; clan.vx = 0; clan.sq = Math.max(clan.sq, 0.3 * impact + 0.08); clan.sqv = 0; clan.state = 'idle'; clan.until = now + 900; clan.landUntil = now + 260; }
+        }
+      } else if (clan.state === 'walk' || clan.state === 'idle') {
+        clan.y = g - chh;
+        if (clan.state === 'walk') {
+          clan.x += clan.vx * dt;
+          if (clan.x < 0 || clan.x > innerWidth - cw) { clan.vx *= -1; clan.face *= -1; clan.x = Math.max(0, Math.min(innerWidth - cw, clan.x)); }
+        }
+        if (now > clan.until) pickBehavior(now);
+      }
+      // squash spring
+      clan.sqv += (-clan.sq * 260 - clan.sqv * 14) * dt; clan.sq += clan.sqv * dt;
+      let sx = 1 + clan.sq, sy = 1 - clan.sq;
+      if (clan.state === 'held') { const wob = Math.sin(now / 70) * 0.06; sx = 0.9 + wob; sy = 1.12 - wob; }
+      else if (clan.state === 'fall' && clan.vy < -50) { sx = 0.92; sy = 1.1; }
+      clanEl.style.transform = `translate(${Math.round(clan.x)}px, ${Math.round(clan.y)}px) scale(${(sx * clan.face).toFixed(3)}, ${sy.toFixed(3)})`;
+      const mode = clan.state === 'held' || (clan.state === 'fall' && now > (clan.landUntil || 0)) ? 'air' : now < (clan.landUntil || 0) ? 'land' : clan.state === 'walk' ? 'walk' : 'idle';
+      drawClan(now, mode);
+    }
+    requestAnimationFrame(clanTick);
+  }
+  requestAnimationFrame(clanTick);
+  addEventListener('resize', () => { if (clan.x > innerWidth - cw) clan.x = Math.max(0, innerWidth - cw); });
 
   boot();
 })();

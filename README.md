@@ -11,6 +11,7 @@ licoryte.github.io/
 ├─ img/covers/       cover images for the game cards
 ├─ img/gallery/      gallery pictures (just drop images here)
 ├─ img/background/   background image (keep one here)
+├─ img/clancies/     Clancies sprite sheets
 ├─ img/              Dave's pictures
 └─ fonts/            VT323 (counter) and Comic Neue (Dave's bubble) — free, OFL
 ```
@@ -96,6 +97,12 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` i
 ## Sparkles
 
 - Sparkles & cursor trail: visitors can turn them off with the checkbox in the "stats" box. They start off for people who set "reduce motion" on their device.
+
+## Fun stuff
+
+- **Windows:** drag any window by its title bar. `_` rolls it up, `□` puts it back where it was, `×` closes it. Closed/rolled windows show up in the taskbar; click to bring them back. Double-click a title bar to roll it up.
+- **Start menu:** bottom-left. "Run..." understands: `help`, `coffee`, `dave`, `clancies`, `pancake`, `notepad`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
+- **Clancies:** walks along the taskbar. Drag and throw her; she falls and squishes on the bottom of the screen. Click her for a hop. Her sprites are in `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish). To change frame counts, speed or size, search `CLANCIES_SPRITE` in `index.html`.
 
 ## Dave
 
