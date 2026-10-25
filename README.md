@@ -12,6 +12,7 @@ licoryte.github.io/
 ├─ img/gallery/      gallery pictures (just drop images here)
 ├─ img/background/   background image (keep one here)
 ├─ img/clancies/     Clancies sprite sheets
+├─ img/friends/      other desktop buddies
 ├─ img/              Dave's pictures
 └─ fonts/            VT323 (counter) and Comic Neue (Dave's bubble) — free, OFL
 ```
@@ -101,8 +102,11 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--desk` i
 ## Fun stuff
 
 - **Windows:** drag any window by its title bar. `_` rolls it up, `□` puts it back where it was, `×` closes it. Closed/rolled windows show up in the taskbar; click to bring them back. Double-click a title bar to roll it up.
-- **Start menu:** bottom-left. "Run..." understands: `help`, `coffee`, `dave`, `clancies`, `pancake`, `notepad`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
-- **Clancies:** walks along the taskbar. Drag and throw her; she falls and squishes on the bottom of the screen. Click her for a hop. Her sprites are in `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish). To change frame counts, speed or size, search `CLANCIES_SPRITE` in `index.html`.
+- **Start menu:** bottom-left. "Run..." understands: `help`, `coffee`, `dave`, `clancies`, `lantern`, `pancake`, `notepad`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
+- **Desktop buddies:** Clancies and Lantern Girl walk along the taskbar. Drag and throw them; they fall and squish on the bottom of the screen. Click one for a hop. Hide or summon each from the Start menu.
+  - Clancies: `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish).
+  - Lantern Girl: `img/friends/lantern-girl.png`, an RPG-style 32×32 sheet (3 walk frames per row; rows = down, left, right, up).
+  - To change names, sizes, speeds or frame counts, or add another buddy: search `const BUDDIES` in `index.html`.
 
 ## Dave
 

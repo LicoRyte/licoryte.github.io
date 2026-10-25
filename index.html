@@ -407,17 +407,17 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 .run-out { margin: 0; min-height: 1.4em; color: #333333; }
 .shutdown {
   position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: pointer;
-  font-family: var(--f-ui); color: #FF9E2C; font-size: clamp(18px, 4vw, 30px); text-align: center; padding: 24px;
+  font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px;
 }
-.shutdown small { display: block; margin-top: 18px; color: #8A8A8A; font-size: 13px; }
+.shutdown .sad { display: block; font-size: 22px; margin-bottom: 8px; }
 
 /* Clancies */
-.clancies {
+.buddy {
   position: fixed; left: 0; top: 0; z-index: 45; cursor: grab; touch-action: none;
   transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
 }
-.clancies canvas, .clancies img { display: block; image-rendering: pixelated; pointer-events: none; }
-.clancies.held { cursor: grabbing; }
+.buddy canvas { display: block; image-rendering: pixelated; pointer-events: none; }
+.buddy.held { cursor: grabbing; }
 
 @media (prefers-reduced-motion: reduce) {
   .newtag { animation: none; }
@@ -549,7 +549,8 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     <li><button type="button" role="menuitem" data-act="games"><span class="ico" style="background:#2E8B22">G</span>My Games</button></li>
     <li><button type="button" role="menuitem" data-act="gallery"><span class="ico" style="background:#2462D8">P</span>Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="dave"><span class="ico" style="background:#7FBF2A;color:#000">D</span>Dave.exe</button></li>
-    <li><button type="button" role="menuitem" data-act="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span id="clanciesLabel">Hide Clancies</span></button></li>
+    <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
+    <li><button type="button" role="menuitem" data-act="buddy" data-buddy="lantern"><span class="ico" style="background:#3A3561">L</span><span data-label="lantern">Hide Lantern Girl</span></button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="restore"><span class="ico" style="background:#808080">W</span>Restore all windows</button></li>
     <li><button type="button" role="menuitem" data-act="sparkles"><span class="ico" style="background:#F2C200;color:#000">*</span><span id="sparkLabel">Sparkles: on</span></button></li>
@@ -568,9 +569,8 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   </form>
 </div>
 <div class="shutdown" id="shutdown" hidden>
-  <div>It's now safe to turn off<br>your computer.<small>(click anywhere to turn it back on)</small></div>
+  <div><span class="sad">:(</span>click to turn it back on</div>
 </div>
-<div class="clancies" id="clancies" role="img" aria-label="Clancies the axolotl. You can drag and throw her."></div>
 
 <script>
 (() => {
@@ -1140,7 +1140,7 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
     if (act === 'games') goTo('#games');
     else if (act === 'gallery') goTo('#gallery');
     else if (act === 'dave') { goTo('#dave'); say(pick(['You opened Dave.exe. Dave.exe is tired.', 'Dave.exe is running. Slowly.', 'Loading Dave... 3%... please hold.'])); }
-    else if (act === 'clancies') toggleClancies();
+    else if (act === 'buddy') buddies[b.dataset.buddy].toggle();
     else if (act === 'restore') { wins.forEach(resetWin); renderTasks(); say('Put everything back. You\'re welcome. I\'m HR now, and also IT.'); }
     else if (act === 'sparkles') { fxToggle.checked = !fxToggle.checked; fxToggle.dispatchEvent(new Event('change')); }
     else if (act === 'run') openRun();
@@ -1153,10 +1153,11 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: coffee, dave, clancies, pancake, notepad, minesweeper, rain, quit, sudo',
+    help: 'Programs: coffee, dave, clancies, lantern, pancake, notepad, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { goTo('#dave'); return 'Dave is already running. He never stops running. Help him.'; },
-    clancies: () => { if (clanciesOff) toggleClancies(); clan.drop(); return 'Clancies has been summoned from the sky.'; },
+    clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
+    lantern: () => { buddies.lantern.summon(); return 'She dropped in. Quietly. Like she was always there.'; },
     pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
     notepad: 'Notepad is busy being a sticky note on Dave\'s monitor.',
     minesweeper: 'You clicked a mine. Game over. That was fast.',
@@ -1188,147 +1189,147 @@ body { padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
   }
   tickClock(); setInterval(tickClock, 15000);
 
-  /* ---------- Clancies ---------- */
-  // Swap in a real sprite sheet: put the file in img/clancies/ and fill these in.
-  const CLANCIES_SPRITE = {
-    idle: { src: 'img/clancies/idle.png', frameW: 16, frameH: 16, frames: 88, fps: 12 },
-    walk: { src: 'img/clancies/walk.png', frameW: 16, frameH: 16, frames: 10, fps: 12 },
-    air:  { src: 'img/clancies/air.png',  frameW: 16, frameH: 16, frames: 3,  fps: 10 },  // being held / flying
-    land: { src: 'img/clancies/land.png', frameW: 16, frameH: 16, frames: 2,  fps: 8 },   // squish after landing
-    scale: 4
-  };
-  const PLACEHOLDER = [
-    '...................',
-    '..P.P.....P.P......',
-    '...PPP...PPP.......',
-    '.P..PPPPPPP..P.....',
-    '..PPPLLLLLLLPP.....',
-    '...PLLLLLLLLLP.....',
-    '...LLKLLLLLKLL.....',
-    '...LLKLLLLLKLLLL...',
-    '...LLLLLRRLLLLLLLL.',
-    '....LLLLLLLLLLLLLLL',
-    '.....LLL.LL..LLL.LL',
-    '.....LL..LL..LL....'
-  ];
-  const PAL = { P: '#D9579B', L: '#F7B3D2', K: '#1B1B2F', R: '#E8507A' };
-  const clanEl = $('#clancies');
-  const cv = document.createElement('canvas');
-  const cx = cv.getContext('2d');
-  clanEl.append(cv);
-  const sheets = {};
-  function loadSheet(name) {
-    const cfg = CLANCIES_SPRITE[name]; if (!cfg) return;
-    const img = new Image(); img.onload = () => { sheets[name] = { img, ...cfg }; sizeClan(); }; img.src = cfg.src;
-  }
-  ['idle', 'walk', 'air', 'land'].forEach(loadSheet);
-  let cw = 0, chh = 0;
-  function sizeClan() {
-    const sh = sheets.idle;
-    const fw = sh ? sh.frameW : PLACEHOLDER[0].length, fh = sh ? sh.frameH : PLACEHOLDER.length;
-    cv.width = fw; cv.height = fh;
-    cw = fw * CLANCIES_SPRITE.scale; chh = fh * CLANCIES_SPRITE.scale;
-    cv.style.width = cw + 'px'; cv.style.height = chh + 'px';
-  }
-  sizeClan();
-  function drawClan(t, mode) {
-    cx.clearRect(0, 0, cv.width, cv.height);
-    const walking = mode === 'walk';
-    const sh = sheets[mode] || sheets.idle;
-    if (sh) {
-      const f = Math.floor(t / 1000 * (sh.fps || 6)) % sh.frames;
-      cx.drawImage(sh.img, f * sh.frameW, 0, sh.frameW, sh.frameH, 0, 0, sh.frameW, sh.frameH);
-      return;
-    }
-    const bob = walking ? (Math.floor(t / 150) % 2) : (Math.floor(t / 500) % 2);
-    PLACEHOLDER.forEach((row, y) => [...row].forEach((ch, x) => {
-      if (!PAL[ch]) return;
-      cx.fillStyle = PAL[ch];
-      const lift = (ch === 'P' && bob) ? 1 : 0;
-      cx.fillRect(x, y - lift, 1, 1);
-    }));
-  }
-  const clan = { x: 80, y: -200, vx: 0, vy: 0, state: 'fall', face: 1, until: 0, sq: 0, sqv: 0, held: null, hist: [] };
-  const ground = () => innerHeight - $('#taskbar').offsetHeight;
-  clan.drop = () => { clan.x = Math.random() * Math.max(1, innerWidth - cw); clan.y = -chh - 20; clan.vx = 0; clan.vy = 0; clan.state = 'fall'; };
-  let clanciesOff = false;
-  try { clanciesOff = localStorage.getItem('lico-clancies') === 'off'; } catch (e) {}
-  function toggleClancies() {
-    clanciesOff = !clanciesOff;
-    try { localStorage.setItem('lico-clancies', clanciesOff ? 'off' : 'on'); } catch (e) {}
-    clanEl.hidden = clanciesOff;
-    $('#clanciesLabel').textContent = clanciesOff ? 'Summon Clancies' : 'Hide Clancies';
-    if (!clanciesOff) clan.drop();
-  }
-  clanEl.hidden = clanciesOff;
-  $('#clanciesLabel').textContent = clanciesOff ? 'Summon Clancies' : 'Hide Clancies';
-  clan.x = Math.min(innerWidth - 120, Math.max(10, innerWidth * 0.15));
-
-  function pickBehavior(now) {
-    if (Math.random() < 0.45) { clan.state = 'idle'; clan.vx = 0; clan.until = now + 1500 + Math.random() * 3500; }
-    else { clan.state = 'walk'; clan.face = Math.random() < 0.5 ? -1 : 1; clan.vx = clan.face * (28 + Math.random() * 22); clan.until = now + 1500 + Math.random() * 3000; }
-  }
-  clanEl.addEventListener('pointerdown', e => {
-    if (e.button !== 0) return;
-    clanEl.setPointerCapture(e.pointerId);
-    clan.held = { dx: e.clientX - clan.x, dy: e.clientY - clan.y, moved: 0, sx: e.clientX, sy: e.clientY };
-    clan.hist = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
-    clan.state = 'held'; clanEl.classList.add('held');
-  });
-  clanEl.addEventListener('pointermove', e => {
-    if (!clan.held) return;
-    clan.x = e.clientX - clan.held.dx; clan.y = e.clientY - clan.held.dy;
-    clan.held.moved = Math.max(clan.held.moved, Math.hypot(e.clientX - clan.held.sx, e.clientY - clan.held.sy));
-    clan.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (clan.hist.length > 6) clan.hist.shift();
-  });
-  function release() {
-    if (!clan.held) return;
-    const tapped = clan.held.moved < 6;
-    clan.held = null; clanEl.classList.remove('held');
-    const a = clan.hist[0], b = clan.hist[clan.hist.length - 1], dt = Math.max(16, b.t - a.t) / 1000;
-    clan.vx = tapped ? 0 : Math.max(-1600, Math.min(1600, (b.x - a.x) / dt));
-    clan.vy = tapped ? -420 : Math.max(-1600, Math.min(1600, (b.y - a.y) / dt));
-    if (Math.abs(clan.vx) > 1) clan.face = Math.sign(clan.vx);
-    clan.state = 'fall';
-  }
-  clanEl.addEventListener('pointerup', release); clanEl.addEventListener('pointercancel', release);
-
-  let clanLast = performance.now();
-  function clanTick(now) {
-    const dt = Math.min(0.05, (now - clanLast) / 1000); clanLast = now;
-    if (!clanciesOff) {
-      const g = ground();
-      if (clan.state === 'fall') {
-        clan.vy += 2200 * dt; clan.x += clan.vx * dt; clan.y += clan.vy * dt; clan.vx *= 0.995;
-        if (clan.x < 0) { clan.x = 0; clan.vx = Math.abs(clan.vx) * 0.5; }
-        if (clan.x > innerWidth - cw) { clan.x = innerWidth - cw; clan.vx = -Math.abs(clan.vx) * 0.5; }
-        if (clan.y + chh >= g) {
-          const impact = Math.min(1, clan.vy / 1400);
-          clan.y = g - chh;
-          if (clan.vy > 500) { clan.vy = -clan.vy * 0.28; clan.sqv = -6 * impact; clan.sq = 0.45 * impact; clan.landUntil = now + 160; }
-          else { clan.vy = 0; clan.vx = 0; clan.sq = Math.max(clan.sq, 0.3 * impact + 0.08); clan.sqv = 0; clan.state = 'idle'; clan.until = now + 900; clan.landUntil = now + 260; }
-        }
-      } else if (clan.state === 'walk' || clan.state === 'idle') {
-        clan.y = g - chh;
-        if (clan.state === 'walk') {
-          clan.x += clan.vx * dt;
-          if (clan.x < 0 || clan.x > innerWidth - cw) { clan.vx *= -1; clan.face *= -1; clan.x = Math.max(0, Math.min(innerWidth - cw, clan.x)); }
-        }
-        if (now > clan.until) pickBehavior(now);
+  /* ---------- Desktop buddies (Clancies + Lantern Girl) ----------
+     Each buddy walks on the taskbar, can be dragged and thrown, and squishes when landing.
+     Sprite sheets live in img/. Two layouts are supported:
+       strip: one row of frames per animation (idle / walk / air / land), flipped to face left/right
+       grid:  RPG-style sheet, columns = walk frames, rows = directions (down, left, right, up) */
+  const BUDDIES = {
+    clancies: {
+      name: 'Clancies', scale: 4, start: 0.15, speed: [28, 50],
+      layout: 'strip', frameW: 16, frameH: 16,
+      anims: {
+        idle: { src: 'img/clancies/idle.png', frames: 88, fps: 12 },
+        walk: { src: 'img/clancies/walk.png', frames: 10, fps: 12 },
+        air:  { src: 'img/clancies/air.png',  frames: 3,  fps: 10 },
+        land: { src: 'img/clancies/land.png', frames: 2,  fps: 8 }
       }
-      // squash spring
-      clan.sqv += (-clan.sq * 260 - clan.sqv * 14) * dt; clan.sq += clan.sqv * dt;
-      let sx = 1 + clan.sq, sy = 1 - clan.sq;
-      if (clan.state === 'held') { const wob = Math.sin(now / 70) * 0.06; sx = 0.9 + wob; sy = 1.12 - wob; }
-      else if (clan.state === 'fall' && clan.vy < -50) { sx = 0.92; sy = 1.1; }
-      clanEl.style.transform = `translate(${Math.round(clan.x)}px, ${Math.round(clan.y)}px) scale(${(sx * clan.face).toFixed(3)}, ${sy.toFixed(3)})`;
-      const mode = clan.state === 'held' || (clan.state === 'fall' && now > (clan.landUntil || 0)) ? 'air' : now < (clan.landUntil || 0) ? 'land' : clan.state === 'walk' ? 'walk' : 'idle';
-      drawClan(now, mode);
+    },
+    lantern: {
+      name: 'Lantern Girl', scale: 3, start: 0.7, speed: [22, 38],
+      layout: 'grid', frameW: 32, frameH: 32, src: 'img/friends/lantern-girl.png',
+      rows: { down: 0, left: 1, right: 2, up: 3 }, walkCycle: [0, 1, 2, 1], idleCol: 1, fps: 7
     }
-    requestAnimationFrame(clanTick);
+  };
+  const ground = () => innerHeight - $('#taskbar').offsetHeight;
+
+  function makeBuddy(id, cfg) {
+    const el = h('div', { class: 'buddy', role: 'img', 'aria-label': `${cfg.name}. You can drag and throw her.` });
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d');
+    cv.width = cfg.frameW; cv.height = cfg.frameH;
+    const W = cfg.frameW * cfg.scale, H = cfg.frameH * cfg.scale;
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    el.append(cv); document.body.append(el);
+    const imgs = {};
+    const load = (key, url) => { const im = new Image(); im.onload = () => { imgs[key] = im; }; im.src = url; };
+    if (cfg.layout === 'strip') Object.entries(cfg.anims).forEach(([k, a]) => load(k, a.src)); else load('sheet', cfg.src);
+
+    const b = { x: 0, y: -200, vx: 0, vy: 0, state: 'fall', face: 1, until: 0, sq: 0, sqv: 0, held: null, hist: [], landUntil: 0, off: false };
+    b.x = Math.max(0, Math.min(innerWidth - W, innerWidth * cfg.start));
+
+    function draw(t) {
+      cx.clearRect(0, 0, cv.width, cv.height);
+      const landing = t < b.landUntil;
+      if (cfg.layout === 'strip') {
+        const mode = b.state === 'held' || (b.state === 'fall' && !landing) ? 'air' : landing ? 'land' : b.state === 'walk' ? 'walk' : 'idle';
+        const a = cfg.anims[mode], im = imgs[mode] || imgs.idle, an = imgs[mode] ? a : cfg.anims.idle;
+        if (!im) return;
+        const f = Math.floor(t / 1000 * an.fps) % an.frames;
+        cx.drawImage(im, f * cfg.frameW, 0, cfg.frameW, cfg.frameH, 0, 0, cfg.frameW, cfg.frameH);
+      } else {
+        const im = imgs.sheet; if (!im) return;
+        let row = cfg.rows.down, col = cfg.idleCol;
+        if (b.state === 'walk') { row = b.face < 0 ? cfg.rows.left : cfg.rows.right; col = cfg.walkCycle[Math.floor(t / 1000 * cfg.fps) % cfg.walkCycle.length]; }
+        else if (b.state === 'held') { col = Math.floor(t / 120) % 2 ? 0 : 2; }
+        cx.drawImage(im, col * cfg.frameW, row * cfg.frameH, cfg.frameW, cfg.frameH, 0, 0, cfg.frameW, cfg.frameH);
+      }
+    }
+    function pickBehavior(now) {
+      if (Math.random() < 0.45) { b.state = 'idle'; b.vx = 0; b.until = now + 1500 + Math.random() * 3500; }
+      else {
+        b.state = 'walk'; b.face = Math.random() < 0.5 ? -1 : 1;
+        b.vx = b.face * (cfg.speed[0] + Math.random() * (cfg.speed[1] - cfg.speed[0]));
+        b.until = now + 1500 + Math.random() * 3000;
+      }
+    }
+    el.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      el.setPointerCapture(e.pointerId);
+      b.held = { dx: e.clientX - b.x, dy: e.clientY - b.y, moved: 0, sx: e.clientX, sy: e.clientY };
+      b.hist = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+      b.state = 'held'; el.classList.add('held'); el.style.zIndex = 46;
+    });
+    el.addEventListener('pointermove', e => {
+      if (!b.held) return;
+      b.x = e.clientX - b.held.dx; b.y = e.clientY - b.held.dy;
+      b.held.moved = Math.max(b.held.moved, Math.hypot(e.clientX - b.held.sx, e.clientY - b.held.sy));
+      b.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (b.hist.length > 6) b.hist.shift();
+    });
+    function release() {
+      if (!b.held) return;
+      const tapped = b.held.moved < 6;
+      b.held = null; el.classList.remove('held'); el.style.zIndex = '';
+      const p = b.hist[0], q = b.hist[b.hist.length - 1], dt = Math.max(16, q.t - p.t) / 1000;
+      b.vx = tapped ? 0 : Math.max(-1600, Math.min(1600, (q.x - p.x) / dt));
+      b.vy = tapped ? -420 : Math.max(-1600, Math.min(1600, (q.y - p.y) / dt));
+      if (Math.abs(b.vx) > 1) b.face = Math.sign(b.vx);
+      b.state = 'fall';
+    }
+    el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release);
+
+    b.tick = (now, dt) => {
+      if (b.off) return;
+      const g = ground();
+      if (b.state === 'fall') {
+        b.vy += 2200 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= 0.995;
+        if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx) * 0.5; }
+        if (b.x > innerWidth - W) { b.x = innerWidth - W; b.vx = -Math.abs(b.vx) * 0.5; }
+        if (b.y + H >= g) {
+          const impact = Math.min(1, b.vy / 1400);
+          b.y = g - H;
+          if (b.vy > 500) { b.vy = -b.vy * 0.28; b.sqv = -6 * impact; b.sq = 0.45 * impact; b.landUntil = now + 160; }
+          else { b.vy = 0; b.vx = 0; b.sq = Math.max(b.sq, 0.3 * impact + 0.08); b.sqv = 0; b.state = 'idle'; b.until = now + 900; b.landUntil = now + 260; }
+        }
+      } else if (b.state === 'walk' || b.state === 'idle') {
+        b.y = g - H;
+        if (b.state === 'walk') {
+          b.x += b.vx * dt;
+          if (b.x < 0 || b.x > innerWidth - W) { b.vx *= -1; b.face *= -1; b.x = Math.max(0, Math.min(innerWidth - W, b.x)); }
+        }
+        if (now > b.until) pickBehavior(now);
+      }
+      b.sqv += (-b.sq * 260 - b.sqv * 14) * dt; b.sq += b.sqv * dt;
+      let sx = 1 + b.sq, sy = 1 - b.sq;
+      if (b.state === 'held') { const wob = Math.sin(now / 70) * 0.06; sx = 0.9 + wob; sy = 1.12 - wob; }
+      else if (b.state === 'fall' && b.vy < -50) { sx = 0.92; sy = 1.1; }
+      const flip = cfg.layout === 'strip' ? b.face : 1;
+      el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px) scale(${(sx * flip).toFixed(3)}, ${sy.toFixed(3)})`;
+      draw(now);
+    };
+    b.drop = () => { b.x = Math.random() * Math.max(1, innerWidth - W); b.y = -H - 20; b.vx = 0; b.vy = 0; b.state = 'fall'; };
+    const label = () => document.querySelector(`[data-label="${id}"]`);
+    b.setOff = off => {
+      b.off = off; el.hidden = off;
+      try { localStorage.setItem('lico-buddy-' + id, off ? 'off' : 'on'); } catch (e) {}
+      const l = label(); if (l) l.textContent = (off ? 'Summon ' : 'Hide ') + cfg.name;
+    };
+    b.toggle = () => { b.setOff(!b.off); if (!b.off) b.drop(); };
+    b.summon = () => { if (b.off) b.setOff(false); b.drop(); };
+    b.fit = () => { if (b.x > innerWidth - W) b.x = Math.max(0, innerWidth - W); };
+    let stored = null;
+    try { stored = localStorage.getItem('lico-buddy-' + id) || (id === 'clancies' ? localStorage.getItem('lico-clancies') : null); } catch (e) {}
+    b.setOff(stored === 'off');
+    return b;
   }
-  requestAnimationFrame(clanTick);
-  addEventListener('resize', () => { if (clan.x > innerWidth - cw) clan.x = Math.max(0, innerWidth - cw); });
+  const buddies = Object.fromEntries(Object.entries(BUDDIES).map(([id, cfg]) => [id, makeBuddy(id, cfg)]));
+  let buddyLast = performance.now();
+  function buddyTick(now) {
+    const dt = Math.min(0.05, (now - buddyLast) / 1000); buddyLast = now;
+    Object.values(buddies).forEach(b => b.tick(now, dt));
+    requestAnimationFrame(buddyTick);
+  }
+  requestAnimationFrame(buddyTick);
+  addEventListener('resize', () => Object.values(buddies).forEach(b => b.fit()));
 
   boot();
 })();
