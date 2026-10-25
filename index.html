@@ -10,7 +10,7 @@
 /* Fonts: VT323 (LCD counter) and Comic Neue (Dave's bubble) are self-hosted in /fonts, SIL Open Font License. The rest are classic system fonts. */
 @font-face { font-family: "VT323"; font-weight: 400; font-display: swap; src: url("fonts/vt323-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Comic Neue"; font-weight: 700; font-display: swap; src: url("fonts/comic-neue-latin-700-normal.woff2") format("woff2"); }
-/* Icons: SerenityOS icon set (BSD 2-Clause), see img/icons/LICENSE-serenityos.txt */
+/* Icons and cursors: SerenityOS (BSD 2-Clause), see img/icons/LICENSE-serenityos.txt */
 
 /* Layout: a late-90s desktop — wallpaper, a column of desktop icons, fixed draggable windows, Dave in the bottom-right corner, taskbar with Start menu */
 :root {
@@ -33,6 +33,12 @@
   --lcd: #33FF33;
   --sky: #CFF5A0;
   --tb-h: 32px;
+  --cur-arrow: url("img/cursors/arrow.png") 2 2, default;
+  --cur-hand: url("img/cursors/hand.png") 8 4, pointer;
+  --cur-text: url("img/cursors/ibeam.png") 7 12, text;
+  --cur-grab: url("img/cursors/grab.png") 9 9, grabbing;
+  --cur-wait: url("img/cursors/wait.png") 10 10, wait;
+  --cur-no: url("img/cursors/no.png") 10 10, not-allowed;
 
   --f-ui: Tahoma, Verdana, "Segoe UI", Geneva, "DejaVu Sans", sans-serif;
   --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
@@ -51,6 +57,12 @@ body {
   background-color: var(--desk); color: var(--text);
   font-family: var(--f-body); font-size: 13px; line-height: 1.5;
 }
+html, body { cursor: var(--cur-arrow); }
+a, a * { cursor: var(--cur-hand); }
+input:not([type="checkbox"]), textarea { cursor: var(--cur-text); }
+input[type="checkbox"] { cursor: var(--cur-hand); }
+button:disabled, .btn[disabled] { cursor: var(--cur-no); }
+body.busy, body.busy * { cursor: var(--cur-wait) !important; }
 a { color: var(--link); }
 a:visited { color: var(--visited); }
 :focus-visible { outline: 1px dotted var(--text); outline-offset: 2px; }
@@ -78,7 +90,7 @@ a:visited { color: var(--visited); }
   background: var(--silver);
   border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi);
   box-shadow: inset 1px 1px 0 var(--silver-lt), inset -1px -1px 0 var(--shade);
-  padding: 3px 12px; min-height: 26px; cursor: pointer; text-decoration: none;
+  padding: 3px 12px; min-height: 26px; cursor: var(--cur-hand); text-decoration: none;
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 a.btn, a.btn:visited { color: var(--text); }
@@ -94,7 +106,7 @@ a.btn, a.btn:visited { color: var(--text); }
 }
 .dicon {
   width: 84px; height: 84px; display: grid; grid-template-rows: 36px auto; justify-items: center; align-content: start; gap: 4px;
-  padding: 6px 2px 0; background: none; border: 0; cursor: pointer; color: #FFFFFF;
+  padding: 6px 2px 0; background: none; border: 0; cursor: var(--cur-hand); color: #FFFFFF;
   font: 12px/1.2 var(--f-ui); text-align: center; -webkit-tap-highlight-color: transparent;
 }
 .dicon img { width: 32px; height: 32px; image-rendering: pixelated; }
@@ -119,7 +131,7 @@ a.btn, a.btn:visited { color: var(--text); }
   padding: 2px 2px 2px 3px; min-height: 22px;
 }
 .app.active .tbar, .run-box .tbar, #lb .tbar { background: linear-gradient(90deg, var(--navy), var(--blue)); color: var(--hi); }
-.app .tbar { cursor: default; user-select: none; -webkit-user-select: none; touch-action: none; }
+.app .tbar { cursor: var(--cur-arrow); user-select: none; -webkit-user-select: none; touch-action: none; }
 .tbar .name { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; min-width: 0; }
 .tbar .name img { width: 16px; height: 16px; flex-shrink: 0; image-rendering: pixelated; }
 .tbar .name span { overflow: hidden; text-overflow: ellipsis; }
@@ -127,11 +139,11 @@ a.btn, a.btn:visited { color: var(--text); }
 .tbtns > * {
   width: 18px; height: 16px; padding: 0; display: grid; place-items: center;
   font: bold 11px/1 var(--f-ui); color: var(--text); background: var(--silver);
-  border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: pointer;
+  border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand);
 }
 .tbtns > .x { margin-left: 2px; }
 .menubar { display: flex; gap: 2px; padding: 1px 0 2px; font: 12px var(--f-ui); flex-shrink: 0; }
-.menubar button { background: none; border: 1px solid transparent; padding: 1px 6px; font: inherit; cursor: pointer; color: var(--text); }
+.menubar button { background: none; border: 1px solid transparent; padding: 1px 6px; font: inherit; cursor: var(--cur-hand); color: var(--text); }
 .menubar button:hover { border-color: var(--hi) var(--shade) var(--shade) var(--hi); }
 .menubar u { text-decoration: underline; }
 .wbody { flex: 1; min-height: 0; overflow: auto; background: var(--paper); container-type: inline-size; }
@@ -158,7 +170,7 @@ a.btn, a.btn:visited { color: var(--text); }
 .panel dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
 .panel dd { margin: 0; text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; }
 .counter { display: inline-block; justify-self: start; background: var(--lcd-bg); color: var(--lcd); font-family: var(--f-mono); font-size: 30px; line-height: 1; letter-spacing: .1em; padding: 2px 6px; font-variant-numeric: tabular-nums; }
-.toggle { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.toggle { display: flex; gap: 6px; align-items: center; cursor: var(--cur-hand); }
 .toggle input { margin: 0; }
 
 /* Recycle bin + dialogs */
@@ -187,7 +199,7 @@ a.card:visited { color: var(--text); }
 
 /* Gallery */
 .gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)); gap: 12px; padding: 12px; }
-.gitem { display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; font: inherit; color: inherit; text-align: center; min-width: 0; }
+.gitem { display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0; cursor: var(--cur-hand); font: inherit; color: inherit; text-align: center; min-width: 0; }
 .gitem .ph { display: block; aspect-ratio: 1; max-width: 100%; overflow: hidden; background: #EFEFEF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
 .gitem img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gitem .cap { font-family: var(--f-ui); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -221,7 +233,7 @@ a.card:visited { color: var(--text); }
 .bubble .who { display: block; font-family: var(--f-ui); font-weight: bold; font-size: 11px; color: var(--navy); margin-bottom: 2px; }
 .mood-tag { font-weight: normal; color: #555555; }
 .dave-body { position: relative; }
-.dave { background: none; border: 0; padding: 0; cursor: pointer; display: block; position: relative; z-index: 1; -webkit-tap-highlight-color: transparent; transition: filter .6s; }
+.dave { background: none; border: 0; padding: 0; cursor: var(--cur-hand); display: block; position: relative; z-index: 1; -webkit-tap-highlight-color: transparent; transition: filter .6s; }
 .dave img { display: block; height: 220px; width: auto; max-width: none; transform-origin: 50% 100%; user-select: none; -webkit-user-drag: none; }
 .dave:hover img { filter: brightness(1.06); }
 .dave.squish img { animation: squish .5s cubic-bezier(.3, 1.6, .5, 1); }
@@ -294,7 +306,7 @@ a.card:visited { color: var(--text); }
 .start-menu li.sep { height: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 3px 2px; }
 .start-menu button {
   width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; padding: 4px 10px 4px 6px;
-  background: none; border: 0; font: 12px var(--f-ui); color: var(--text); cursor: pointer;
+  background: none; border: 0; font: 12px var(--f-ui); color: var(--text); cursor: var(--cur-hand);
 }
 .start-menu button img { width: 24px; height: 24px; image-rendering: pixelated; flex-shrink: 0; }
 .start-menu button .face { object-fit: cover; object-position: 50% 20%; border: 1px solid #000000; image-rendering: auto; }
@@ -308,13 +320,13 @@ a.card:visited { color: var(--text); }
 .run-box input { font: 13px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; width: 100%; }
 .run-box .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
 .run-out { margin: 0; min-height: 1.4em; color: #333333; }
-.shutdown { position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: pointer; font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px; }
+.shutdown { position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: var(--cur-hand); font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px; }
 .shutdown .sad { display: block; font-size: 22px; margin-bottom: 8px; }
 
 /* Desktop buddies + sparkles */
-.buddy { position: fixed; left: 0; top: 0; z-index: 45; cursor: grab; touch-action: none; transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.buddy { position: fixed; left: 0; top: 0; z-index: 45; cursor: var(--cur-hand); touch-action: none; transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 .buddy canvas { display: block; image-rendering: pixelated; pointer-events: none; }
-.buddy.held { cursor: grabbing; }
+.buddy.held { cursor: var(--cur-grab); }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
 
 /* Phones: windows open full-screen, Dave gets smaller */
@@ -1021,6 +1033,8 @@ a.card:visited { color: var(--text); }
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
     if (w.hidden) {
+      document.body.classList.add('busy'); clearTimeout(openApp.t);
+      openApp.t = setTimeout(() => document.body.classList.remove('busy'), 350);
       w.hidden = false;
       if (!w.dataset.placed) {
         sizeFor(w);

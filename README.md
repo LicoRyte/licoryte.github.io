@@ -113,6 +113,7 @@ The site looks like a late-90s desktop.
   - Clancies: `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish).
   - Mon: `img/friends/mon.png`, an RPG-style 32×32 sheet (3 walk frames per row; rows = down, left, right, up).
   - To change names, sizes, speeds or frame counts, or add another buddy: search `const BUDDIES` in `index.html`.
+- **Cursors:** pixel cursors in `img/cursors/` (arrow, hand, I-beam, grab, hourglass, no-entry), also from SerenityOS. Swap a file to change it; hotspots are set at the top of `index.html` (search `--cur-`).
 - **Icons:** from the SerenityOS icon set (free, BSD license, see `img/icons/LICENSE-serenityos.txt`). To change a window's icon, swap the file in `img/icons/` or edit the `data-icon` / `<img src>` in `index.html`.
 
 ## Dave
