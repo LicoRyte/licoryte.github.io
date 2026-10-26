@@ -104,18 +104,17 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--navy` a
 
 The site looks like a late-90s desktop.
 
-- **Desktop icons** (top-left) open windows: about_me.txt, My Games, Gallery, Texty (the browser), Control Panel, Recycle Bin, Dave.exe. Double-click on a computer, one tap on a phone.
+- **Desktop icons** (top-left) open windows: about_me.txt, My Games, Gallery, Texty (the browser), Gmail/Twitter/YouTube shortcuts, Workstation, Paint, Sticky Notes, OS, Recycle Bin. Double-click on a computer, one tap on a phone.
 - **Windows** stay fixed on screen. Drag them by the title bar. `_` minimizes to the taskbar, `□` maximizes (or double-click the title bar), `×` closes. Games and Gallery scroll inside their window. On phones windows open full-screen.
-- **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#texty`, `#control`).
-- **Start menu:** your profile (title + tagline from `games.json`) at the top, then shortcuts. "Run..." understands: `help`, `notepad`, `explorer`, `texty`, any web address, `mspaint`, `control`, `coffee`, `dave`, `clancies`, `mon`, `pancake`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
+- **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#texty`, `#workstation`, `#paint`, `#os`).
+- **Start menu:** your profile (title + tagline from `games.json`) at the top, then shortcuts. "Run..." understands: `help`, `notepad`, `explorer`, `texty`, `workstation`, `os`, any web address, `mspaint`, `control`, `coffee`, `dave`, `clancies`, `mon`, `pancake`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
 - **Texty:** a little browser window. Type a website in the Address bar (or words to search with DuckDuckGo) and press Enter; it opens in a new tab. Real sites refuse to be shown inside other pages, so new tabs are the way. Favorites come from `links` in `games.json`. The globe is from the KDE Oxygen icon set (LGPL 3, see `img/icons/LICENSE-oxygen-LGPL-3.0.txt`).
 - **Website shortcuts:** Gmail, Twitter and YouTube icons on the desktop (and in the Start menu) open those sites in a new tab. Generic icons on purpose: envelope and video player from SerenityOS, the speech bubble is hand-drawn for this site. To add another, copy one of the `class="dicon shortcut"` lines in `index.html` and change the `url:` address, icon and name.
 - **Workstation:** a folder of useful work websites (PDF, convert/translate, images, video/audio, design, game dev, code, everyday), grouped by category, with a Find box and an info panel. Double-click opens the site in a new tab. Edit the list in `games.json` under `"workstation"`: each category has `"tools"`, each tool has `name`, `url`, `desc` and `icon` (a name from `img/icons/ws/`, e.g. `filetype-pdf`, or a path to your own image).
-- **Right-click the desktop:** Arrange Icons, Refresh, New Folder, New Sticky Note, Properties. Right-click an icon for Open / Rename / Delete (only folders visitors made can be renamed or deleted).
-- **Display Properties:** visitors pick a wallpaper (your forest, classic teal, night, or their own Paint drawing) and a window color (forest, classic blue, maroon, slate). Saved in their browser only.
+- **Right-click the desktop:** Arrange Icons, Refresh, New Folder, New Sticky Note, Properties (opens OS). Right-click an icon for Open / Rename / Delete (only folders visitors made can be renamed or deleted).
+- **OS:** one settings window with tabs. *Display*: wallpaper (your forest, classic teal, night, or the visitor's own Paint drawing) and window color (forest, classic blue, maroon, slate). *System*: game counter, picture count, Dave poke count. *Extras*: sparkles on/off, Clancies/Mon on/off. All saved in the visitor's browser only.
 - **Sticky Notes:** yellow notes on the desktop. Drag by the top strip, resize from the corner, `+` adds another, `×` deletes. Saved in that visitor's browser only (nobody else sees them).
 - **Paint:** pencil, brush (4 sizes), eraser, fill bucket, color picker, airbrush, 28-color palette (left click = main color, right click = second color), Undo (also Ctrl+Z), New, Save as PNG (downloads `lico-paint.png`), and Set as wallpaper. Tool icons are from SerenityOS's PixelPaint.
-- **Control Panel:** game counter, sparkles on/off, and Clancies/Mon on/off.
 - **Desktop buddies:** Clancies and Mon (Monochrome) walk along the taskbar. Drag and throw them; they fall and squish on the bottom of the screen. Click one for a hop.
   - Clancies: `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish).
   - Mon: `img/friends/mon.png`, an RPG-style 32×32 sheet (3 walk frames per row; rows = down, left, right, up).
@@ -125,4 +124,4 @@ The site looks like a late-90s desktop.
 
 ## Dave
 
-`img/dave-half.webp` (bottom-right of the desktop) and `img/dave-face.webp` (Start menu profile and the Dave.exe icon). His lines are in `index.html`: `DAVE_LINES` (any time), `MOODS` (lines per mood: asleep 0-6, booting up, working, lunch, afternoon slump, overtime, late, monday, friday, day off on weekends, annoyed when poked 6 times in 4 seconds) and `DAVE_MILESTONES` (after 10, 25, 50 and 100 pokes). Moods follow the visitor's own clock.
+`img/dave-half.webp` (bottom-right of the desktop) and `img/dave-face.webp` (Start menu profile). His lines are in `index.html`: `DAVE_LINES` (any time), `MOODS` (lines per mood: asleep 0-6, booting up, working, lunch, afternoon slump, overtime, late, monday, friday, day off on weekends, annoyed when poked 6 times in 4 seconds) and `DAVE_MILESTONES` (after 10, 25, 50 and 100 pokes). Moods follow the visitor's own clock.

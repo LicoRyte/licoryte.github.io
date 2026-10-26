@@ -474,6 +474,21 @@ a.card:visited { color: var(--text); }
 .ws-none { padding: 20px; font: 12px var(--f-ui); color: #555555; }
 @container (max-width: 520px) { .ws-main { grid-template-columns: minmax(0, 1fr); } .ws-pane { display: none; } }
 
+
+/* OS window (tabbed, like a 98 Properties dialog) */
+.os-body { padding: 8px; display: flex; flex-direction: column; gap: 0; }
+.tabs { display: flex; gap: 0; padding-left: 2px; position: relative; z-index: 1; }
+.tabs [role="tab"] {
+  font: 12px var(--f-ui); color: var(--text); background: var(--silver); padding: 3px 12px 2px; margin-right: -1px;
+  border: 2px solid; border-bottom: 0; border-color: var(--hi) var(--dark) transparent var(--hi); border-radius: 3px 3px 0 0;
+  box-shadow: inset -1px 0 0 var(--shade); position: relative; top: 2px;
+}
+.tabs [role="tab"][aria-selected="true"] { top: 0; padding: 4px 14px 5px; margin-bottom: -2px; z-index: 2; }
+.tabpanes { flex: 1; min-height: 0; overflow: auto; padding: 4px; }
+.tabpanes .dp, .tabpanes .panel { padding: 8px; }
+.os-about { margin: 0; color: #555555; font-size: 11px; }
+.os-btns { display: flex; justify-content: flex-end; gap: 6px; padding-top: 8px; }
+
 /* Phones: windows open full-screen, Dave gets smaller */
 @media (max-width: 600px) {
   .dave img { height: 140px; }
@@ -507,9 +522,8 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
-  <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
+  <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
   <button type="button" class="dicon" data-open="bin"><img src="img/icons/recycle-bin.png" alt=""><span>Recycle Bin</span></button>
-  <button type="button" class="dicon" data-open="dave"><img class="face" src="img/dave-face.webp" alt=""><span>Dave.exe</span></button>
 </nav>
 
 <div class="dave-spot" id="dave" data-mood="working">
@@ -580,33 +594,6 @@ a.card:visited { color: var(--text); }
   <div class="statusbar"><span id="txStatus">Done</span><span class="zone"><img src="img/icons/texty-16.png" alt="">Internet</span></div>
 </section>
 
-<section class="win raised app" id="w-control" data-app="control" data-title="Control Panel" data-icon="img/icons/app-settings-16.png" data-w="320" data-h="420" hidden aria-labelledby="t-control">
-  <div class="tbar"><span class="name" id="t-control"></span></div>
-  <div class="wbody plain">
-    <div class="panel">
-      <fieldset>
-        <legend>System</legend>
-        <span>games on the shelf:</span>
-        <span class="counter sunken" id="counter">000000</span>
-        <dl>
-          <dt>pictures</dt><dd id="stPics">0</dd>
-          <dt>updated</dt><dd id="stSave">----</dd>
-          <dt>Dave pokes</dt><dd id="stPokes">0</dd>
-        </dl>
-      </fieldset>
-      <fieldset>
-        <legend>Effects</legend>
-        <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
-      </fieldset>
-      <fieldset>
-        <legend>Desktop friends</legend>
-        <label class="toggle"><input type="checkbox" data-buddy-toggle="clancies"> Clancies</label>
-        <label class="toggle"><input type="checkbox" data-buddy-toggle="mon"> Mon</label>
-      </fieldset>
-    </div>
-  </div>
-</section>
-
 <section class="win raised app" id="w-bin" data-app="bin" data-title="Recycle Bin" data-icon="img/icons/recycle-bin-16.png" data-w="320" data-h="240" hidden aria-labelledby="t-bin">
   <div class="tbar"><span class="name" id="t-bin"></span></div>
   <div class="wbody sunken"><div class="empty-bin"><img src="img/icons/recycle-bin.png" alt=""><span id="binText">The Recycle Bin is empty.</span></div></div>
@@ -657,10 +644,16 @@ a.card:visited { color: var(--text); }
   <div class="statusbar"><span id="ptStatus">Left click a color to draw with it. Right click picks the second color.</span><span id="ptPos">0, 0</span></div>
 </section>
 
-<section class="win raised app" id="w-display" data-app="display" data-title="Display Properties" data-icon="img/icons/display-16.png" data-w="330" data-h="500" hidden aria-labelledby="t-display">
-  <div class="tbar"><span class="name" id="t-display"></span></div>
-  <div class="wbody plain">
-    <div class="dp">
+<section class="win raised app" id="w-os" data-app="os" data-title="OS" data-icon="img/icons/app-settings-16.png" data-w="350" data-h="560" hidden aria-labelledby="t-os">
+  <div class="tbar"><span class="name" id="t-os"></span></div>
+  <div class="wbody plain os-body">
+    <div class="tabs" role="tablist" aria-label="OS settings">
+      <button type="button" role="tab" id="tab-display" aria-controls="pane-display" aria-selected="true">Display</button>
+      <button type="button" role="tab" id="tab-system" aria-controls="pane-system" aria-selected="false" tabindex="-1">System</button>
+      <button type="button" role="tab" id="tab-extras" aria-controls="pane-extras" aria-selected="false" tabindex="-1">Extras</button>
+    </div>
+    <div class="tabpanes raised">
+      <div class="dp" role="tabpanel" id="pane-display" aria-labelledby="tab-display">
       <div class="dp-monitor"><div class="dp-screen sunken" id="dpScreen"><i></i></div></div>
       <fieldset>
         <legend>Wallpaper</legend>
@@ -676,8 +669,33 @@ a.card:visited { color: var(--text); }
         <label><input type="radio" name="dpTheme" value="maroon"><span class="swatch" style="background:linear-gradient(90deg,#5A0A0A,#B03A3A)"></span> Maroon</label>
         <label><input type="radio" name="dpTheme" value="slate"><span class="swatch" style="background:linear-gradient(90deg,#2B3440,#6A7F99)"></span> Slate</label>
       </fieldset>
-      <div class="row-btns"><button type="button" class="btn" id="dpReset">Reset</button><button type="button" class="btn" id="dpOk">OK</button></div>
+      </div>
+      <div class="panel" role="tabpanel" id="pane-system" aria-labelledby="tab-system" hidden>
+  <fieldset>
+        <legend>System</legend>
+        <span>games on the shelf:</span>
+        <span class="counter sunken" id="counter">000000</span>
+        <dl>
+          <dt>pictures</dt><dd id="stPics">0</dd>
+          <dt>updated</dt><dd id="stSave">----</dd>
+          <dt>Dave pokes</dt><dd id="stPokes">0</dd>
+        </dl>
+      </fieldset>
+        <p class="os-about">Lico98 · running on GitHub Pages · coffee level: low</p>
+      </div>
+      <div class="panel" role="tabpanel" id="pane-extras" aria-labelledby="tab-extras" hidden>
+  <fieldset>
+        <legend>Effects</legend>
+        <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
+      </fieldset>
+  <fieldset>
+        <legend>Desktop friends</legend>
+        <label class="toggle"><input type="checkbox" data-buddy-toggle="clancies"> Clancies</label>
+        <label class="toggle"><input type="checkbox" data-buddy-toggle="mon"> Mon</label>
+      </fieldset>
+      </div>
     </div>
+    <div class="row-btns os-btns"><button type="button" class="btn" id="dpReset">Reset display</button><button type="button" class="btn" id="dpOk">OK</button></div>
   </div>
 </section>
 
@@ -718,14 +736,12 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="open" data-app="url:https://twitter.com/"><img src="img/icons/chat.png" alt="">Twitter</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="url:https://www.youtube.com/"><img src="img/icons/app-video-player.png" alt="">YouTube</button></li>
     <li class="sep" role="separator"></li>
-    <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="control"><img src="img/icons/app-settings.png" alt="">Control Panel</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="display"><img src="img/icons/display.png" alt="">Display Properties</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="run"><img src="img/icons/app-run.png" alt="">Run...</button></li>
     <li><button type="button" role="menuitem" data-act="shutdown"><img src="img/icons/shutdown.png" alt="">Shut Down...</button></li>
@@ -1296,7 +1312,8 @@ a.card:visited { color: var(--text); }
     if (id === 'sticky') { stickies.add(); return; }
     if (id.startsWith('url:')) { texty.go(id.slice(4)); return; }
     if (id.startsWith('folder-')) folders.ensure(id);
-    if (id === 'display') syncDisplayForm();
+    if (id === 'display' || id === 'control' || id === 'system') { const tab = id === 'control' ? 'system' : id; id = 'os'; osTab(tab === 'system' ? 'system' : 'display'); }
+    if (id === 'os') syncDisplayForm();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1415,7 +1432,8 @@ a.card:visited { color: var(--text); }
     youtube: () => { openApp('url:https://www.youtube.com/'); return 'Opening YouTube in a new tab. See you in 3 hours.'; },
     iexplore: () => { openApp('texty'); return 'Internet Explorer has been replaced by Texty. You\'re welcome.'; },
     mspaint: () => { openApp('gallery'); return 'Paint is broken. Opened the Gallery instead.'; },
-    control: () => { openApp('control'); return 'Opened Control Panel.'; },
+    control: () => { openApp('os'); osTab('system'); return 'Opened OS.'; },
+    os: () => { openApp('os'); return 'Opened OS.'; },
     clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
     mon: () => { buddies.mon.summon(); return 'Mon dropped in. Quietly. Like she was always there.'; },
     monochrome: () => RUN.mon(),
@@ -1695,7 +1713,7 @@ a.card:visited { color: var(--text); }
       { label: 'New Folder', icon: 'img/icons/folder-16.png', run: () => folders.create() },
       { label: 'New Sticky Note', icon: 'img/icons/sticky-16.png', run: () => stickies.add(e.clientX, e.clientY) },
       '-',
-      { label: 'Properties', icon: 'img/icons/display-16.png', run: () => openApp('display') },
+      { label: 'Properties', icon: 'img/icons/display-16.png', run: () => { openApp('os'); osTab('display'); } },
     ]);
   });
   // right-clicking the wallpaper outside the icon column counts as the desktop too
@@ -1767,7 +1785,7 @@ a.card:visited { color: var(--text); }
     return { create, ensure, rename, remove };
   })();
 
-  /* ---------- Display Properties (saved in this browser) ---------- */
+  /* ---------- OS > Display (saved in this browser) ---------- */
   const THEMES = {
     forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12' },
     blue:   { navy: '#000080', blue: '#1084D0', select: '#000080' },
@@ -1801,13 +1819,28 @@ a.card:visited { color: var(--text); }
   }
   document.querySelectorAll('input[name="dpWall"]').forEach(r => r.addEventListener('change', () => { applyWall(r.value); try { localStorage.setItem('lico-wall', wallChoice); } catch (e) {} }));
   document.querySelectorAll('input[name="dpTheme"]').forEach(r => r.addEventListener('change', () => { applyTheme(r.value); try { localStorage.setItem('lico-theme', themeChoice); } catch (e) {} }));
-  $('#dpOk').addEventListener('click', () => closeApp('display'));
+  $('#dpOk').addEventListener('click', () => closeApp('os'));
   $('#dpReset').addEventListener('click', () => {
     applyTheme('forest'); applyWall('site');
     try { localStorage.removeItem('lico-theme'); localStorage.removeItem('lico-wall'); } catch (e) {}
     syncDisplayForm();
   });
-  APPS.display.addEventListener('focusin', syncDisplayForm);
+  APPS.os.addEventListener('focusin', syncDisplayForm);
+  const osTabs = [...document.querySelectorAll('#w-os [role="tab"]')];
+  function osTab(name) {
+    osTabs.forEach(t => {
+      const on = t.id === 'tab-' + name;
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+      $('#' + t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  osTabs.forEach((t, i) => {
+    t.addEventListener('click', () => osTab(t.id.slice(4)));
+    t.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
+      const n = osTabs[(i + d + osTabs.length) % osTabs.length]; osTab(n.id.slice(4)); n.focus(); e.preventDefault();
+    });
+  });
   applyTheme(themeChoice); applyWall(wallChoice); syncDisplayForm();
 
   /* ---------- Sticky notes (saved in this browser) ---------- */
@@ -1960,7 +1993,7 @@ a.card:visited { color: var(--text); }
       try { localStorage.setItem('lico-paintwall', paintWall); } catch (e) { status('Set as wallpaper for now (too big to remember after a reload).'); }
       applyWall('paint'); try { localStorage.setItem('lico-wall', 'paint'); } catch (e) {}
       syncDisplayForm();
-      status('Wallpaper set. Change it back in Display Properties.');
+      status('Wallpaper set. Change it back in OS > Display.');
       say('Bold choice of wallpaper. I respect it.');
     });
     return {};
@@ -2009,7 +2042,7 @@ a.card:visited { color: var(--text); }
   })();
 
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
-  const ALIAS = { links: 'texty', internet: 'texty', browser: 'texty' };
+  const ALIAS = { links: 'texty', internet: 'texty', browser: 'texty', control: 'os', display: 'os' };
   const startApp = ALIAS[decodeURIComponent(location.hash.slice(1))] || decodeURIComponent(location.hash.slice(1));
   if (APPS[startApp]) openApp(startApp);
   else if (isPhone()) openApp('about');
