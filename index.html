@@ -33,12 +33,13 @@
   --lcd: #33FF33;
   --sky: #CFF5A0;
   --tb-h: 32px;
+  /* Lico's arrow is used for every cursor state. To bring back a different one for a state, point that line at another file in img/cursors/. */
   --cur-arrow: url("img/cursors/arrow.png") 2 2, default;
-  --cur-hand: url("img/cursors/hand.png") 7 2, pointer;
-  --cur-text: url("img/cursors/ibeam.png") 7 12, text;
-  --cur-grab: url("img/cursors/grab.png") 9 9, grabbing;
-  --cur-wait: url("img/cursors/wait.png") 10 10, wait;
-  --cur-no: url("img/cursors/no.png") 10 10, not-allowed;
+  --cur-hand: var(--cur-arrow);
+  --cur-text: var(--cur-arrow);
+  --cur-grab: var(--cur-arrow);
+  --cur-wait: var(--cur-arrow);
+  --cur-no: var(--cur-arrow);
 
   --f-ui: Tahoma, Verdana, "Segoe UI", Geneva, "DejaVu Sans", sans-serif;
   --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
