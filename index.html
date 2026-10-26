@@ -159,10 +159,52 @@ a.btn, a.btn:visited { color: var(--text); }
 .welcome .sig { font-style: italic; color: #333333; margin: 0; }
 
 /* Internet / links */
-.links { list-style: none; margin: 0; padding: 8px; display: grid; gap: 2px; }
-.links a { display: flex; gap: 8px; align-items: center; padding: 4px 6px; font: 12px var(--f-ui); text-decoration: none; color: var(--text); }
-.links a::before { content: ""; width: 16px; height: 16px; background: url("img/icons/app-browser-16.png") center / 16px no-repeat; image-rendering: pixelated; flex-shrink: 0; }
-.links a:hover, .links a:focus-visible { background: var(--select); color: #FFFFFF; outline: none; }
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.links a { display: flex; gap: 8px; align-items: center; padding: 4px 6px; font: 12px var(--f-ui); text-decoration: none; color: #0B3A8A; }
+.links a::before { content: ""; width: 16px; height: 16px; background: url("img/icons/texty-16.png") center / 16px no-repeat; flex-shrink: 0; }
+.links a:hover, .links a:focus-visible { background: #DCEBFF; text-decoration: underline; outline: none; }
+
+/* Texty browser */
+.tx-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 2px 0 3px; border-bottom: 1px solid var(--shade); box-shadow: 0 1px 0 var(--hi); flex-shrink: 0; }
+.tx-bar .sep { width: 2px; align-self: stretch; margin: 2px 3px; border-left: 1px solid var(--shade); border-right: 1px solid var(--hi); }
+.tx-btn { display: grid; justify-items: center; gap: 1px; min-width: 44px; padding: 2px 6px; background: none; border: 1px solid transparent; font: 11px var(--f-ui); color: var(--text); }
+.tx-btn b { font-size: 16px; line-height: 1; font-weight: bold; }
+.tx-btn:hover:not(:disabled) { border-color: var(--hi) var(--shade) var(--shade) var(--hi); }
+.tx-btn:active:not(:disabled) { border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.tx-btn:disabled { color: var(--shade); text-shadow: 1px 1px 0 var(--hi); }
+.tx-throb { margin-left: auto; width: 36px; height: 30px; display: grid; place-items: center; background: #000000; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.tx-throb img { width: 26px; height: 26px; }
+.tx-throb.busy img { animation: txspin .8s linear infinite; }
+@keyframes txspin { to { transform: rotate(360deg); } }
+.tx-addr { display: flex; align-items: center; gap: 6px; padding: 3px 0; font: 12px var(--f-ui); flex-shrink: 0; }
+.tx-addr label { color: #333333; }
+.tx-field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; background: #FFFFFF; padding: 1px 4px; }
+.tx-field img { width: 16px; height: 16px; flex-shrink: 0; }
+.tx-field input { flex: 1; min-width: 0; border: 0; outline: none; font: 13px var(--f-ui); padding: 2px 0; background: transparent; }
+.tx-go { min-height: 24px; padding: 0 10px; }
+.tx-page {
+  min-height: 100%; padding: 22px 18px 18px; display: grid; gap: 18px; align-content: start; justify-items: center;
+  background: linear-gradient(180deg, #DDF1FF 0%, #A9D8FF 38%, #E8F6FF 38.2%, #FFFFFF 100%);
+}
+.tx-hero { display: flex; align-items: center; gap: 14px; }
+.tx-hero img { width: 96px; height: 96px; filter: drop-shadow(0 6px 8px rgba(0, 40, 90, .35)); }
+.tx-hero h2 { margin: 0; font-family: var(--f-head); font-style: italic; font-weight: bold; font-size: 44px; line-height: 1; letter-spacing: -.01em;
+  color: #0B4FA8; text-shadow: 0 1px 0 #FFFFFF, 0 2px 6px rgba(0, 60, 140, .35); }
+.tx-hero p { margin: 4px 0 0; font: 12px var(--f-ui); color: #1F4E8A; }
+.tx-search { width: min(100%, 460px); display: flex; gap: 6px; }
+.tx-search input { flex: 1; min-width: 0; font: 13px var(--f-ui); padding: 6px 10px; border: 1px solid #7FA8D8; border-radius: 14px; background: #FFFFFF; box-shadow: inset 0 1px 3px rgba(0, 40, 90, .2); }
+.tx-search button { font: bold 12px var(--f-ui); padding: 0 14px; border-radius: 14px; border: 1px solid #3C78C8; color: #FFFFFF;
+  background: linear-gradient(180deg, #8CC4FF 0%, #3C8AE8 50%, #2A72D0 51%, #4A9CF0 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
+.tx-boxes { width: min(100%, 560px); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@container (max-width: 480px) { .tx-boxes { grid-template-columns: minmax(0, 1fr); } .tx-hero h2 { font-size: 34px; } .tx-hero img { width: 72px; height: 72px; } }
+.tx-box { background: rgba(255, 255, 255, .85); border: 1px solid #A9C6E8; border-radius: 6px; padding: 8px 10px 10px; min-width: 0; }
+.tx-box h3 { margin: 0 0 6px; font: bold 12px var(--f-ui); color: #0B4FA8; }
+.tx-hist { list-style: none; margin: 0; padding: 0; font: 12px var(--f-ui); display: grid; gap: 2px; }
+.tx-hist a { color: #0B3A8A; overflow-wrap: anywhere; }
+.tx-hist .none { color: #666666; font-style: italic; }
+.tx-note { margin: 0; font: 11px var(--f-ui); color: #4A6A90; text-align: center; max-width: 52ch; }
+.statusbar .zone { display: flex; align-items: center; gap: 4px; }
+.statusbar .zone img { width: 16px; height: 16px; }
 
 /* Control panel */
 .panel { padding: 10px; display: grid; gap: 10px; font: 12px var(--f-ui); }
@@ -356,7 +398,7 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon" data-open="about"><img src="img/icons/filetype-text.png" alt=""><span>about_me.txt</span></button>
   <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
   <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
-  <button type="button" class="dicon" data-open="links"><img src="img/icons/app-browser.png" alt=""><span>Internet</span></button>
+  <button type="button" class="dicon" data-open="texty"><img src="img/icons/texty.png" alt=""><span>Texty</span></button>
   <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
   <button type="button" class="dicon" data-open="bin"><img src="img/icons/recycle-bin.png" alt=""><span>Recycle Bin</span></button>
   <button type="button" class="dicon" data-open="dave"><img class="face" src="img/dave-face.webp" alt=""><span>Dave.exe</span></button>
@@ -393,10 +435,41 @@ a.card:visited { color: var(--text); }
   <div class="statusbar"><span id="galTitle">0 picture(s)</span><span>double-click... or just click</span></div>
 </section>
 
-<section class="win raised app" id="w-links" data-app="links" data-title="Internet" data-icon="img/icons/app-browser-16.png" data-w="320" data-h="260" hidden aria-labelledby="t-links">
-  <div class="tbar"><span class="name" id="t-links"></span></div>
-  <div class="wbody sunken"><ul class="links" id="linkList"></ul></div>
-  <div class="statusbar"><span>Connected at 56 kbps</span></div>
+<section class="win raised app" id="w-texty" data-app="texty" data-title="Texty" data-icon="img/icons/texty-16.png" data-w="780" data-h="560" hidden aria-labelledby="t-texty">
+  <div class="tbar"><span class="name" id="t-texty"></span></div>
+  <div class="menubar" aria-hidden="true"><button type="button" tabindex="-1"><u>F</u>ile</button><button type="button" tabindex="-1"><u>E</u>dit</button><button type="button" tabindex="-1"><u>V</u>iew</button><button type="button" tabindex="-1">F<u>a</u>vorites</button><button type="button" tabindex="-1"><u>T</u>ools</button><button type="button" tabindex="-1"><u>H</u>elp</button></div>
+  <div class="tx-bar">
+    <button type="button" class="tx-btn" disabled><b>&#9664;</b>Back</button>
+    <button type="button" class="tx-btn" disabled><b>&#9654;</b>Forward</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" class="tx-btn" id="txStop"><b>&#10005;</b>Stop</button>
+    <button type="button" class="tx-btn" id="txRefresh"><b>&#8635;</b>Refresh</button>
+    <button type="button" class="tx-btn" id="txHome"><b>&#8962;</b>Home</button>
+    <span class="tx-throb" id="txThrob" aria-hidden="true"><img src="img/icons/texty-128.png" alt=""></span>
+  </div>
+  <form class="tx-addr" id="txForm" autocomplete="off">
+    <label for="txUrl">Address</label>
+    <span class="tx-field sunken"><img src="img/icons/texty-16.png" alt=""><input id="txUrl" type="text" inputmode="url" spellcheck="false" placeholder="type a website, then press Enter" aria-describedby="txStatus"></span>
+    <button type="submit" class="btn tx-go">Go</button>
+  </form>
+  <div class="wbody sunken">
+    <div class="tx-page">
+      <div class="tx-hero">
+        <img src="img/icons/texty-256.png" alt="">
+        <div><h2>Texty</h2><p>the web, one tab at a time</p></div>
+      </div>
+      <form class="tx-search" id="txSearch" role="search">
+        <input id="txQuery" type="search" placeholder="Search the web" aria-label="Search the web">
+        <button type="submit">Search</button>
+      </form>
+      <div class="tx-boxes">
+        <section class="tx-box"><h3>Favorites</h3><ul class="links" id="linkList"></ul></section>
+        <section class="tx-box"><h3>History (this visit)</h3><ul class="tx-hist" id="txHist"><li class="none">nothing yet</li></ul></section>
+      </div>
+      <p class="tx-note">Texty opens every site in a new tab. Most websites won't let themselves be shown inside other pages, so this is as close as it gets.</p>
+    </div>
+  </div>
+  <div class="statusbar"><span id="txStatus">Done</span><span class="zone"><img src="img/icons/texty-16.png" alt="">Internet</span></div>
 </section>
 
 <section class="win raised app" id="w-control" data-app="control" data-title="Control Panel" data-icon="img/icons/app-settings-16.png" data-w="320" data-h="420" hidden aria-labelledby="t-control">
@@ -461,7 +534,7 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="open" data-app="games"><img src="img/icons/games.png" alt="">My Games</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="about"><img src="img/icons/filetype-text.png" alt="">About me</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="links"><img src="img/icons/app-browser.png" alt="">Internet</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="texty"><img src="img/icons/texty.png" alt="">Texty</button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
@@ -1134,10 +1207,12 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
+    texty: () => { openApp('texty'); return 'Opened Texty.'; },
+    iexplore: () => { openApp('texty'); return 'Internet Explorer has been replaced by Texty. You\'re welcome.'; },
     mspaint: () => { openApp('gallery'); return 'Paint is broken. Opened the Gallery instead.'; },
     control: () => { openApp('control'); return 'Opened Control Panel.'; },
     clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
@@ -1162,6 +1237,7 @@ a.card:visited { color: var(--text); }
     if (!cmd) out = 'Type something. Anything. Please.';
     else if (RUN[cmd] !== undefined) out = typeof RUN[cmd] === 'function' ? RUN[cmd]() : RUN[cmd];
     else if (cmd.startsWith('sudo')) out = RUN.sudo;
+    else if (looksLikeUrl(raw)) { openApp('texty'); texty.go(raw); out = 'Texty is opening ' + raw + ' in a new tab.'; }
     else out = `Windows cannot find '${raw}'. Make sure you typed the name correctly. Or type 'help'.`;
     $('#runOut').textContent = out;
     $('#runInput').select();
@@ -1318,8 +1394,58 @@ a.card:visited { color: var(--text); }
   requestAnimationFrame(buddyTick);
   addEventListener('resize', () => Object.values(buddies).forEach(b => b.fit()));
 
+  /* ---------- Texty (mini browser) ---------- */
+  function looksLikeUrl(t) { return /^[a-z][a-z0-9+.-]*:\/\//i.test(t) || (/^[^\s]+\.[a-z]{2,}([/:?#].*)?$/i.test(t) && !/\s/.test(t)); }
+  const texty = (() => {
+    const urlIn = $('#txUrl'), status = $('#txStatus'), throb = $('#txThrob'), histEl = $('#txHist');
+    const hist = [];
+    let busyT = 0;
+    const setStatus = t => { status.textContent = t; };
+    function spin(ms = 900) { throb.classList.add('busy'); clearTimeout(busyT); busyT = setTimeout(() => { throb.classList.remove('busy'); setStatus('Done'); }, ms); }
+    function normalize(raw) {
+      const t = raw.trim(); if (!t) return null;
+      if (looksLikeUrl(t)) {
+        const u = /^[a-z][a-z0-9+.-]*:\/\//i.test(t) ? t : 'https://' + t;
+        try { const p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : null; } catch (e) { return null; }
+      }
+      return 'https://duckduckgo.com/?q=' + encodeURIComponent(t);
+    }
+    function renderHist() {
+      histEl.replaceChildren(...(hist.length ? hist.map(u => h('li', {}, h('a', { href: u, target: '_blank', rel: 'noopener noreferrer' }, u.replace(/^https?:\/\//, '').replace(/\/$/, '')))) : [h('li', { class: 'none' }, 'nothing yet')]));
+    }
+    function openTab(url) {
+      const a = h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' });
+      document.body.append(a); a.click(); a.remove();
+    }
+    function go(raw) {
+      const url = normalize(raw);
+      if (!url) { setStatus(raw.trim() ? 'Texty can only open web addresses (http or https).' : 'Type a website first.'); return; }
+      urlIn.value = url;
+      setStatus('Opening ' + url + ' in a new tab...');
+      spin();
+      openTab(url);
+      const i = hist.indexOf(url); if (i >= 0) hist.splice(i, 1);
+      hist.unshift(url); if (hist.length > 8) hist.pop();
+      renderHist();
+      if (Math.random() < .5) say(pick(["Texty opened a new tab. Don't download any toolbars.", 'Browsing the web at work? Bold.', "If it asks you to install something, don't.", 'Remember dial-up? I do. I still hear it.']));
+    }
+    $('#txForm').addEventListener('submit', e => { e.preventDefault(); go(urlIn.value); });
+    $('#txSearch').addEventListener('submit', e => { e.preventDefault(); const q = $('#txQuery').value.trim(); if (q) go(q); });
+    $('#txHome').addEventListener('click', () => { urlIn.value = ''; $('#txQuery').value = ''; setStatus('Done'); $('#w-texty .wbody').scrollTop = 0; urlIn.focus(); });
+    $('#txRefresh').addEventListener('click', () => { setStatus('Refreshing...'); spin(700); });
+    $('#txStop').addEventListener('click', () => { clearTimeout(busyT); throb.classList.remove('busy'); setStatus('Stopped.'); });
+    $('#linkList').addEventListener('click', e => {
+      const a = e.target.closest('a'); if (!a) return;
+      const i = hist.indexOf(a.href); if (i >= 0) hist.splice(i, 1);
+      hist.unshift(a.href); if (hist.length > 8) hist.pop(); renderHist();
+      urlIn.value = a.href; setStatus('Opening ' + a.href + ' in a new tab...'); spin();
+    });
+    return { go };
+  })();
+
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
-  const startApp = decodeURIComponent(location.hash.slice(1));
+  const ALIAS = { links: 'texty', internet: 'texty', browser: 'texty' };
+  const startApp = ALIAS[decodeURIComponent(location.hash.slice(1))] || decodeURIComponent(location.hash.slice(1));
   if (APPS[startApp]) openApp(startApp);
   else if (isPhone()) openApp('about');
   else { openApp('games'); openApp('about'); }

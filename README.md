@@ -104,10 +104,11 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--navy` a
 
 The site looks like a late-90s desktop.
 
-- **Desktop icons** (top-left) open windows: about_me.txt, My Games, Gallery, Internet (your links), Control Panel, Recycle Bin, Dave.exe. Double-click on a computer, one tap on a phone.
+- **Desktop icons** (top-left) open windows: about_me.txt, My Games, Gallery, Texty (the browser), Control Panel, Recycle Bin, Dave.exe. Double-click on a computer, one tap on a phone.
 - **Windows** stay fixed on screen. Drag them by the title bar. `_` minimizes to the taskbar, `□` maximizes (or double-click the title bar), `×` closes. Games and Gallery scroll inside their window. On phones windows open full-screen.
-- **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#links`, `#control`).
-- **Start menu:** your profile (title + tagline from `games.json`) at the top, then shortcuts. "Run..." understands: `help`, `notepad`, `explorer`, `mspaint`, `control`, `coffee`, `dave`, `clancies`, `mon`, `pancake`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
+- **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#texty`, `#control`).
+- **Start menu:** your profile (title + tagline from `games.json`) at the top, then shortcuts. "Run..." understands: `help`, `notepad`, `explorer`, `texty`, any web address, `mspaint`, `control`, `coffee`, `dave`, `clancies`, `mon`, `pancake`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
+- **Texty:** a little browser window. Type a website in the Address bar (or words to search with DuckDuckGo) and press Enter; it opens in a new tab. Real sites refuse to be shown inside other pages, so new tabs are the way. Favorites come from `links` in `games.json`. The globe is from the KDE Oxygen icon set (LGPL 3, see `img/icons/LICENSE-oxygen-LGPL-3.0.txt`).
 - **Control Panel:** game counter, sparkles on/off, and Clancies/Mon on/off.
 - **Desktop buddies:** Clancies and Mon (Monochrome) walk along the taskbar. Drag and throw them; they fall and squish on the bottom of the screen. Click one for a hop.
   - Clancies: `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish).
