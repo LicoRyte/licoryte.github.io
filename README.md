@@ -109,6 +109,10 @@ The site looks like a late-90s desktop.
 - **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#texty`, `#control`).
 - **Start menu:** your profile (title + tagline from `games.json`) at the top, then shortcuts. "Run..." understands: `help`, `notepad`, `explorer`, `texty`, any web address, `mspaint`, `control`, `coffee`, `dave`, `clancies`, `mon`, `pancake`, `minesweeper`, `rain`, `quit`, `sudo`. Add more in `index.html` (search `const RUN`).
 - **Texty:** a little browser window. Type a website in the Address bar (or words to search with DuckDuckGo) and press Enter; it opens in a new tab. Real sites refuse to be shown inside other pages, so new tabs are the way. Favorites come from `links` in `games.json`. The globe is from the KDE Oxygen icon set (LGPL 3, see `img/icons/LICENSE-oxygen-LGPL-3.0.txt`).
+- **Right-click the desktop:** Arrange Icons, Refresh, New Folder, New Sticky Note, Properties. Right-click an icon for Open / Rename / Delete (only folders visitors made can be renamed or deleted).
+- **Display Properties:** visitors pick a wallpaper (your forest, classic teal, night, or their own Paint drawing) and a window color (forest, classic blue, maroon, slate). Saved in their browser only.
+- **Sticky Notes:** yellow notes on the desktop. Drag by the top strip, resize from the corner, `+` adds another, `×` deletes. Saved in that visitor's browser only (nobody else sees them).
+- **Paint:** pencil, brush (4 sizes), eraser, fill bucket, color picker, airbrush, 28-color palette (left click = main color, right click = second color), Undo (also Ctrl+Z), New, Save as PNG (downloads `lico-paint.png`), and Set as wallpaper. Tool icons are from SerenityOS's PixelPaint.
 - **Control Panel:** game counter, sparkles on/off, and Clancies/Mon on/off.
 - **Desktop buddies:** Clancies and Mon (Monochrome) walk along the taskbar. Drag and throw them; they fall and squish on the bottom of the screen. Click one for a hop.
   - Clancies: `img/clancies/` (16×16 frames in one row): `idle.png`, `walk.png`, `air.png` (held/flying), `land.png` (landing squish).

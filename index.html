@@ -73,8 +73,11 @@ a:visited { color: var(--visited); }
   background:
     linear-gradient(180deg, rgba(2, 26, 8, .10) 0%, rgba(2, 26, 8, .25) 70%, rgba(2, 26, 8, .45) 100%),
     var(--bg-img, none) center 30% / cover no-repeat,
-    var(--desk);
+    var(--bg-color, var(--desk));
 }
+.bg.plain { background: var(--bg-color, var(--desk)); }
+.bg.drawn { background: var(--bg-img) center / cover no-repeat, #FFFFFF; image-rendering: pixelated; }
+.desktop.blink { visibility: hidden; }
 
 /* Bevels */
 .raised {
@@ -372,6 +375,72 @@ a.card:visited { color: var(--text); }
 .buddy.held { cursor: var(--cur-grab); }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
 
+
+/* Right-click menu */
+.ctx { position: fixed; z-index: 75; min-width: 180px; padding: 2px; font: 12px var(--f-ui); }
+.ctx ul { list-style: none; margin: 0; padding: 0; }
+.ctx li.sep { height: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 3px 2px; }
+.ctx button { width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px 18px 4px 8px; background: none; border: 0; font: inherit; color: var(--text); }
+.ctx button img { width: 16px; height: 16px; flex-shrink: 0; }
+.ctx button .noimg { width: 16px; flex-shrink: 0; }
+.ctx button:hover:not(:disabled), .ctx button:focus-visible { background: var(--select); color: #FFFFFF; outline: none; }
+.ctx button:disabled { color: var(--shade); text-shadow: 1px 1px 0 var(--hi); }
+.ctx button b { font-weight: bold; }
+.dicon .rename { width: 80px; font: 12px var(--f-ui); text-align: center; padding: 0 2px; border: 1px solid #000000; }
+
+/* Display Properties */
+.dp { padding: 10px; display: grid; gap: 10px; font: 12px var(--f-ui); }
+.dp-monitor { justify-self: center; width: 180px; padding: 10px 10px 18px; background: var(--silver); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); border-radius: 6px 6px 2px 2px; position: relative; }
+.dp-monitor::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 60px; height: 12px; margin-left: -30px; background: var(--silver); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); }
+.dp-screen { height: 100px; background: var(--desk) center / cover no-repeat; position: relative; overflow: hidden; }
+.dp-screen i { position: absolute; left: 30px; top: 20px; width: 90px; height: 50px; background: var(--silver); border: 1px solid #000000; }
+.dp-screen i::before { content: ""; position: absolute; left: 1px; right: 1px; top: 1px; height: 8px; background: linear-gradient(90deg, var(--navy), var(--blue)); }
+.dp fieldset { margin: 0; padding: 6px 10px 10px; border: 2px groove var(--hi); display: grid; gap: 4px; }
+.dp label { display: flex; gap: 6px; align-items: center; }
+.dp .swatch { width: 28px; height: 10px; border: 1px solid #000000; }
+.dp .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
+
+/* Sticky notes */
+.sticky {
+  position: fixed; z-index: 5; width: 190px; min-width: 140px; min-height: 120px; display: flex; flex-direction: column;
+  background: #FFF57A; border: 1px solid #C9B200; box-shadow: 3px 4px 0 rgba(0, 0, 0, .35); resize: both; overflow: hidden;
+}
+.sticky.top { z-index: 6; }
+.sticky-bar { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 2px 3px 2px 6px; background: #F2E35A; border-bottom: 1px solid #D8C83A; touch-action: none; user-select: none; -webkit-user-select: none; }
+.sticky-bar > span:first-child { font: bold 11px var(--f-ui); color: #6B5E00; }
+.sticky-bar .sb-btns { display: flex; gap: 2px; }
+.sticky-bar button { width: 18px; height: 16px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; font: bold 12px/1 var(--f-ui); color: #6B5E00; }
+.sticky-bar button:hover { border-color: #C9B200; background: #FFF9A8; }
+.sticky textarea { flex: 1; width: 100%; border: 0; resize: none; padding: 6px 8px; background: transparent; font: 700 14px/1.35 var(--f-comic); color: #3A3200; outline: none; }
+.sticky textarea::placeholder { color: #9C8E30; }
+
+/* Folder */
+.folder-empty { padding: 26px 14px; text-align: center; font: 12px var(--f-ui); color: #555555; }
+
+/* Paint */
+.pt-top { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0 4px; flex-shrink: 0; }
+.pt-top .btn { min-height: 24px; padding: 2px 8px; font-size: 11px; }
+.pt-top .btn img { width: 16px; height: 16px; }
+.pt-main { flex: 1; min-height: 0; display: flex; gap: 4px; }
+.pt-tools { display: grid; grid-template-columns: repeat(2, 26px); grid-auto-rows: 26px; gap: 1px; align-content: start; padding: 2px; }
+.pt-tool { display: grid; place-items: center; padding: 0; background: var(--silver); border: 1px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); }
+.pt-tool img { width: 16px; height: 16px; image-rendering: pixelated; }
+.pt-tool[aria-pressed="true"] { border-color: var(--dark) var(--hi) var(--hi) var(--dark); background: repeating-conic-gradient(var(--silver) 0 25%, var(--hi) 0 50%) 0 0 / 2px 2px; }
+.pt-sizes { grid-column: 1 / -1; display: grid; gap: 2px; padding: 3px; margin-top: 4px; }
+.pt-sizes button { height: 16px; padding: 0; display: grid; place-items: center; background: none; border: 1px solid transparent; }
+.pt-sizes button i { display: block; background: #000000; }
+.pt-sizes button[aria-pressed="true"] { background: var(--select); }
+.pt-sizes button[aria-pressed="true"] i { background: #FFFFFF; }
+.pt-canvas-wrap { flex: 1; min-width: 0; overflow: auto; background: var(--shade); padding: 6px; display: grid; place-items: start; }
+.pt-canvas { display: block; background: #FFFFFF; image-rendering: pixelated; touch-action: none; max-width: none; box-shadow: 1px 1px 0 #000000; }
+.pt-colors { display: flex; gap: 6px; align-items: center; padding: 4px 0 0; flex-shrink: 0; }
+.pt-current { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
+.pt-current i { position: absolute; width: 16px; height: 16px; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.pt-current .fg { left: 3px; top: 3px; z-index: 1; }
+.pt-current .bgc { right: 3px; bottom: 3px; }
+.pt-palette { display: grid; grid-template-columns: repeat(14, 15px); grid-auto-rows: 15px; gap: 1px; }
+.pt-palette button { padding: 0; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+
 /* Phones: windows open full-screen, Dave gets smaller */
 @media (max-width: 600px) {
   .dave img { height: 140px; }
@@ -399,6 +468,8 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
   <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
   <button type="button" class="dicon" data-open="texty"><img src="img/icons/texty.png" alt=""><span>Texty</span></button>
+  <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
+  <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
   <button type="button" class="dicon" data-open="bin"><img src="img/icons/recycle-bin.png" alt=""><span>Recycle Bin</span></button>
   <button type="button" class="dicon" data-open="dave"><img class="face" src="img/dave-face.webp" alt=""><span>Dave.exe</span></button>
@@ -505,6 +576,61 @@ a.card:visited { color: var(--text); }
   <div class="statusbar"><span>0 object(s)</span><span>0 bytes</span></div>
 </section>
 
+
+<section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
+  <div class="tbar"><span class="name" id="t-paint"></span></div>
+  <div class="pt-top">
+    <button type="button" class="btn" id="ptNew"><img src="img/icons/new-16.png" alt="">New</button>
+    <button type="button" class="btn" id="ptUndo"><img src="img/icons/undo-16.png" alt="">Undo</button>
+    <button type="button" class="btn" id="ptSave"><img src="img/icons/save-16.png" alt="">Save as PNG</button>
+    <button type="button" class="btn" id="ptWall"><img src="img/icons/display-16.png" alt="">Set as wallpaper</button>
+  </div>
+  <div class="pt-main">
+    <div class="pt-tools" role="toolbar" aria-label="Tools">
+      <button type="button" class="pt-tool" data-tool="pen" title="Pencil" aria-label="Pencil" aria-pressed="true"><img src="img/icons/tools/pen.png" alt=""></button>
+      <button type="button" class="pt-tool" data-tool="brush" title="Brush" aria-label="Brush" aria-pressed="false"><img src="img/icons/tools/brush.png" alt=""></button>
+      <button type="button" class="pt-tool" data-tool="eraser" title="Eraser" aria-label="Eraser" aria-pressed="false"><img src="img/icons/tools/eraser.png" alt=""></button>
+      <button type="button" class="pt-tool" data-tool="bucket" title="Fill with color" aria-label="Fill with color" aria-pressed="false"><img src="img/icons/tools/bucket.png" alt=""></button>
+      <button type="button" class="pt-tool" data-tool="picker" title="Pick color" aria-label="Pick color" aria-pressed="false"><img src="img/icons/tools/picker.png" alt=""></button>
+      <button type="button" class="pt-tool" data-tool="spray" title="Airbrush" aria-label="Airbrush" aria-pressed="false"><img src="img/icons/tools/spray.png" alt=""></button>
+      <div class="pt-sizes sunken" id="ptSizes" aria-label="Size"></div>
+    </div>
+    <div class="pt-canvas-wrap sunken"><canvas class="pt-canvas" id="ptCanvas" width="480" height="320" aria-label="Drawing canvas"></canvas></div>
+  </div>
+  <div class="pt-colors">
+    <div class="pt-current sunken" title="Left click: main color. Right click: second color."><i class="fg" id="ptFg"></i><i class="bgc" id="ptBg"></i></div>
+    <div class="pt-palette" id="ptPalette"></div>
+  </div>
+  <div class="statusbar"><span id="ptStatus">Left click a color to draw with it. Right click picks the second color.</span><span id="ptPos">0, 0</span></div>
+</section>
+
+<section class="win raised app" id="w-display" data-app="display" data-title="Display Properties" data-icon="img/icons/display-16.png" data-w="330" data-h="500" hidden aria-labelledby="t-display">
+  <div class="tbar"><span class="name" id="t-display"></span></div>
+  <div class="wbody plain">
+    <div class="dp">
+      <div class="dp-monitor"><div class="dp-screen sunken" id="dpScreen"><i></i></div></div>
+      <fieldset>
+        <legend>Wallpaper</legend>
+        <label><input type="radio" name="dpWall" value="site" checked> Forest (Lico's pick)</label>
+        <label><input type="radio" name="dpWall" value="teal"> Classic teal</label>
+        <label><input type="radio" name="dpWall" value="night"> Night</label>
+        <label><input type="radio" name="dpWall" value="paint" id="dpWallPaint"> My Paint drawing</label>
+      </fieldset>
+      <fieldset>
+        <legend>Window color</legend>
+        <label><input type="radio" name="dpTheme" value="forest" checked><span class="swatch" style="background:linear-gradient(90deg,#0B4A12,#2E8B22)"></span> Forest</label>
+        <label><input type="radio" name="dpTheme" value="blue"><span class="swatch" style="background:linear-gradient(90deg,#000080,#1084D0)"></span> Classic blue</label>
+        <label><input type="radio" name="dpTheme" value="maroon"><span class="swatch" style="background:linear-gradient(90deg,#5A0A0A,#B03A3A)"></span> Maroon</label>
+        <label><input type="radio" name="dpTheme" value="slate"><span class="swatch" style="background:linear-gradient(90deg,#2B3440,#6A7F99)"></span> Slate</label>
+      </fieldset>
+      <div class="row-btns"><button type="button" class="btn" id="dpReset">Reset</button><button type="button" class="btn" id="dpOk">OK</button></div>
+    </div>
+  </div>
+</section>
+
+<div class="ctx raised" id="ctx" hidden role="menu"><ul id="ctxList"></ul></div>
+<div id="stickies"></div>
+
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="win raised">
     <div class="tbar"><span class="name" id="lbTitle">picture.bmp</span><div class="tbtns"><button type="button" class="x" id="lbClose" aria-label="Close picture">×</button></div></div>
@@ -539,7 +665,10 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="control"><img src="img/icons/app-settings.png" alt="">Control Panel</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="display"><img src="img/icons/display.png" alt="">Display Properties</button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="run"><img src="img/icons/app-run.png" alt="">Run...</button></li>
     <li><button type="button" role="menuitem" data-act="shutdown"><img src="img/icons/shutdown.png" alt="">Shut Down...</button></li>
@@ -584,10 +713,13 @@ a.card:visited { color: var(--text); }
   const src = f => /^(https?:|data:)/.test(f) ? f : encodeURI(f);
 
   /* Background: the image in img/background/ (or site.background in games.json) */
+  let siteBg = null, wallChoice = 'site';
+  try { wallChoice = localStorage.getItem('lico-wall') || 'site'; } catch (e) {}
   function applyBg(path) {
     if (!path) return;
-    document.querySelector('.bg').style.setProperty('--bg-img', `url("${src(path)}")`);
+    siteBg = path;
     try { localStorage.setItem('lico-bg', path); } catch (e) {}
+    if (wallChoice === 'site') document.querySelector('.bg').style.setProperty('--bg-img', `url("${src(path)}")`);
   }
   try { applyBg(localStorage.getItem('lico-bg') || DEFAULT_BG); } catch (e) { applyBg(DEFAULT_BG); }
 
@@ -1103,6 +1235,9 @@ a.card:visited { color: var(--text); }
   }
   function openApp(id) {
     if (id === 'dave') { pokeDaveFromMenu(); return; }
+    if (id === 'sticky') { stickies.add(); return; }
+    if (id.startsWith('folder-')) folders.ensure(id);
+    if (id === 'display') syncDisplayForm();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1135,7 +1270,7 @@ a.card:visited { color: var(--text); }
   }
   function toggleMax(id) { const w = APPS[id]; if (!w || isPhone()) return; w.classList.toggle('max'); focusApp(id); }
 
-  Object.entries(APPS).forEach(([id, w]) => {
+  function setupApp(id, w) {
     const bar = w.querySelector('.tbar');
     bar.querySelector('.name').replaceChildren(h('img', { src: w.dataset.icon, alt: '' }), h('span', {}, w.dataset.title));
     bar.append(h('div', { class: 'tbtns' },
@@ -1155,7 +1290,9 @@ a.card:visited { color: var(--text); }
     const end = () => { st = null; };
     bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
     bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) toggleMax(id); });
-  });
+  }
+  Object.entries(APPS).forEach(([id, w]) => setupApp(id, w));
+  function registerApp(w) { APPS[w.dataset.app] = w; setupApp(w.dataset.app, w); }
   addEventListener('resize', () => Object.values(APPS).forEach(w => {
     if (w.hidden) return;
     if (isPhone()) w.classList.add('max');
@@ -1164,15 +1301,15 @@ a.card:visited { color: var(--text); }
 
   /* Desktop icons: click selects, double-click opens (one tap on touch screens) */
   const coarse = matchMedia('(pointer: coarse)');
-  const icons = [...document.querySelectorAll('.dicon')];
-  icons.forEach(ic => {
-    ic.addEventListener('click', e => {
-      icons.forEach(x => x.classList.toggle('sel', x === ic));
-      if (coarse.matches || e.detail === 0) openApp(ic.dataset.open);
-    });
-    ic.addEventListener('dblclick', () => openApp(ic.dataset.open));
+  const deskEl = $('#desktop');
+  const selectIcon = ic => deskEl.querySelectorAll('.dicon').forEach(x => x.classList.toggle('sel', x === ic));
+  deskEl.addEventListener('click', e => {
+    const ic = e.target.closest('.dicon'); if (!ic || ic.querySelector('.rename')) return;
+    selectIcon(ic);
+    if (coarse.matches || e.detail === 0) openApp(ic.dataset.open);
   });
-  $('#desktop').addEventListener('pointerdown', e => { if (e.target.id === 'desktop') icons.forEach(x => x.classList.remove('sel')); });
+  deskEl.addEventListener('dblclick', e => { const ic = e.target.closest('.dicon'); if (ic && !ic.querySelector('.rename')) openApp(ic.dataset.open); });
+  deskEl.addEventListener('pointerdown', e => { if (e.target === deskEl) selectIcon(null); });
   function pokeDaveFromMenu() {
     daveBtn.classList.remove('squish'); void daveBtn.offsetWidth; daveBtn.classList.add('squish');
     say(pick(['You opened Dave.exe. Dave.exe is tired.', 'Dave.exe is running. Slowly.', 'Loading Dave... 3%... please hold.', "I'm already open. I'm always open. That's the problem."]));
@@ -1441,6 +1578,328 @@ a.card:visited { color: var(--text); }
       urlIn.value = a.href; setStatus('Opening ' + a.href + ' in a new tab...'); spin();
     });
     return { go };
+  })();
+
+  /* ---------- Right-click menu ---------- */
+  const ctx = $('#ctx'), ctxList = $('#ctxList');
+  function showMenu(x, y, items) {
+    ctxList.replaceChildren(...items.map(it => it === '-' ? h('li', { class: 'sep', role: 'separator' }) :
+      h('li', {}, h('button', { type: 'button', role: 'menuitem', disabled: it.disabled || null, onclick: () => { hideMenu(); it.run && it.run(); } },
+        it.icon ? h('img', { src: it.icon, alt: '' }) : h('span', { class: 'noimg' }),
+        it.bold ? h('b', {}, it.label) : it.label))));
+    ctx.hidden = false;
+    const r = ctx.getBoundingClientRect();
+    ctx.style.left = Math.max(2, Math.min(x, innerWidth - r.width - 2)) + 'px';
+    ctx.style.top = Math.max(2, Math.min(y, innerHeight - tbH() - r.height - 2)) + 'px';
+    const first = ctx.querySelector('button:not(:disabled)'); if (first) first.focus({ preventScroll: true });
+  }
+  function hideMenu() { ctx.hidden = true; }
+  document.addEventListener('pointerdown', e => { if (!ctx.hidden && !ctx.contains(e.target)) hideMenu(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !ctx.hidden) hideMenu(); });
+  addEventListener('blur', hideMenu); addEventListener('resize', hideMenu);
+
+  let iconsSorted = false;
+  const defaultOrder = [...deskEl.querySelectorAll('.dicon')];
+  function arrangeIcons() {
+    iconsSorted = !iconsSorted;
+    const all = [...deskEl.querySelectorAll('.dicon')];
+    const list = iconsSorted ? all.sort((a, b) => a.textContent.localeCompare(b.textContent)) : [...defaultOrder.filter(x => x.isConnected), ...all.filter(x => !defaultOrder.includes(x))];
+    deskEl.append(...list);
+  }
+  function refreshDesktop() { deskEl.classList.add('blink'); setTimeout(() => deskEl.classList.remove('blink'), 140); }
+
+  deskEl.addEventListener('contextmenu', e => {
+    const ic = e.target.closest('.dicon');
+    e.preventDefault();
+    if (ic) {
+      selectIcon(ic);
+      const custom = ic.dataset.open.startsWith('folder-');
+      showMenu(e.clientX, e.clientY, [
+        { label: 'Open', bold: true, run: () => openApp(ic.dataset.open) },
+        '-',
+        { label: 'Rename', disabled: !custom, run: () => folders.rename(ic.dataset.open) },
+        { label: 'Delete', icon: 'img/icons/recycle-bin-16.png', run: () => custom ? folders.remove(ic.dataset.open) : say(pick(["You can't delete that. I tried.", 'Access denied. Even I can\'t delete that one.', 'Nope. That one\'s load-bearing.'])) },
+      ]);
+      return;
+    }
+    if (e.target !== deskEl) return;
+    selectIcon(null);
+    showMenu(e.clientX, e.clientY, [
+      { label: iconsSorted ? 'Arrange Icons: default' : 'Arrange Icons: by name', run: arrangeIcons },
+      { label: 'Refresh', run: refreshDesktop },
+      '-',
+      { label: 'New Folder', icon: 'img/icons/folder-16.png', run: () => folders.create() },
+      { label: 'New Sticky Note', icon: 'img/icons/sticky-16.png', run: () => stickies.add(e.clientX, e.clientY) },
+      '-',
+      { label: 'Properties', icon: 'img/icons/display-16.png', run: () => openApp('display') },
+    ]);
+  });
+  // right-clicking the wallpaper outside the icon column counts as the desktop too
+  document.addEventListener('contextmenu', e => {
+    if (e.target.closest('.desktop, .app, .ctx, .start-menu, .taskbar, .sticky, .lb, .run-box, input, textarea, a') || e.defaultPrevented) return;
+    if (e.target === document.body || e.target.classList.contains('bg') || e.target.closest('.dave-spot')) {
+      e.preventDefault();
+      deskEl.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: e.clientX, clientY: e.clientY }));
+    }
+  });
+
+  /* ---------- New folders (saved in this browser) ---------- */
+  const folders = (() => {
+    const KEY = 'lico-folders';
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} };
+    const iconFor = f => h('button', { type: 'button', class: 'dicon', 'data-open': f.id }, h('img', { src: 'img/icons/folder.png', alt: '' }), h('span', {}, f.name));
+    function addIcon(f) { const ic = iconFor(f); deskEl.append(ic); return ic; }
+    list.forEach(addIcon);
+    function uniqueName() {
+      let n = 'New Folder', i = 2;
+      while (list.some(f => f.name === n)) n = `New Folder (${i++})`;
+      return n;
+    }
+    function create() {
+      if (list.length >= 20) { say('Twenty folders. That\'s enough folders. I\'m cutting you off.'); return; }
+      const f = { id: 'folder-' + Date.now().toString(36), name: uniqueName() };
+      list.push(f); save();
+      const ic = addIcon(f); selectIcon(ic); rename(f.id);
+    }
+    function ensure(id) {
+      if (APPS[id]) return;
+      const f = list.find(x => x.id === id); if (!f) return;
+      const w = h('section', { class: 'win raised app', id: 'w-' + id, 'data-app': id, 'data-title': f.name, 'data-icon': 'img/icons/folder-16.png', 'data-w': 360, 'data-h': 240, hidden: true },
+        h('div', { class: 'tbar' }, h('span', { class: 'name' })),
+        h('div', { class: 'wbody sunken' }, h('div', { class: 'folder-empty' }, 'This folder is empty.')),
+        h('div', { class: 'statusbar' }, h('span', {}, '0 object(s)'), h('span', {}, '0 bytes')));
+      document.body.insertBefore(w, $('#ctx'));
+      registerApp(w);
+    }
+    function rename(id) {
+      const f = list.find(x => x.id === id); if (!f) return;
+      const ic = deskEl.querySelector(`.dicon[data-open="${id}"]`); if (!ic) return;
+      const label = ic.querySelector('span');
+      const inp = h('input', { class: 'rename', value: f.name, 'aria-label': 'Folder name', maxlength: 40 });
+      label.replaceWith(inp); inp.focus(); inp.select();
+      let done = false;
+      const finish = keep => {
+        if (done) return; done = true;
+        const v = inp.value.trim();
+        if (keep && v) f.name = v;
+        save();
+        inp.replaceWith(h('span', {}, f.name));
+        if (APPS[id]) { APPS[id].dataset.title = f.name; APPS[id].querySelector('.tbar .name span').textContent = f.name; renderTasks(); }
+      };
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') finish(true); else if (e.key === 'Escape') finish(false); e.stopPropagation(); });
+      inp.addEventListener('blur', () => finish(true));
+      inp.addEventListener('click', e => e.stopPropagation());
+      inp.addEventListener('dblclick', e => e.stopPropagation());
+    }
+    function remove(id) {
+      const i = list.findIndex(x => x.id === id); if (i < 0) return;
+      list.splice(i, 1); save();
+      if (APPS[id]) { closeApp(id); APPS[id].remove(); delete APPS[id]; }
+      const ic = deskEl.querySelector(`.dicon[data-open="${id}"]`); if (ic) ic.remove();
+      $('#binText').textContent = 'The Recycle Bin is empty. (It ate your folder.)';
+    }
+    return { create, ensure, rename, remove };
+  })();
+
+  /* ---------- Display Properties (saved in this browser) ---------- */
+  const THEMES = {
+    forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12' },
+    blue:   { navy: '#000080', blue: '#1084D0', select: '#000080' },
+    maroon: { navy: '#5A0A0A', blue: '#B03A3A', select: '#800000' },
+    slate:  { navy: '#2B3440', blue: '#6A7F99', select: '#2B3440' }
+  };
+  const WALLS = { teal: '#008080', night: '#0B0F14' };
+  let themeChoice = 'forest', paintWall = null;
+  try { themeChoice = localStorage.getItem('lico-theme') || 'forest'; paintWall = localStorage.getItem('lico-paintwall'); } catch (e) {}
+  function applyTheme(name) {
+    const t = THEMES[name] || THEMES.forest; themeChoice = THEMES[name] ? name : 'forest';
+    const r = document.documentElement.style;
+    r.setProperty('--navy', t.navy); r.setProperty('--blue', t.blue); r.setProperty('--select', t.select);
+  }
+  function applyWall(name) {
+    const bg = document.querySelector('.bg');
+    if (name === 'paint' && !paintWall) name = 'site';
+    wallChoice = name;
+    bg.classList.remove('plain', 'drawn'); bg.style.removeProperty('--bg-color');
+    if (WALLS[name]) { bg.classList.add('plain'); bg.style.setProperty('--bg-color', WALLS[name]); }
+    else if (name === 'paint') { bg.classList.add('drawn'); bg.style.setProperty('--bg-img', `url("${paintWall}")`); }
+    else bg.style.setProperty('--bg-img', `url("${src(siteBg || DEFAULT_BG)}")`);
+    const scr = $('#dpScreen');
+    scr.style.background = WALLS[name] || (name === 'paint' ? `#FFFFFF url("${paintWall}") center / cover` : `var(--desk) url("${src(siteBg || DEFAULT_BG)}") center / cover`);
+  }
+  function syncDisplayForm() {
+    document.querySelectorAll('input[name="dpWall"]').forEach(r => { r.checked = r.value === wallChoice; });
+    document.querySelectorAll('input[name="dpTheme"]').forEach(r => { r.checked = r.value === themeChoice; });
+    $('#dpWallPaint').disabled = !paintWall;
+    $('#dpWallPaint').parentElement.title = paintWall ? '' : 'Draw something in Paint and press "Set as wallpaper" first.';
+  }
+  document.querySelectorAll('input[name="dpWall"]').forEach(r => r.addEventListener('change', () => { applyWall(r.value); try { localStorage.setItem('lico-wall', wallChoice); } catch (e) {} }));
+  document.querySelectorAll('input[name="dpTheme"]').forEach(r => r.addEventListener('change', () => { applyTheme(r.value); try { localStorage.setItem('lico-theme', themeChoice); } catch (e) {} }));
+  $('#dpOk').addEventListener('click', () => closeApp('display'));
+  $('#dpReset').addEventListener('click', () => {
+    applyTheme('forest'); applyWall('site');
+    try { localStorage.removeItem('lico-theme'); localStorage.removeItem('lico-wall'); } catch (e) {}
+    syncDisplayForm();
+  });
+  APPS.display.addEventListener('focusin', syncDisplayForm);
+  applyTheme(themeChoice); applyWall(wallChoice); syncDisplayForm();
+
+  /* ---------- Sticky notes (saved in this browser) ---------- */
+  const stickies = (() => {
+    const KEY = 'lico-notes', box = $('#stickies');
+    let notes = [];
+    try { notes = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+    let saveT = 0;
+    const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} }, 250); };
+    const clampNote = (n, el) => {
+      n.x = Math.max(0, Math.min(innerWidth - 60, n.x));
+      n.y = Math.max(0, Math.min(innerHeight - tbH() - 30, n.y));
+      el.style.left = n.x + 'px'; el.style.top = n.y + 'px';
+    };
+    function bringUp(el) { box.querySelectorAll('.sticky').forEach(x => x.classList.toggle('top', x === el)); }
+    function render(n) {
+      const ta = h('textarea', { 'aria-label': 'Sticky note', placeholder: 'write something...', maxlength: 2000 });
+      ta.value = n.text || '';
+      const bar = h('div', { class: 'sticky-bar' }, h('span', {}, 'note'),
+        h('span', { class: 'sb-btns' },
+          h('button', { type: 'button', title: 'New note', 'aria-label': 'New note', onclick: () => add(n.x + 24, n.y + 24) }, '+'),
+          h('button', { type: 'button', title: 'Delete note', 'aria-label': 'Delete note', onclick: () => remove(n.id) }, '×')));
+      const el = h('div', { class: 'sticky', 'data-id': n.id }, bar, ta);
+      if (n.w) el.style.width = n.w + 'px';
+      if (n.h) el.style.height = n.h + 'px';
+      box.append(el); clampNote(n, el);
+      ta.addEventListener('input', () => { n.text = ta.value; save(); });
+      el.addEventListener('pointerdown', () => bringUp(el));
+      let st = null;
+      bar.addEventListener('pointerdown', e => {
+        if (e.button !== 0 || e.target.closest('button')) return;
+        st = { px: e.clientX, py: e.clientY, x: n.x, y: n.y }; bar.setPointerCapture(e.pointerId);
+      });
+      bar.addEventListener('pointermove', e => { if (!st) return; n.x = st.x + e.clientX - st.px; n.y = st.y + e.clientY - st.py; clampNote(n, el); });
+      const end = () => { if (st) { st = null; save(); } };
+      bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+      if ('ResizeObserver' in window) new ResizeObserver(() => { n.w = el.offsetWidth; n.h = el.offsetHeight; save(); }).observe(el);
+      return el;
+    }
+    function add(x, y) {
+      if (notes.length >= 12) { say('Twelve sticky notes. My whole monitor is yellow. That\'s the limit.'); return; }
+      const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), x: x ?? (innerWidth / 2 - 95 + (notes.length % 5) * 18), y: y ?? (90 + (notes.length % 5) * 18), text: '' };
+      notes.push(n); save();
+      const el = render(n); bringUp(el); el.querySelector('textarea').focus();
+    }
+    function remove(id) {
+      const i = notes.findIndex(n => n.id === id); if (i < 0) return;
+      notes.splice(i, 1); save();
+      const el = box.querySelector(`.sticky[data-id="${id}"]`); if (el) el.remove();
+    }
+    notes.forEach(render);
+    addEventListener('resize', () => notes.forEach(n => { const el = box.querySelector(`.sticky[data-id="${n.id}"]`); if (el) clampNote(n, el); }));
+    return { add, remove };
+  })();
+
+  /* ---------- Paint ---------- */
+  const paint = (() => {
+    const cv = $('#ptCanvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    const W = cv.width, H = cv.height;
+    const PALETTE = ['#000000','#808080','#800000','#808000','#008000','#008080','#000080','#800080','#808040','#004040','#0080FF','#004080','#8000FF','#804000',
+                     '#FFFFFF','#C0C0C0','#FF0000','#FFFF00','#00FF00','#00FFFF','#0000FF','#FF00FF','#FFFF80','#00FF80','#80FFFF','#8080FF','#FF0080','#FF8040'];
+    const SIZES = [1, 3, 6, 12];
+    let tool = 'pen', size = 3, fg = '#000000', bgc = '#FFFFFF', drawing = null, undo = [], dirty = false;
+    cx.fillStyle = '#FFFFFF'; cx.fillRect(0, 0, W, H);
+    const status = t => { $('#ptStatus').textContent = t; };
+    function setColors() { $('#ptFg').style.background = fg; $('#ptBg').style.background = bgc; }
+    $('#ptPalette').append(...PALETTE.map(c => h('button', { type: 'button', title: c, 'aria-label': 'Color ' + c, style: 'background:' + c,
+      onclick: () => { fg = c; setColors(); },
+      oncontextmenu: e => { e.preventDefault(); bgc = c; setColors(); } })));
+    function renderSizes() {
+      $('#ptSizes').replaceChildren(...SIZES.map(sz => h('button', { type: 'button', 'aria-label': 'Size ' + sz, 'aria-pressed': String(sz === size), onclick: () => { size = sz; renderSizes(); } },
+        h('i', { style: `width:${Math.min(18, sz + 2)}px;height:${Math.min(10, Math.max(1, sz))}px` }))));
+    }
+    renderSizes(); setColors();
+    document.querySelectorAll('.pt-tool').forEach(b => b.addEventListener('click', () => {
+      tool = b.dataset.tool;
+      document.querySelectorAll('.pt-tool').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      status({ pen: 'Pencil: 1 pixel, always.', brush: 'Brush: pick a size below the tools.', eraser: 'Eraser: paints with the second color.', bucket: 'Fill: click an area to flood it with color.', picker: 'Pick color: click the drawing to grab a color.', spray: 'Airbrush: hold to spray.' }[tool]);
+    }));
+    function pushUndo() { undo.push(cx.getImageData(0, 0, W, H)); if (undo.length > 25) undo.shift(); }
+    function pos(e) {
+      const r = cv.getBoundingClientRect();
+      return { x: Math.floor((e.clientX - r.left) * W / r.width), y: Math.floor((e.clientY - r.top) * H / r.height) };
+    }
+    function stamp(x, y, c, s) { const o = Math.floor(s / 2); cx.fillStyle = c; cx.fillRect(x - o, y - o, s, s); }
+    function line(a, b, c, s) {
+      const dx = Math.abs(b.x - a.x), dy = Math.abs(b.y - a.y), n = Math.max(dx, dy, 1);
+      for (let i = 0; i <= n; i++) stamp(Math.round(a.x + (b.x - a.x) * i / n), Math.round(a.y + (b.y - a.y) * i / n), c, s);
+    }
+    function spray(p, c) { cx.fillStyle = c; const r = size * 2 + 4; for (let i = 0; i < 18; i++) { const a = Math.random() * Math.PI * 2, d = Math.random() * r; cx.fillRect(Math.round(p.x + Math.cos(a) * d), Math.round(p.y + Math.sin(a) * d), 1, 1); } }
+    function hexToRgb(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+    function fill(p, c) {
+      if (p.x < 0 || p.y < 0 || p.x >= W || p.y >= H) return;
+      const img = cx.getImageData(0, 0, W, H), d = img.data, at = (x, y) => (y * W + x) * 4;
+      const i0 = at(p.x, p.y), t = [d[i0], d[i0 + 1], d[i0 + 2], d[i0 + 3]], nc = hexToRgb(c);
+      if (t[0] === nc[0] && t[1] === nc[1] && t[2] === nc[2] && t[3] === 255) return;
+      const same = i => d[i] === t[0] && d[i + 1] === t[1] && d[i + 2] === t[2] && d[i + 3] === t[3];
+      const stack = [[p.x, p.y]];
+      while (stack.length) {
+        let [x, y] = stack.pop();
+        while (x >= 0 && same(at(x, y))) x--;
+        x++; let up = false, dn = false;
+        while (x < W && same(at(x, y))) {
+          const i = at(x, y); d[i] = nc[0]; d[i + 1] = nc[1]; d[i + 2] = nc[2]; d[i + 3] = 255;
+          if (y > 0) { const u = same(at(x, y - 1)); if (u && !up) stack.push([x, y - 1]); up = u; }
+          if (y < H - 1) { const v = same(at(x, y + 1)); if (v && !dn) stack.push([x, y + 1]); dn = v; }
+          x++;
+        }
+      }
+      cx.putImageData(img, 0, 0);
+    }
+    function pickAt(p) { const d = cx.getImageData(Math.max(0, Math.min(W - 1, p.x)), Math.max(0, Math.min(H - 1, p.y)), 1, 1).data; return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase(); }
+    let sprayT = 0;
+    cv.addEventListener('contextmenu', e => e.preventDefault());
+    cv.addEventListener('pointerdown', e => {
+      if (e.button !== 0 && e.button !== 2) return;
+      const p = pos(e), c = tool === 'eraser' ? bgc : (e.button === 2 ? bgc : fg);
+      if (tool === 'picker') { const got = pickAt(p); if (e.button === 2) bgc = got; else fg = got; setColors(); return; }
+      pushUndo(); dirty = true;
+      if (tool === 'bucket') { fill(p, c); return; }
+      cv.setPointerCapture(e.pointerId);
+      drawing = { last: p, c };
+      if (tool === 'spray') { spray(p, c); clearInterval(sprayT); sprayT = setInterval(() => drawing && spray(drawing.last, drawing.c), 40); }
+      else stamp(p.x, p.y, c, tool === 'pen' ? 1 : size);
+    });
+    cv.addEventListener('pointermove', e => {
+      const p = pos(e); $('#ptPos').textContent = `${Math.max(0, Math.min(W - 1, p.x))}, ${Math.max(0, Math.min(H - 1, p.y))}`;
+      if (!drawing) return;
+      if (tool === 'spray') { drawing.last = p; return; }
+      line(drawing.last, p, drawing.c, tool === 'pen' ? 1 : size); drawing.last = p;
+    });
+    const stop = () => { drawing = null; clearInterval(sprayT); };
+    cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+    function doUndo() { const img = undo.pop(); if (img) cx.putImageData(img, 0, 0); else status('Nothing to undo.'); }
+    $('#ptUndo').addEventListener('click', doUndo);
+    APPS.paint.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); } });
+    $('#ptNew').addEventListener('click', () => { pushUndo(); cx.fillStyle = '#FFFFFF'; cx.fillRect(0, 0, W, H); dirty = false; status('New picture. Fresh start.'); });
+    $('#ptSave').addEventListener('click', () => {
+      cv.toBlob(blob => {
+        if (!blob) { status("Couldn't save the picture."); return; }
+        const url = URL.createObjectURL(blob);
+        const a = h('a', { href: url, download: 'lico-paint.png' }); document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        status('Saved as lico-paint.png (check your downloads).');
+        say(pick(['Is that me? Don\'t answer that.', 'Nice. Very modern art.', 'I\'d put that on the fridge. If we had a fridge.']));
+      }, 'image/png');
+    });
+    $('#ptWall').addEventListener('click', () => {
+      paintWall = cv.toDataURL('image/png');
+      try { localStorage.setItem('lico-paintwall', paintWall); } catch (e) { status('Set as wallpaper for now (too big to remember after a reload).'); }
+      applyWall('paint'); try { localStorage.setItem('lico-wall', 'paint'); } catch (e) {}
+      syncDisplayForm();
+      status('Wallpaper set. Change it back in Display Properties.');
+      say('Bold choice of wallpaper. I respect it.');
+    });
+    return {};
   })();
 
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
