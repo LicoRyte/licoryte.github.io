@@ -447,6 +447,33 @@ a.card:visited { color: var(--text); }
 .pt-palette { display: grid; grid-template-columns: repeat(14, 15px); grid-auto-rows: 15px; gap: 1px; }
 .pt-palette button { padding: 0; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
 
+
+/* Workstation */
+.ws-top { display: flex; align-items: center; gap: 6px; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
+.ws-top input { flex: 1; min-width: 0; max-width: 260px; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+#w-workstation { container-type: inline-size; }
+.ws-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 200px minmax(0, 1fr); background: #FFFFFF; }
+.ws-pane { overflow: auto; padding: 14px 12px; border-right: 1px solid var(--silver); background: linear-gradient(180deg, #FFFFFF 0%, #E9F2FF 100%); font: 12px var(--f-ui); display: grid; gap: 8px; align-content: start; }
+.ws-pane h2 { margin: 0; font: bold 18px var(--f-head); color: var(--navy); line-height: 1.1; }
+.ws-pane hr { width: 100%; height: 3px; margin: 0; border: 0; background: linear-gradient(90deg, var(--navy), var(--blue), transparent); }
+.ws-pane h3 { margin: 0; font: bold 13px var(--f-ui); overflow-wrap: anywhere; }
+.ws-pane p { margin: 0; line-height: 1.45; }
+.ws-pane .url { color: #555555; font-size: 11px; overflow-wrap: anywhere; }
+.ws-pane .btn { justify-self: start; }
+.ws-list { overflow: auto; padding: 8px 10px 14px; }
+.ws-cat { margin: 10px 0 4px; font: bold 12px var(--f-ui); color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.ws-cat:first-child { margin-top: 2px; }
+.ws-cat::after { content: ""; flex: 1; height: 1px; background: var(--silver); }
+.ws-grid { display: grid; grid-template-columns: repeat(auto-fill, 84px); gap: 2px; }
+.ws-item { width: 84px; display: grid; grid-template-rows: 34px auto; justify-items: center; gap: 3px; padding: 4px 2px; background: none; border: 0; color: var(--text); font: 11px/1.2 var(--f-ui); text-align: center; position: relative; }
+.ws-item img { width: 32px; height: 32px; image-rendering: pixelated; }
+.ws-item span { padding: 1px 2px; overflow-wrap: anywhere; }
+.ws-item::after { content: ""; position: absolute; left: 26px; top: 28px; width: 9px; height: 9px; background: #FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges'%3E%3Cpath d='M2 7 L6 3 M3 2 H7 V6' stroke='%23000' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") center / 9px no-repeat; border: 1px solid #000000; }
+.ws-item.sel span { background: var(--select); color: #FFFFFF; outline: 1px dotted #000000; }
+.ws-item.sel img { filter: brightness(.7) sepia(1) hue-rotate(60deg) saturate(2.5); }
+.ws-none { padding: 20px; font: 12px var(--f-ui); color: #555555; }
+@container (max-width: 520px) { .ws-main { grid-template-columns: minmax(0, 1fr); } .ws-pane { display: none; } }
+
 /* Phones: windows open full-screen, Dave gets smaller */
 @media (max-width: 600px) {
   .dave img { height: 140px; }
@@ -477,6 +504,7 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon shortcut" data-open="url:https://mail.google.com/" title="Opens Gmail in a new tab"><img src="img/icons/app-mail.png" alt=""><span>Gmail</span></button>
   <button type="button" class="dicon shortcut" data-open="url:https://twitter.com/" title="Opens Twitter in a new tab"><img src="img/icons/chat.png" alt=""><span>Twitter</span></button>
   <button type="button" class="dicon shortcut" data-open="url:https://www.youtube.com/" title="Opens YouTube in a new tab"><img src="img/icons/app-video-player.png" alt=""><span>YouTube</span></button>
+  <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
@@ -586,6 +614,22 @@ a.card:visited { color: var(--text); }
 </section>
 
 
+<section class="win raised app" id="w-workstation" data-app="workstation" data-title="Workstation" data-icon="img/icons/workstation-16.png" data-w="760" data-h="540" hidden aria-labelledby="t-workstation">
+  <div class="tbar"><span class="name" id="t-workstation"></span></div>
+  <div class="menubar" aria-hidden="true"><button type="button" tabindex="-1"><u>F</u>ile</button><button type="button" tabindex="-1"><u>E</u>dit</button><button type="button" tabindex="-1"><u>V</u>iew</button><button type="button" tabindex="-1"><u>G</u>o</button><button type="button" tabindex="-1">F<u>a</u>vorites</button><button type="button" tabindex="-1"><u>H</u>elp</button></div>
+  <div class="ws-top"><label for="wsFind">Find:</label><input id="wsFind" type="search" placeholder="pdf, image, sound..." autocomplete="off"></div>
+  <div class="ws-main sunken">
+    <aside class="ws-pane" aria-live="polite">
+      <img src="img/icons/workstation.png" width="32" height="32" alt="">
+      <h2>Workstation</h2>
+      <hr>
+      <div id="wsInfo"><p>Handy websites for getting work done. Select a tool to see what it does. Double-click to open it in a new tab.</p></div>
+    </aside>
+    <div class="ws-list" id="wsList"></div>
+  </div>
+  <div class="statusbar"><span id="wsStatus">0 object(s)</span><span>Opens in a new tab</span></div>
+</section>
+
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
   <div class="tbar"><span class="name" id="t-paint"></span></div>
   <div class="pt-top">
@@ -677,6 +721,7 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="control"><img src="img/icons/app-settings.png" alt="">Control Panel</button></li>
@@ -891,6 +936,7 @@ a.card:visited { color: var(--text); }
     }
     games = (DATA.games || []).filter(g => g && g.title);
     pics = buildPics(null);
+    workstation.load(DATA.workstation);
     if (DATA.site && DATA.site.background) applyBg(DATA.site.background);
     renderSite();
     renderGrid();
@@ -1267,6 +1313,7 @@ a.card:visited { color: var(--text); }
       w.classList.toggle('max', isPhone() || w.classList.contains('max'));
     }
     focusApp(id);
+    if (id === 'workstation') say(pick(['Workstation. Finally, someone wants to do actual work.', 'All the tools. None of the motivation.', 'If you need a PDF merged, I know a guy. It\'s the first icon.']));
     if (id === 'bin') say(pick(["Nothing in there. I emptied it. Twice.", 'The Recycle Bin is empty. Like my coffee mug.', 'Where old games go to rest. None yet. Good.']));
   }
   function minimize(id) {
@@ -1357,11 +1404,12 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
     texty: () => { openApp('texty'); return 'Opened Texty.'; },
+    workstation: () => { openApp('workstation'); return 'Opened Workstation. Time to work. Ugh.'; },
     gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
     twitter: () => { openApp('url:https://twitter.com/'); return 'Opening Twitter in a new tab. Good luck in there.'; },
     youtube: () => { openApp('url:https://www.youtube.com/'); return 'Opening YouTube in a new tab. See you in 3 hours.'; },
@@ -1916,6 +1964,48 @@ a.card:visited { color: var(--text); }
       say('Bold choice of wallpaper. I respect it.');
     });
     return {};
+  })();
+
+  /* ---------- Workstation (tool links from games.json) ---------- */
+  const workstation = (() => {
+    const list = $('#wsList'), info = $('#wsInfo'), statusEl = $('#wsStatus'), find = $('#wsFind');
+    let cats = [], selected = null;
+    const iconSrc = ic => !ic ? 'img/icons/workstation.png' : (ic.includes('/') ? ic : `img/icons/ws/${ic}.png`);
+    function showInfo(t) {
+      if (!t) { info.replaceChildren(h('p', {}, 'Handy websites for getting work done. Select a tool to see what it does. Double-click to open it in a new tab.')); return; }
+      let host = ''; try { host = new URL(t.url).hostname.replace(/^www\./, ''); } catch (e) {}
+      info.replaceChildren(h('h3', {}, t.name), h('p', {}, t.desc || ''), h('p', { class: 'url' }, host),
+        h('button', { type: 'button', class: 'btn', onclick: () => open(t) }, 'Open'));
+    }
+    function open(t) { texty.go(t.url); statusEl.textContent = `Opening ${t.name} in a new tab...`; }
+    function render() {
+      const q = find.value.trim().toLowerCase();
+      let n = 0;
+      const out = [];
+      cats.forEach(c => {
+        const tools = (c.tools || []).filter(t => t && t.name && t.url && (!q || (t.name + ' ' + (t.desc || '') + ' ' + c.category).toLowerCase().includes(q)));
+        if (!tools.length) return;
+        n += tools.length;
+        out.push(h('h3', { class: 'ws-cat' }, c.category || 'Tools'),
+          h('div', { class: 'ws-grid', role: 'list' }, ...tools.map(t => {
+            const b = h('button', { type: 'button', class: 'ws-item', role: 'listitem', title: t.desc ? `${t.name}: ${t.desc}` : t.name },
+              h('img', { src: iconSrc(t.icon), alt: '' }), h('span', {}, t.name));
+            b.addEventListener('click', e => {
+              list.querySelectorAll('.ws-item.sel').forEach(x => x.classList.remove('sel'));
+              b.classList.add('sel'); selected = t; showInfo(t);
+              statusEl.textContent = t.desc || t.name;
+              if (coarse.matches || e.detail === 0) open(t);
+            });
+            b.addEventListener('dblclick', () => open(t));
+            return b;
+          })));
+      });
+      list.replaceChildren(...(out.length ? out : [h('p', { class: 'ws-none' }, q ? `Nothing matches "${find.value.trim()}".` : 'No tools yet. Add some to "workstation" in games.json.')]));
+      statusEl.textContent = `${n} object(s)`;
+      if (selected && !out.length) showInfo(null);
+    }
+    find.addEventListener('input', render);
+    return { load(data) { cats = Array.isArray(data) ? data : []; render(); } };
   })();
 
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */

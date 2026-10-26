@@ -52,5 +52,257 @@
       "date": "2026-10-24",
       "alt": "Dave, an office worker with a green CRT monitor for a head, holding a #1 Employee mug and a stack of papers"
     }
+  ],
+  "workstation": [
+    {
+      "category": "PDF & Documents",
+      "tools": [
+        {
+          "name": "iLovePDF",
+          "url": "https://www.ilovepdf.com/",
+          "desc": "Merge, split, compress and convert PDFs.",
+          "icon": "filetype-pdf"
+        },
+        {
+          "name": "PDF24 Tools",
+          "url": "https://tools.pdf24.org/en/",
+          "desc": "A big free PDF toolbox. No sign-up.",
+          "icon": "filetype-pdf"
+        },
+        {
+          "name": "Smallpdf",
+          "url": "https://smallpdf.com/",
+          "desc": "Quick PDF edits, signing and conversion.",
+          "icon": "filetype-pdf"
+        }
+      ]
+    },
+    {
+      "category": "Convert & Translate",
+      "tools": [
+        {
+          "name": "CloudConvert",
+          "url": "https://cloudconvert.com/",
+          "desc": "Convert almost any file format to another.",
+          "icon": "filetype-archive"
+        },
+        {
+          "name": "DeepL (files)",
+          "url": "https://www.deepl.com/translator/files",
+          "desc": "Translate whole Word, PDF and PowerPoint files.",
+          "icon": "app-character-map"
+        },
+        {
+          "name": "Google Translate (docs)",
+          "url": "https://translate.google.com/?op=docs",
+          "desc": "Upload a document and get it translated.",
+          "icon": "app-character-map"
+        }
+      ]
+    },
+    {
+      "category": "Images",
+      "tools": [
+        {
+          "name": "remove.bg",
+          "url": "https://www.remove.bg/",
+          "desc": "Remove the background from a photo.",
+          "icon": "filetype-image"
+        },
+        {
+          "name": "Photopea",
+          "url": "https://www.photopea.com/",
+          "desc": "A Photoshop-like image editor in the browser.",
+          "icon": "app-pixel-paint"
+        },
+        {
+          "name": "Squoosh",
+          "url": "https://squoosh.app/",
+          "desc": "Compress and resize images, side-by-side preview.",
+          "icon": "filetype-image"
+        },
+        {
+          "name": "TinyPNG",
+          "url": "https://tinypng.com/",
+          "desc": "Shrink PNG, JPG and WebP files.",
+          "icon": "filetype-image"
+        },
+        {
+          "name": "ezgif",
+          "url": "https://ezgif.com/",
+          "desc": "Make, crop, resize and optimize GIFs.",
+          "icon": "filetype-video"
+        }
+      ]
+    },
+    {
+      "category": "Video & Audio",
+      "tools": [
+        {
+          "name": "123apps",
+          "url": "https://123apps.com/",
+          "desc": "Cut video and audio, convert, record screen.",
+          "icon": "app-video-player"
+        },
+        {
+          "name": "Kapwing",
+          "url": "https://www.kapwing.com/",
+          "desc": "Simple video editor with subtitles.",
+          "icon": "app-video-player"
+        },
+        {
+          "name": "Vocal Remover",
+          "url": "https://vocalremover.org/",
+          "desc": "Split vocals from music, change key and tempo.",
+          "icon": "app-sound-player"
+        }
+      ]
+    },
+    {
+      "category": "Design & Diagrams",
+      "tools": [
+        {
+          "name": "draw.io",
+          "url": "https://app.diagrams.net/",
+          "desc": "Flowcharts, UML and system diagrams.",
+          "icon": "app-spreadsheet"
+        },
+        {
+          "name": "Excalidraw",
+          "url": "https://excalidraw.com/",
+          "desc": "Hand-drawn style whiteboard sketches.",
+          "icon": "app-pixel-paint"
+        },
+        {
+          "name": "Figma",
+          "url": "https://www.figma.com/",
+          "desc": "UI design and prototypes.",
+          "icon": "filetype-presenter"
+        },
+        {
+          "name": "Canva",
+          "url": "https://www.canva.com/",
+          "desc": "Posters, slides and social images.",
+          "icon": "filetype-presenter"
+        },
+        {
+          "name": "Coolors",
+          "url": "https://coolors.co/",
+          "desc": "Generate and save color palettes.",
+          "icon": "filetype-palette"
+        }
+      ]
+    },
+    {
+      "category": "Game Dev",
+      "tools": [
+        {
+          "name": "Piskel",
+          "url": "https://www.piskelapp.com/",
+          "desc": "Pixel art and sprite animation editor.",
+          "icon": "app-pixel-paint"
+        },
+        {
+          "name": "Lospec Palettes",
+          "url": "https://lospec.com/palette-list",
+          "desc": "Thousands of pixel art palettes.",
+          "icon": "filetype-palette"
+        },
+        {
+          "name": "jsfxr",
+          "url": "https://sfxr.me/",
+          "desc": "Retro sound effects in one click.",
+          "icon": "app-sound-player"
+        },
+        {
+          "name": "BeepBox",
+          "url": "https://www.beepbox.co/",
+          "desc": "Make chiptune music in the browser.",
+          "icon": "filetype-music"
+        },
+        {
+          "name": "Kenney Assets",
+          "url": "https://kenney.nl/assets",
+          "desc": "Free game art, UI and sound packs.",
+          "icon": "games"
+        },
+        {
+          "name": "OpenGameArt",
+          "url": "https://opengameart.org/",
+          "desc": "Free sprites, music and sounds.",
+          "icon": "games"
+        }
+      ]
+    },
+    {
+      "category": "Code",
+      "tools": [
+        {
+          "name": "regex101",
+          "url": "https://regex101.com/",
+          "desc": "Build and test regular expressions.",
+          "icon": "app-terminal"
+        },
+        {
+          "name": "CyberChef",
+          "url": "https://gchq.github.io/CyberChef/",
+          "desc": "Encode, decode, hash and convert data.",
+          "icon": "app-terminal"
+        },
+        {
+          "name": "JSONLint",
+          "url": "https://jsonlint.com/",
+          "desc": "Check a JSON file for mistakes (like games.json).",
+          "icon": "filetype-json"
+        },
+        {
+          "name": "Can I Use",
+          "url": "https://caniuse.com/",
+          "desc": "Which browsers support a web feature.",
+          "icon": "filetype-html"
+        }
+      ]
+    },
+    {
+      "category": "Files & Everyday",
+      "tools": [
+        {
+          "name": "Wormhole",
+          "url": "https://wormhole.app/",
+          "desc": "Send big files with an encrypted link.",
+          "icon": "downloads"
+        },
+        {
+          "name": "WeTransfer",
+          "url": "https://wetransfer.com/",
+          "desc": "Send files by email link.",
+          "icon": "downloads"
+        },
+        {
+          "name": "QR Code Monkey",
+          "url": "https://www.qrcode-monkey.com/",
+          "desc": "Make QR codes.",
+          "icon": "search-engine"
+        },
+        {
+          "name": "Desmos",
+          "url": "https://www.desmos.com/calculator",
+          "desc": "Graphing calculator.",
+          "icon": "app-calculator"
+        },
+        {
+          "name": "World Clock",
+          "url": "https://www.timeanddate.com/worldclock/",
+          "desc": "Time in every timezone.",
+          "icon": "app-analog-clock"
+        },
+        {
+          "name": "fast.com",
+          "url": "https://fast.com/",
+          "desc": "Check your internet speed.",
+          "icon": "network"
+        }
+      ]
+    }
   ]
 }
