@@ -119,6 +119,12 @@ a.btn, a.btn:visited { color: var(--text); }
 .dicon.sel span { background: var(--select); text-shadow: none; outline: 1px dotted #FFFFFF; }
 .dicon:focus-visible { outline: none; }
 .dicon:focus-visible span { outline: 1px dotted #FFFFFF; }
+.dicon { position: relative; }
+.dicon.shortcut::after {
+  content: ""; position: absolute; left: 25px; top: 30px; width: 11px; height: 11px; pointer-events: none;
+  background: #FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 11' shape-rendering='crispEdges'%3E%3Cpath d='M3 8 L7 4 M4 3 H8 V7' stroke='%23000' stroke-width='1.6' fill='none'/%3E%3C/svg%3E") center / 11px no-repeat;
+  border: 1px solid #000000;
+}
 .dicon .face { width: 32px; height: 32px; object-fit: cover; object-position: 50% 20%; border: 1px solid #000000; image-rendering: auto; }
 
 /* Windows */
@@ -468,6 +474,9 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
   <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
   <button type="button" class="dicon" data-open="texty"><img src="img/icons/texty.png" alt=""><span>Texty</span></button>
+  <button type="button" class="dicon shortcut" data-open="url:https://mail.google.com/" title="Opens Gmail in a new tab"><img src="img/icons/app-mail.png" alt=""><span>Gmail</span></button>
+  <button type="button" class="dicon shortcut" data-open="url:https://twitter.com/" title="Opens Twitter in a new tab"><img src="img/icons/chat.png" alt=""><span>Twitter</span></button>
+  <button type="button" class="dicon shortcut" data-open="url:https://www.youtube.com/" title="Opens YouTube in a new tab"><img src="img/icons/app-video-player.png" alt=""><span>YouTube</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="control"><img src="img/icons/app-settings.png" alt=""><span>Control Panel</span></button>
@@ -661,6 +670,9 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="about"><img src="img/icons/filetype-text.png" alt="">About me</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="texty"><img src="img/icons/texty.png" alt="">Texty</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="url:https://mail.google.com/"><img src="img/icons/app-mail.png" alt="">Gmail</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="url:https://twitter.com/"><img src="img/icons/chat.png" alt="">Twitter</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="url:https://www.youtube.com/"><img src="img/icons/app-video-player.png" alt="">YouTube</button></li>
     <li class="sep" role="separator"></li>
     <li><button type="button" role="menuitem" data-act="dave"><img class="face" src="img/dave-face.webp" alt="">Dave.exe</button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
@@ -1236,6 +1248,7 @@ a.card:visited { color: var(--text); }
   function openApp(id) {
     if (id === 'dave') { pokeDaveFromMenu(); return; }
     if (id === 'sticky') { stickies.add(); return; }
+    if (id.startsWith('url:')) { texty.go(id.slice(4)); return; }
     if (id.startsWith('folder-')) folders.ensure(id);
     if (id === 'display') syncDisplayForm();
     const w = APPS[id]; if (!w) return;
@@ -1344,11 +1357,14 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
     texty: () => { openApp('texty'); return 'Opened Texty.'; },
+    gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
+    twitter: () => { openApp('url:https://twitter.com/'); return 'Opening Twitter in a new tab. Good luck in there.'; },
+    youtube: () => { openApp('url:https://www.youtube.com/'); return 'Opening YouTube in a new tab. See you in 3 hours.'; },
     iexplore: () => { openApp('texty'); return 'Internet Explorer has been replaced by Texty. You\'re welcome.'; },
     mspaint: () => { openApp('gallery'); return 'Paint is broken. Opened the Gallery instead.'; },
     control: () => { openApp('control'); return 'Opened Control Panel.'; },
