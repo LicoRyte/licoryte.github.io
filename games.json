@@ -59,6 +59,12 @@
       "category": "PDF & Documents",
       "tools": [
         {
+          "name": "Google Docs",
+          "url": "https://docs.google.com/",
+          "desc": "Write and share documents online.",
+          "icon": "img/icons/filetype-text.png"
+        },
+        {
           "name": "iLovePDF",
           "url": "https://www.ilovepdf.com/",
           "desc": "Merge, split, compress and convert PDFs.",
@@ -191,6 +197,12 @@
           "url": "https://coolors.co/",
           "desc": "Generate and save color palettes.",
           "icon": "filetype-palette"
+        },
+        {
+          "name": "Pinterest",
+          "url": "https://www.pinterest.com/",
+          "desc": "Collect ideas and references on mood boards.",
+          "icon": "filetype-image"
         }
       ]
     },
