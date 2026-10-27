@@ -25,6 +25,8 @@
   --deep: #00003C;
   --accent: #3A8EE6;
   --hover: #DCE8F8;
+  --ring: #5FB0FF;
+  --sel-tint: brightness(.55) sepia(1) hue-rotate(180deg) saturate(4);
   --inactive-a: #808080;
   --inactive-b: #B5B5B5;
   --select: #000080;
@@ -119,7 +121,7 @@ a.btn, a.btn:visited { color: var(--text); }
 }
 .dicon img { width: 32px; height: 32px; image-rendering: pixelated; }
 .dicon span { padding: 1px 3px; text-shadow: 1px 1px 0 #000000, 0 0 3px #000000; overflow-wrap: anywhere; }
-.dicon.sel img { filter: brightness(.6) sepia(1) hue-rotate(60deg) saturate(3); }
+.dicon.sel img { filter: var(--sel-tint); }
 .dicon.sel span { background: var(--select); text-shadow: none; outline: 1px dotted #FFFFFF; }
 .dicon:focus-visible { outline: none; }
 .dicon:focus-visible span { outline: 1px dotted #FFFFFF; }
@@ -353,7 +355,7 @@ a.card:visited { color: var(--text); }
 .profile p { margin: 3px 0 0; font-size: 11px; line-height: 1.35; color: var(--sky); font-style: italic; }
 .hex {
   --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  width: 56px; height: 64px; flex-shrink: 0; display: block; clip-path: var(--hex); background: #B6E33B; padding: 3px;
+  width: 56px; height: 64px; flex-shrink: 0; display: block; clip-path: var(--hex); background: var(--ring); padding: 3px;
 }
 .hex-in { display: block; width: 100%; height: 100%; overflow: hidden; clip-path: var(--hex); background: radial-gradient(circle at 50% 40%, var(--blue), var(--deep) 75%); }
 .hex-in img { width: 100%; height: 100%; max-width: none; display: block; object-fit: cover; object-position: 50% 30%; }
@@ -1982,10 +1984,11 @@ a.card:visited { color: var(--text); }
   /* ---------- OS > Display (saved in this browser) ---------- */
   // Window colors. The default is 'blue' (Classic blue). Each one also colors the Start menu, links and highlights.
   const THEMES = {
-    blue:   { navy: '#000080', blue: '#1084D0', select: '#000080', deep: '#00003C', accent: '#3A8EE6', sky: '#BFE0FF', hover: '#DCE8F8', link: '#0000EE' },
-    forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12', deep: '#052A0A', accent: '#3FA82E', sky: '#CFF5A0', hover: '#E2F2DC', link: '#006E00' },
-    maroon: { navy: '#5A0A0A', blue: '#B03A3A', select: '#800000', deep: '#2A0404', accent: '#D46A6A', sky: '#FFD0C8', hover: '#F5E0E0', link: '#8B0000' },
-    slate:  { navy: '#2B3440', blue: '#6A7F99', select: '#2B3440', deep: '#151A20', accent: '#8EA3BC', sky: '#DCE6F2', hover: '#E4E9EF', link: '#2B4A7A' }
+    // ring = Dave's hexagon border, 'sel-tint' = how a selected desktop icon is tinted
+    blue:   { navy: '#000080', blue: '#1084D0', select: '#000080', deep: '#00003C', accent: '#3A8EE6', sky: '#BFE0FF', hover: '#DCE8F8', link: '#0000EE', ring: '#5FB0FF', 'sel-tint': 'brightness(.55) sepia(1) hue-rotate(180deg) saturate(4)' },
+    forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12', deep: '#052A0A', accent: '#3FA82E', sky: '#CFF5A0', hover: '#E2F2DC', link: '#006E00', ring: '#B6E33B', 'sel-tint': 'brightness(.6) sepia(1) hue-rotate(60deg) saturate(3)' },
+    maroon: { navy: '#5A0A0A', blue: '#B03A3A', select: '#800000', deep: '#2A0404', accent: '#D46A6A', sky: '#FFD0C8', hover: '#F5E0E0', link: '#8B0000', ring: '#FF8A7A', 'sel-tint': 'brightness(.55) sepia(1) hue-rotate(-35deg) saturate(3.5)' },
+    slate:  { navy: '#2B3440', blue: '#6A7F99', select: '#2B3440', deep: '#151A20', accent: '#8EA3BC', sky: '#DCE6F2', hover: '#E4E9EF', link: '#2B4A7A', ring: '#AFC3DA', 'sel-tint': 'brightness(.6) sepia(.8) hue-rotate(175deg) saturate(1.3)' }
   };
   const DEFAULT_THEME = 'blue', DEFAULT_WALL = 'teal';
   const WALLS = { teal: '#008080', night: '#0B0F14' };
