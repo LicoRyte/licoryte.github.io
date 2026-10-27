@@ -104,6 +104,7 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--navy` a
 
 The site looks like a late-90s desktop.
 
+- **Log on + boot:** every visit (and every refresh) starts at a Log On box with a blank gray user picture. Type any name (or none, for Guest) and press OK. Then a BIOS text screen and a splash with a progress bar play before the desktop appears, and Dave greets you by name. Turning the site back on after Shut Down plays the boot again (no log on). Visitors can skip the boot with a click or Esc. The name is kept in that visitor's browser only, to fill the box next time. Edit the BIOS text in  (search ) and the splash messages right below it.
 - **Desktop icons** (top-left) open windows: about_me.txt, My Games, Gallery, Texty (the browser), Gmail/Twitter/YouTube shortcuts, Workstation, Paint, Sticky Notes, OS, Recycle Bin. Double-click on a computer, one tap on a phone.
 - **Windows** stay fixed on screen. Drag them by the title bar. `_` minimizes to the taskbar, `□` maximizes (or double-click the title bar), `×` closes. Games and Gallery scroll inside their window. On phones windows open full-screen.
 - **Links straight to a window:** add the window name after `#`, e.g. https://licoryte.github.io/#games (also `#gallery`, `#about`, `#texty`, `#workstation`, `#paint`, `#os`).
