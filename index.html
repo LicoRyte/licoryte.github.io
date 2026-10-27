@@ -408,19 +408,29 @@ a.card:visited { color: var(--text); }
 .dp .swatch { width: 28px; height: 10px; border: 1px solid #000000; }
 .dp .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
 
-/* Sticky notes */
+/* Sticky notes: four CMYK colors (set by data-color = c, m, y, k) */
 .sticky {
-  position: fixed; z-index: 5; width: 190px; min-width: 140px; min-height: 120px; display: flex; flex-direction: column;
-  background: #FFF57A; border: 1px solid #C9B200; box-shadow: 3px 4px 0 rgba(0, 0, 0, .35); resize: both; overflow: hidden;
+  --n-bg: #FFF57A; --n-bar: #F2E35A; --n-edge: #C9B200; --n-ink: #3A3200; --n-label: #6B5E00; --n-dim: #9C8E30; --n-hover: #FFF9A8; --n-dot: rgba(120, 100, 0, .16);
+  position: fixed; z-index: 5; width: 190px; min-width: 150px; min-height: 120px; display: flex; flex-direction: column;
+  background: var(--n-bg); border: 1px solid var(--n-edge); box-shadow: 3px 4px 0 rgba(0, 0, 0, .35); resize: both; overflow: hidden;
 }
+.sticky[data-color="c"] { --n-bg: #8FE3F7; --n-bar: #5CD3F0; --n-edge: #1FA6C9; --n-ink: #00313D; --n-label: #00566B; --n-dim: #2E7F93; --n-hover: #C2F1FB; --n-dot: rgba(0, 80, 110, .16); }
+.sticky[data-color="m"] { --n-bg: #FF9BD6; --n-bar: #F772C2; --n-edge: #D23E9C; --n-ink: #45002A; --n-label: #7A0A4C; --n-dim: #A8467F; --n-hover: #FFC8E8; --n-dot: rgba(110, 0, 60, .16); }
+.sticky[data-color="k"] { --n-bg: #262626; --n-bar: #111111; --n-edge: #000000; --n-ink: #F2F2F2; --n-label: #CFCFCF; --n-dim: #8A8A8A; --n-hover: #3A3A3A; --n-dot: rgba(255, 255, 255, .09); }
 .sticky.top { z-index: 6; }
-.sticky-bar { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 2px 3px 2px 6px; background: #F2E35A; border-bottom: 1px solid #D8C83A; touch-action: none; user-select: none; -webkit-user-select: none; }
-.sticky-bar > span:first-child { font: bold 11px var(--f-ui); color: #6B5E00; }
-.sticky-bar .sb-btns { display: flex; gap: 2px; }
-.sticky-bar button { width: 18px; height: 16px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; font: bold 12px/1 var(--f-ui); color: #6B5E00; }
-.sticky-bar button:hover { border-color: #C9B200; background: #FFF9A8; }
-.sticky textarea { flex: 1; width: 100%; border: 0; resize: none; padding: 6px 8px; background: transparent; font: 700 14px/1.35 var(--f-comic); color: #3A3200; outline: none; }
-.sticky textarea::placeholder { color: #9C8E30; }
+.sticky-bar { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 2px 3px 2px 6px; background: var(--n-bar); background-image: radial-gradient(var(--n-dot) 1px, transparent 1.4px); background-size: 4px 4px; border-bottom: 1px solid var(--n-edge); touch-action: none; user-select: none; -webkit-user-select: none; }
+.sticky-bar > span:first-child { font: bold 11px var(--f-ui); color: var(--n-label); }
+.sticky-bar .sb-btns { display: flex; gap: 2px; align-items: center; }
+.sticky-bar button { width: 18px; height: 16px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; font: bold 12px/1 var(--f-ui); color: var(--n-label); }
+.sticky-bar button:hover { border-color: var(--n-edge); background: var(--n-hover); }
+.sticky-bar .sb-colors { display: flex; gap: 2px; margin-right: 3px; }
+.sticky-bar .sb-colors button { width: 11px; height: 11px; border: 1px solid rgba(0, 0, 0, .55); box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .45); }
+.sticky-bar .sb-colors button[aria-pressed="true"] { outline: 1px solid var(--n-label); outline-offset: 1px; }
+.sticky-bar .sb-colors button:hover { border-color: #000000; }
+.sticky-bar .sb-colors [data-c="c"] { background: #00AEEF; } .sticky-bar .sb-colors [data-c="m"] { background: #EC008C; }
+.sticky-bar .sb-colors [data-c="y"] { background: #FFF200; } .sticky-bar .sb-colors [data-c="k"] { background: #1A1A1A; border-color: #8A8A8A; }
+.sticky textarea { flex: 1; width: 100%; border: 0; resize: none; padding: 6px 8px; background: transparent; font: 700 14px/1.35 var(--f-comic); color: var(--n-ink); outline: none; }
+.sticky textarea::placeholder { color: var(--n-dim); }
 
 /* Folder */
 .folder-empty { padding: 26px 14px; text-align: center; font: 12px var(--f-ui); color: #555555; }
@@ -1872,8 +1882,13 @@ a.card:visited { color: var(--text); }
     const KEY = 'lico-notes', box = $('#stickies');
     let notes = [];
     try { notes = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+    const COLORS = { c: 'Cyan', m: 'Magenta', y: 'Yellow', k: 'Black' };
+    let lastColor = 'y';
+    try { lastColor = localStorage.getItem('lico-note-color') || 'y'; } catch (e) {}
+    if (!COLORS[lastColor]) lastColor = 'y';
     let saveT = 0;
     const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} }, 250); };
+    addEventListener('pagehide', () => { clearTimeout(saveT); try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} });
     const clampNote = (n, el) => {
       n.x = Math.max(0, Math.min(innerWidth - 60, n.x));
       n.y = Math.max(0, Math.min(innerHeight - tbH() - 30, n.y));
@@ -1883,11 +1898,18 @@ a.card:visited { color: var(--text); }
     function render(n) {
       const ta = h('textarea', { 'aria-label': 'Sticky note', placeholder: 'write something...', maxlength: 2000 });
       ta.value = n.text || '';
+      const swatches = Object.entries(COLORS).map(([c, name]) => h('button', { type: 'button', 'data-c': c, title: name, 'aria-label': name + ' note', 'aria-pressed': String((n.color || 'y') === c), onclick: () => setColor(c) }));
       const bar = h('div', { class: 'sticky-bar' }, h('span', {}, 'note'),
         h('span', { class: 'sb-btns' },
-          h('button', { type: 'button', title: 'New note', 'aria-label': 'New note', onclick: () => add(n.x + 24, n.y + 24) }, '+'),
+          h('span', { class: 'sb-colors' }, swatches),
+          h('button', { type: 'button', title: 'New note', 'aria-label': 'New note', onclick: () => add(n.x + 24, n.y + 24, n.color) }, '+'),
           h('button', { type: 'button', title: 'Delete note', 'aria-label': 'Delete note', onclick: () => remove(n.id) }, '×')));
-      const el = h('div', { class: 'sticky', 'data-id': n.id }, bar, ta);
+      const el = h('div', { class: 'sticky', 'data-id': n.id, 'data-color': COLORS[n.color] ? n.color : 'y' }, bar, ta);
+      function setColor(c) {
+        n.color = c; el.dataset.color = c; save();
+        swatches.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.c === c)));
+        lastColor = c; try { localStorage.setItem('lico-note-color', c); } catch (e) {}
+      }
       if (n.w) el.style.width = n.w + 'px';
       if (n.h) el.style.height = n.h + 'px';
       box.append(el); clampNote(n, el);
@@ -1904,9 +1926,9 @@ a.card:visited { color: var(--text); }
       if ('ResizeObserver' in window) new ResizeObserver(() => { n.w = el.offsetWidth; n.h = el.offsetHeight; save(); }).observe(el);
       return el;
     }
-    function add(x, y) {
-      if (notes.length >= 12) { say('Twelve sticky notes. My whole monitor is yellow. That\'s the limit.'); return; }
-      const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), x: x ?? (innerWidth / 2 - 95 + (notes.length % 5) * 18), y: y ?? (90 + (notes.length % 5) * 18), text: '' };
+    function add(x, y, color) {
+      if (notes.length >= 12) { say('Twelve sticky notes. My whole monitor looks like a printer test page. That\'s the limit.'); return; }
+      const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), x: x ?? (innerWidth / 2 - 95 + (notes.length % 5) * 18), y: y ?? (90 + (notes.length % 5) * 18), text: '', color: COLORS[color] ? color : lastColor };
       notes.push(n); save();
       const el = render(n); bringUp(el); el.querySelector('textarea').focus();
     }
@@ -2163,7 +2185,7 @@ a.card:visited { color: var(--text); }
      Every visit: name entry -> loading bar -> faint white flash -> desktop. Turning the site back on after Shut Down plays the loading bar again.
      The name is kept in this visitor's browser only ('lico-user'). BLOCKS = number of blocks in the bar. */
   const system = (() => {
-    const BLOCKS = 10;
+    const BLOCKS = 12;
     const logon = $('#logon'), scr = $('#bootscr'), bar = $('#bootbar'), flash = $('#flash');
     const quick = matchMedia('(prefers-reduced-motion: reduce)').matches;
     for (let k = 0; k < BLOCKS; k++) bar.append(h('i'));
@@ -2187,7 +2209,7 @@ a.card:visited { color: var(--text); }
       const frames = quick
         ? [{ opacity: 0.9 }, { opacity: 0 }]
         : [{ opacity: 1, offset: 0 }, { opacity: 0.55, offset: 0.08 }, { opacity: 0.95, offset: 0.14 }, { opacity: 0.7, offset: 0.22 }, { opacity: 0.5, offset: 0.35 }, { opacity: 0, offset: 1 }];
-      try { flash.getAnimations().forEach(a => a.cancel()); flash.animate(frames, { duration: quick ? 600 : 900, easing: 'ease-out' }); }
+      try { flash.getAnimations().forEach(a => a.cancel()); flash.animate(frames, { duration: quick ? 900 : 1300, easing: 'ease-out' }); }
       catch (e) { flash.style.transition = 'none'; flash.style.opacity = '1'; void flash.offsetWidth; flash.style.transition = 'opacity 1.2s ease-out'; flash.style.opacity = '0'; }
     }
     async function boot(done) {
@@ -2197,9 +2219,9 @@ a.card:visited { color: var(--text); }
       const blocks = [...bar.children];
       blocks.forEach(b => b.classList.remove('on'));
       scr.hidden = false;
-      await wait(75);
-      for (const b of blocks) { b.classList.add('on'); await wait(35); }
-      await wait(75);
+      await wait(350);
+      for (const b of blocks) { b.classList.add('on'); await wait(130 + Math.random() * 120 + (Math.random() < .15 ? 260 : 0)); }
+      await wait(300);
       scr.hidden = true;
       crtFlash();
       startupSound();
