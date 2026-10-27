@@ -72,6 +72,7 @@ Or with GitHub Desktop: copy the image into `img/gallery/` → commit → push.
 
 - The title comes from the file name: `my-cool_drawing.png` shows as "my cool drawing".
 - Order is by file name. Start names with numbers (`01-...`, `02-...`) to control it.
+- **Pixel art:** put `pixel` in the file name (`mon-pixel.png`, `clancies_pixel.png`) and it shows sharp (no blur), uncropped, on a light background, so small sprites can be blown up big. The word `pixel` is left out of the title. Or add `"pixel": true` to its entry in `games.json`.
 - To delete a picture: open it on github.com → **⋯ → Delete file** → commit.
 - Optional: to give a picture a nicer title, a caption or a date, add it to the `"gallery"` list in `games.json`. Listed pictures show first, in list order:
 

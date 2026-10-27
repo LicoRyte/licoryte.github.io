@@ -257,6 +257,8 @@ a.card:visited { color: var(--text); }
 .gitem { display: grid; gap: 4px; align-content: start; background: none; border: 0; padding: 0; margin: 0; cursor: var(--cur-hand); font: inherit; color: inherit; text-align: center; min-width: 0; }
 .gitem .ph { display: block; aspect-ratio: 1; max-width: 100%; overflow: hidden; background: #EFEFEF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
 .gitem img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gitem.pixel .ph { background: #F4F4F4; }
+.gitem.pixel img { object-fit: contain; image-rendering: pixelated; padding: 4px; box-sizing: border-box; }
 .gitem .cap { font-family: var(--f-ui); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gitem:hover .ph, .gitem:focus-visible .ph { outline: 2px solid var(--blue); outline-offset: 1px; }
 .gal .empty { grid-column: 1 / -1; }
@@ -267,6 +269,7 @@ a.card:visited { color: var(--text); }
 .lb .win { width: min(100%, 880px); max-height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
 .lb-view { background: #000000; display: grid; place-items: center; min-height: 0; overflow: hidden; margin: 3px 0; }
 .lb-view img { max-width: 100%; max-height: min(72vh, 900px); width: auto; height: auto; display: block; object-fit: contain; }
+.lb-view img.pixel { width: 100%; height: min(72vh, 900px); image-rendering: pixelated; background: #F4F4F4; padding: 12px; box-sizing: border-box; }
 .lb-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 4px 3px; }
 .lb-note { flex: 1 1 200px; min-width: 0; font-size: 12px; margin: 0; }
 .lb-count { font-family: var(--f-ui); font-size: 11px; color: #333333; }
@@ -889,7 +892,9 @@ a.card:visited { color: var(--text); }
       return files;
     } catch (e) { return null; }
   }
-  const niceName = f => decodeURIComponent(f.split('/').pop().replace(IMG_RE, '')).replace(/[-_]+/g, ' ').trim();
+  const niceName = f => decodeURIComponent(f.split('/').pop().replace(IMG_RE, '')).replace(/[-_]+/g, ' ').replace(/\bpixel\b/gi, '').replace(/\s+/g, ' ').trim();
+  // pixel art: "pixel": true in games.json, or "pixel" in the file name (e.g. mon-pixel.png) -> sharp, uncropped, light background
+  const isPixel = pic => pic.pixel === true || /(^|[-_ ])pixel([-_ .]|$)/i.test(pic.file.split('/').pop());
   function buildPics(files) {
     const listed = ((DATA && DATA.gallery) || []).filter(x => x && x.file);
     if (!files) return listed;
@@ -1044,7 +1049,7 @@ a.card:visited { color: var(--text); }
     $('#galTitle').textContent = `${pics.length} picture(s)`;
     if (!pics.length) { grid.replaceChildren(h('p', { class: 'empty' }, 'no pictures yet.')); return; }
     grid.replaceChildren(...pics.map((pic, i) =>
-      h('button', { type: 'button', class: 'gitem', onclick: () => openPic(i), 'aria-label': 'Open picture: ' + (pic.title || 'untitled') },
+      h('button', { type: 'button', class: 'gitem' + (isPixel(pic) ? ' pixel' : ''), onclick: () => openPic(i), 'aria-label': 'Open picture: ' + (pic.title || 'untitled') },
         h('span', { class: 'ph' }, h('img', { src: src(pic.thumb || pic.file), alt: pic.alt || pic.title || '', loading: 'lazy', onerror: e => { const b = e.target.closest('.gitem'); if (b) b.hidden = true; } })),
         h('span', { class: 'cap' }, pic.title || 'untitled'))));
   }
@@ -1053,6 +1058,7 @@ a.card:visited { color: var(--text); }
     const pic = pics[lbIndex];
     const img = $('#lbImg');
     img.src = src(pic.file); img.alt = pic.alt || pic.title || '';
+    img.classList.toggle('pixel', isPixel(pic));
     const name = decodeURIComponent(pic.file.split('/').pop() || 'picture');
     $('#lbTitle').textContent = (pic.title ? pic.title + ' - ' : '') + name;
     $('#lbNote').textContent = [pic.note, fmtDate(pic.date)].filter(Boolean).join(' · ');

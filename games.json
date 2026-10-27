@@ -47,6 +47,46 @@
   ],
   "gallery": [
     {
+      "file": "img/gallery/pink-bot-pixel.png",
+      "title": "Pink bot",
+      "note": "4-frame pixel animation",
+      "date": "2026-10-27",
+      "alt": "A small pink pixel-art robot on a black wheel, four animation frames side by side",
+      "pixel": true
+    },
+    {
+      "file": "img/gallery/mon-pixel.png",
+      "title": "Mon",
+      "note": "",
+      "date": "2026-10-27",
+      "alt": "Mon (Monochrome), a dark navy pixel-art character with horns, a scarf and a little hand mirror",
+      "pixel": true
+    },
+    {
+      "file": "img/gallery/axolotl-vest-pixel.png",
+      "title": "Axolotl in a vest",
+      "note": "",
+      "date": "2026-10-27",
+      "alt": "A pale pink pixel-art axolotl in a blue shirt and purple vest, holding a snack",
+      "pixel": true
+    },
+    {
+      "file": "img/gallery/axolotl-closeup-pixel.png",
+      "title": "Pink axolotl close-up",
+      "note": "",
+      "date": "2026-10-27",
+      "alt": "Close-up of a pink pixel-art axolotl face",
+      "pixel": true
+    },
+    {
+      "file": "img/gallery/axolotl-poncho-pixel.png",
+      "title": "Axolotl in a poncho",
+      "note": "",
+      "date": "2026-10-27",
+      "alt": "A pink pixel-art axolotl wearing a teal patterned poncho, on a dark background with its color palette on top",
+      "pixel": true
+    },
+    {
       "file": "img/gallery/dave.webp",
       "title": "Dave",
       "note": "",
