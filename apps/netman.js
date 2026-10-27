@@ -15,6 +15,18 @@
     router: { label: 'Router', ports: 4, port: i => 'G0/' + i, l3: true },
   };
 
+  /* Pixel-art devices (original, 30x24 each). Letters map to the colors in PIX_PAL; '.' is transparent. */
+  const PIX_PAL = {"k": "#000000", "w": "#FFFFFF", "l": "#DFDFDF", "g": "#C0C0C0", "d": "#808080", "s": "#404040", "G": "#0B4A12", "L": "#5BE35B", "M": "#2E8B22", "y": "#FFD600", "r": "#E8352A", "c": "#2462D8", "b": "#96C4F0"};
+  const PIX = {"pc": ["..kkkkkkkkkkkkkkkkkkkkkkkk....", "..kwwwwwwwwwwwwwwwwwwwwwgk....", "..kwgggggggggggggggggggdgk....", "..kwgkkkkkkkkkkkkkkkkkkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGLLGGGGGGGGGGGGGkgdk....", "..kwgkGLGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLLLGGGGGGGGGkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLLLLLLGGGGGGkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLMGGGGGGGGGGkgdk....", "..kwgkkkkkkkkkkkkkkkkkkgdk....", "..kwgggggggggggggggggyggdk....", "..kddddddddddddddddddddddk....", "..kkkkkkkkkkkkkkkkkkkkkkkk....", "..........kwggddk.............", "......kkkkkkkkkkkkkkk.........", ".kkkkkkkkkkkkkkkkkkkkkkkkkk...", ".kwwwwwwwwwwwwwwwwwwwwwwwgk...", ".kwglglglglglglglglglglgdgk...", ".kwgglglglglglglglglglglggk...", ".kwdddddddddddddddddddddddk...", ".kkkkkkkkkkkkkkkkkkkkkkkkkk..."], "server": [".........kkkkkkkkkkkk.........", ".........kwwwwwwwwwgk.........", ".........kwgggggggdgk.........", ".........kwkkkkkkkkgk.........", ".........kwkdddddddgk.........", ".........kwkwwwwwgdgk.........", ".........kwkkkkkkkkgk.........", ".........kwkdddddddgk.........", ".........kwkwwwwwgdgk.........", ".........kwkkkkkkkkgk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwggggLgyrdk.........", ".........kwggggggggdk.........", ".........kwggggggggdk.........", ".........kddddddddddk.........", ".........kkkkkkkkkkkk.........", "..........kdk......kdk........", "..........kkk......kkk........"], "switch": ["..............................", "..............................", "..............................", "..............................", "..............................", "..............................", "..............................", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", ".kwwwwwwwwwwwwwwwwwwwwwwwwwgk.", ".kwggggggggggggggggggggggggdk.", ".kwgLgLgLgLgLgLgLgLggggMMMgdk.", ".kwggggggggggggggggggggggggdk.", ".kwgkkgkkgkkgkkgkkgkkgkkgkkdk.", ".kwgksgksgksgksgksgksgksgksdk.", ".kwggggggggggggggggggggggggdk.", ".kddddddddddddddddddddddddddk.", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", "..............................", "..............................", "..............................", "..............................", "..............................", "..............................", ".............................."], "router": ["..............................", "..............................", "..............................", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "..kddk................kddk....", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", ".kwwwwwwwwwwwwwwwwwwwwwwwwwgk.", ".kwbbbbbbbbbbbbbbbbbbbbbbbbdk.", ".kwbccccccccccccccccccccccbdk.", ".kwbcwcccccccccccccccccccdbdk.", ".kwbcccccccccccccccccccccdbdk.", ".kwbbbbbbbbbbbbbbbbbbbbbbbbdk.", ".kwgLgygLgrgggggggkkgkkgkkgdk.", ".kwggggggggggggggggggggggggdk.", ".kddddddddddddddddddddddddddk.", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", "..............................", "..............................", ".............................."]};
+  const pixCache = {};
+  function pixURL(type) {
+    if (pixCache[type]) return pixCache[type];
+    const rows = PIX[type], c = document.createElement('canvas'); c.width = 30; c.height = 24;
+    const x = c.getContext('2d');
+    rows.forEach((r, y) => { for (let i = 0; i < r.length; i++) { const col = PIX_PAL[r[i]]; if (col) { x.fillStyle = col; x.fillRect(i, y, 1, 1); } } });
+    return (pixCache[type] = c.toDataURL());
+  }
+
   /* ---------- small helpers ---------- */
   function el(tag, attrs, ...kids) {
     const e = document.createElement(tag);
@@ -162,27 +174,12 @@
 
     /* ---------- drawing ---------- */
     function iconSmall(type) {
-      const s = sv('svg', { viewBox: '0 0 60 48', width: 18, height: 14, 'aria-hidden': 'true' }); s.append(glyph(type)); return s;
+      return el('img', { src: pixURL(type), width: 30, height: 24, alt: '', class: 'nm-ico' });
     }
     function glyph(type) {
-      const g = sv('g', { class: 'nm-glyph nm-' + type });
-      if (type === 'pc') {
-        g.append(sv('rect', { x: 8, y: 2, width: 44, height: 32, rx: 2, class: 'body' }), sv('rect', { x: 13, y: 7, width: 34, height: 22, class: 'screen' }),
-          sv('rect', { x: 24, y: 34, width: 12, height: 6, class: 'body' }), sv('rect', { x: 14, y: 40, width: 32, height: 5, rx: 1, class: 'body' }));
-      } else if (type === 'server') {
-        g.append(sv('rect', { x: 16, y: 1, width: 28, height: 46, rx: 2, class: 'body' }));
-        for (let i = 0; i < 3; i++) g.append(sv('rect', { x: 20, y: 6 + i * 9, width: 20, height: 5, class: 'slot' }));
-        g.append(sv('circle', { cx: 37, cy: 39, r: 2.5, class: 'led' }));
-      } else if (type === 'switch') {
-        g.append(sv('rect', { x: 2, y: 14, width: 56, height: 20, rx: 2, class: 'body' }));
-        for (let i = 0; i < 6; i++) g.append(sv('rect', { x: 7 + i * 8, y: 22, width: 5, height: 5, class: 'slot' }));
-        g.append(sv('path', { d: 'M14 9h32M40 5l6 4-6 4M46 39H14M20 35l-6 4 6 4', class: 'arrow' }));
-      } else {
-        g.append(sv('ellipse', { cx: 30, cy: 33, rx: 26, ry: 9, class: 'body' }), sv('rect', { x: 4, y: 17, width: 52, height: 16, class: 'body side' }),
-          sv('ellipse', { cx: 30, cy: 17, rx: 26, ry: 9, class: 'top' }),
-          sv('path', { d: 'M19 13l7 4m-7-4v4m0-4h4M41 21l-7-4m7 4v-4m0 4h-4M41 13l-7 4m7-4h-4m4 0v4M19 21l7-4m-7 4h4m-4 0v-4', class: 'arrow' }));
-      }
-      return g;
+      const im = sv('image', { width: 60, height: 48, class: 'nm-pix' });
+      im.setAttribute('href', pixURL(type));
+      return im;
     }
     const W = () => svg.clientWidth || 600, H = () => svg.clientHeight || 400;
     // The drawing zooms out to fit when the window is smaller than the network (phones); 1:1 otherwise.

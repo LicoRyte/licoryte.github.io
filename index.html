@@ -553,6 +553,8 @@ a.card:visited { color: var(--text); }
 .nm-stage.cabling { outline: 2px dashed var(--blue); outline-offset: -4px; }
 .nm-svg { display: block; width: 100%; height: 100%; outline: none; touch-action: none; user-select: none; -webkit-user-select: none; font-family: var(--f-ui); }
 .nm-hint { position: absolute; left: 8px; bottom: 6px; padding: 2px 6px; font: 11px var(--f-ui); background: #FFFFE1; border: 1px solid #000000; pointer-events: none; }
+.nm-pix, .nm-ico { image-rendering: pixelated; image-rendering: crisp-edges; }
+.nm-ico { display: block; margin: -3px 0; }
 .nm-glyph .body { fill: #D4D0C8; stroke: #404040; stroke-width: 1.5; }
 .nm-glyph .side { stroke: none; } .nm-glyph .top { fill: #E8E5DE; stroke: #404040; stroke-width: 1.5; }
 .nm-glyph .screen { fill: #1B5E20; stroke: #404040; }
@@ -2242,7 +2244,7 @@ a.card:visited { color: var(--text); }
     if (netmanLoading) return netmanLoading;
     netmanLoading = new Promise((ok, no) => {
       const sc = document.createElement('script');
-      sc.src = 'apps/netman.js?v=1'; sc.onload = ok; sc.onerror = no;
+      sc.src = 'apps/netman.js?v=2'; sc.onload = ok; sc.onerror = no;
       document.head.append(sc);
     }).then(() => {
       // wait one frame so the window has its size before drawing
