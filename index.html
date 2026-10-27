@@ -525,11 +525,12 @@ a.card:visited { color: var(--text); }
 .yd-tabs { display: flex; gap: 1px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
 .yd-tabs button { flex: 0 0 auto; width: 30px; height: 26px; padding: 0; font: 15px/1 var(--f-emoji); background: var(--silver); border: 2px solid; border-color: var(--hi) var(--shade) transparent var(--hi); margin-bottom: -2px; }
 .yd-tabs button[aria-selected="true"] { background: #FFFFFF; position: relative; z-index: 1; }
-.yd-grid { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; padding: 4px; display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); align-content: start; gap: 1px; }
-.yd-grid button { height: 34px; padding: 0; font: 22px/1 var(--f-emoji); background: none; border: 1px solid transparent; border-radius: 2px; }
+.yd-grid { flex: 1; min-height: 0; overflow: auto; overflow-anchor: none; contain: strict; background: #FFFFFF; padding: 4px; position: relative; }
+.yd-inner { position: relative; }
+.yd-grid button { position: absolute; height: 34px; padding: 0; font: 22px/1 var(--f-emoji); background: none; border: 1px solid transparent; border-radius: 2px; }
 .yd-grid button:hover, .yd-grid button:focus-visible { background: #E2F2DC; border-color: var(--blue); outline: none; }
-.yd-grid .yd-none { grid-column: 1 / -1; padding: 20px 8px; font: 12px var(--f-ui); color: #555555; text-align: center; }
-.yd-grid h3 { grid-column: 1 / -1; margin: 6px 2px 2px; font: bold 11px var(--f-ui); color: var(--navy); }
+.yd-grid .yd-none { margin: 0; padding: 20px 8px; font: 12px var(--f-ui); color: #555555; text-align: center; }
+
 .yd-tray { display: flex; align-items: center; gap: 6px; padding-top: 5px; font: 12px var(--f-ui); flex-shrink: 0; }
 .yd-tray .big { width: 34px; height: 34px; display: grid; place-items: center; font: 26px/1 var(--f-emoji); flex-shrink: 0; }
 .yd-tray input { flex: 1; min-width: 0; font: 16px var(--f-emoji), var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
@@ -1980,69 +1981,153 @@ a.card:visited { color: var(--text); }
     return { add, remove };
   })();
 
-  /* ---------- Your Dude: emoji picker. Data: data/emoji.json (from unicode-emoji-json + emojilib, MIT). ---------- */
+  /* ---------- Your Dude: emoji picker. Data: data/emoji.json (from unicode-emoji-json + emojilib, MIT). ----------
+     Loading, parsing and searching run in a background thread (Web Worker) so the page never freezes.
+     The grid is drawn a few dozen emoji per frame, and off-screen emoji aren't painted (content-visibility). */
   const dude = (() => {
     const grid = $('#ydGrid'), tabsEl = $('#ydTabs'), find = $('#ydFind'), tray = $('#ydTray'), big = $('#ydBig'), status = $('#ydStatus'), count = $('#ydCount');
     const TAB_ICON = { Recent: '🕘', Smileys: '😀', People: '🧑', Nature: '🐻', Food: '🍔', Travel: '✈️', Activities: '⚽', Objects: '💡', Symbols: '❤️', Flags: '🏁' };
     const RKEY = 'lico-dude-recent';
-    let groups = null, all = [], byChar = new Map(), tab = 'Smileys', loading = null;
     let recent = [];
     try { recent = JSON.parse(localStorage.getItem(RKEY) || '[]').filter(x => typeof x === 'string').slice(0, 32); } catch (e) {}
+
+    // The engine: same code runs inside the worker, or on the page if workers are unavailable.
+    function engineSrc() {
+      let all = [], groups = [], byChar = new Map();
+      function init(data) {
+        groups = data.map(g => g[0]);
+        for (const [g, list] of data) for (const [ch, name, kw] of list) { const e = { ch, name, g, hay: (name + ' ' + (kw || '')).toLowerCase() }; all.push(e); byChar.set(ch, e); }
+        return groups;
+      }
+      function query(m) {
+        let list;
+        if (m.q) {
+          const q = m.q, words = q.split(/\s+/);
+          const score = e => { const n = e.name.toLowerCase(); return (n === q) * 8 + n.split(/[\s:-]+/).includes(words[0]) * 4 + n.startsWith(words[0]) * 2 + (` ${e.hay} `.includes(` ${words[0]} `)); };
+          list = all.filter(e => words.every(w => e.hay.includes(w))).map((e, i) => [e, score(e), i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]).map(x => x[0]);
+        } else if (m.chars) list = m.chars.map(ch => byChar.get(ch) || { ch, name: ch });
+        else list = all.filter(e => e.g === m.g);
+        return list.map(e => [e.ch, e.name]);
+      }
+      return { init, query };
+    }
+    const SRC = 'const E = (' + engineSrc.toString() + ')();' +
+      'onmessage = async ev => { const m = ev.data;' +
+      ' if (m.type === "load") { try { const r = await fetch(m.url); if (!r.ok) throw 0; postMessage({ type: "ready", groups: E.init(await r.json()) }); } catch (e) { postMessage({ type: "fail" }); } }' +
+      ' else postMessage({ type: "result", id: m.id, list: E.query(m) }); };';
+
+    let worker = null, local = null, groups = null, loading = null, reqId = 0, pending = new Map();
+    function ask(m) {
+      const id = ++reqId;
+      if (local) return Promise.resolve(local.query(m));
+      return new Promise(res => { pending.set(id, res); worker.postMessage({ ...m, id }); });
+    }
+    function startLocal(url) {
+      local = engineSrc();
+      return fetch(url).then(r => { if (!r.ok) throw 0; return r.json(); }).then(d => local.init(d));
+    }
     function load() {
       if (loading) return loading;
-      loading = fetch('data/emoji.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => {
-        groups = data;
-        for (const [g, list] of data) for (const [ch, name, kw] of list) { const e = { ch, name, g, hay: (name + ' ' + (kw || '')).toLowerCase() }; all.push(e); byChar.set(ch, e); }
-        tab = recent.length ? 'Recent' : 'Smileys';
-        renderTabs(); render();
-      }).catch(() => { status.textContent = "Couldn't load the emoji list. Refresh and try again."; loading = null; });
+      const url = new URL('data/emoji.json', location.href).href;
+      loading = new Promise((resolve, reject) => {
+        try {
+          worker = new Worker(URL.createObjectURL(new Blob([SRC], { type: 'text/javascript' })));
+          worker.onmessage = ev => {
+            const m = ev.data;
+            if (m.type === 'ready') resolve(m.groups);
+            else if (m.type === 'fail') reject();
+            else if (m.type === 'result' && pending.has(m.id)) { pending.get(m.id)(m.list); pending.delete(m.id); }
+          };
+          worker.onerror = () => { worker = null; startLocal(url).then(resolve, reject); };
+          worker.postMessage({ type: 'load', url });
+        } catch (e) { worker = null; startLocal(url).then(resolve, reject); }
+      }).then(g => { groups = g; return g; }).catch(() => { loading = null; status.textContent = "Couldn't load the emoji list. Close and open again."; throw 0; });
       return loading;
     }
+    let tab = recent.length ? 'Recent' : 'Smileys', shown = false;
+    function open() {
+      // let the window appear first, then fill it
+      if (!shown) status.textContent = 'Loading emoji...';
+      requestAnimationFrame(() => requestAnimationFrame(() => load().then(() => { if (!shown) { shown = true; renderTabs(); render(); } }).catch(() => {})));
+    }
     function renderTabs() {
-      tabsEl.replaceChildren(...['Recent', ...groups.map(g => g[0])].map(name => h('button', {
+      if (!groups) return;
+      tabsEl.replaceChildren(...['Recent', ...groups].map(name => h('button', {
         type: 'button', role: 'tab', title: name, 'aria-label': name, 'aria-selected': String(name === tab && !find.value.trim()),
         onclick: () => { tab = name; find.value = ''; renderTabs(); render(); grid.scrollTop = 0; }
       }, TAB_ICON[name] || '•')));
     }
-    function btn(e) { return h('button', { type: 'button', title: e.name, 'aria-label': e.name, 'data-ch': e.ch }, e.ch); }
-    function render() {
-      const q = find.value.trim().toLowerCase();
-      let list;
-      if (q) {
-        const words = q.split(/\s+/);
-        list = all.filter(e => words.every(w => e.hay.includes(w)));
-        // best matches first: exact name, then a whole word in the name, then names starting with it
-        const score = e => { const n = e.name.toLowerCase(); return (n === q) * 8 + n.split(/[\s:-]+/).includes(words[0]) * 4 + n.startsWith(words[0]) * 2 + (` ${e.hay} `.includes(` ${words[0]} `)); };
-        list = list.map((e, i) => [e, score(e), i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]).map(x => x[0]);
-      } else if (tab === 'Recent') list = recent.map(ch => byChar.get(ch) || { ch, name: ch });
-      else list = all.filter(e => e.g === tab);
-      grid.replaceChildren(...(list.length ? list.map(btn) : [h('p', { class: 'yd-none' }, q ? 'No emoji for "' + q + '". Try a simpler word.' : 'Nothing here yet. Emoji you copy show up here.')]));
+    // Virtual grid: only the rows you can see exist as buttons (about one screenful), swapped while scrolling.
+    const CELL = 35, inner = h('div', { class: 'yd-inner' }), none = h('p', { class: 'yd-none', hidden: true });
+    grid.append(inner, none);
+    let cur = [], cols = 1, cellW = CELL, vStart = -1, vEnd = -1, renderSeq = 0, rowsPending = false;
+    function layoutGrid() {
+      const w = grid.clientWidth - 8;
+      if (w <= 0) return;
+      cols = Math.max(1, Math.floor(w / CELL)); cellW = w / cols;
+      inner.style.height = Math.ceil(cur.length / cols) * CELL + 'px';
+      vStart = vEnd = -1; paintRows();
+    }
+    function paintRows() {
+      rowsPending = false;
+      const top = grid.scrollTop, hgt = grid.clientHeight || 300;
+      const r0 = Math.max(0, Math.floor(top / CELL) - 2), r1 = Math.ceil((top + hgt) / CELL) + 2;
+      if (r0 === vStart && r1 === vEnd) return;
+      vStart = r0; vEnd = r1;
+      const frag = document.createDocumentFragment(), end = Math.min(cur.length, r1 * cols);
+      for (let i = r0 * cols; i < end; i++) {
+        const [ch, name] = cur[i], b = document.createElement('button');
+        b.type = 'button'; b.title = name; b.setAttribute('aria-label', name); b.dataset.ch = ch; b.textContent = ch;
+        b.style.cssText = `left:${(i % cols) * cellW}px;top:${Math.floor(i / cols) * CELL}px;width:${cellW - 1}px`;
+        frag.append(b);
+      }
+      inner.replaceChildren(frag);
+    }
+    grid.addEventListener('scroll', () => { if (!rowsPending) { rowsPending = true; requestAnimationFrame(paintRows); } }, { passive: true });
+    if ('ResizeObserver' in window) new ResizeObserver(layoutGrid).observe(grid);
+    function draw(list, q) {
+      cur = list; grid.scrollTop = 0;
       count.textContent = list.length + ' emoji';
       status.textContent = q ? 'Search results. Enter copies the first one.' : (tab === 'Recent' ? 'Recently copied' : tab) + '. Click one to copy it.';
+      none.hidden = !!list.length;
+      none.textContent = q ? 'No emoji for "' + q + '". Try a simpler word.' : 'Nothing here yet. Emoji you copy show up here.';
+      layoutGrid();
+    }
+    function render() {
+      const q = find.value.trim().toLowerCase();
+      const m = q ? { q } : tab === 'Recent' ? { chars: recent } : { g: tab };
+      const my = ++renderSeq;
+      ask(m).then(list => { if (my === renderSeq) draw(list, q); });
     }
     async function copyText(text) {
       try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
       try { const t = h('textarea', { style: 'position:fixed;left:-9999px;top:0' }); t.value = text; document.body.append(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok; } catch (e) { return false; }
     }
-    async function pickEmoji(ch) {
-      const e = byChar.get(ch);
+    async function pickEmoji(ch, name) {
       tray.value += ch; big.textContent = ch;
       recent = [ch, ...recent.filter(x => x !== ch)].slice(0, 32);
       try { localStorage.setItem(RKEY, JSON.stringify(recent)); } catch (err) {}
       const ok = await copyText(ch);
-      status.textContent = ok ? 'Copied ' + ch + (e ? ' ' + e.name : '') + (tray.value.length > ch.length ? '. Copy button = all of them.' : '') : 'Couldn\'t copy automatically. Select the box below and press Ctrl+C.';
+      status.textContent = ok ? 'Copied ' + ch + (name && name !== ch ? ' ' + name : '') + (tray.value.length > ch.length ? '. Copy button = all of them.' : '') : 'Couldn\'t copy automatically. Select the box below and press Ctrl+C.';
     }
-    grid.addEventListener('click', e => { const b = e.target.closest('button[data-ch]'); if (b) pickEmoji(b.dataset.ch); });
+    grid.addEventListener('click', e => { const b = e.target.closest('button[data-ch]'); if (b) pickEmoji(b.dataset.ch, b.title); });
     grid.addEventListener('pointerover', e => { const b = e.target.closest('button[data-ch]'); if (b) { big.textContent = b.dataset.ch; status.textContent = b.title; } });
     let ft = 0;
-    find.addEventListener('input', () => { clearTimeout(ft); ft = setTimeout(() => { renderTabs(); render(); grid.scrollTop = 0; }, 80); });
+    find.addEventListener('input', () => { clearTimeout(ft); ft = setTimeout(() => { renderTabs(); render(); }, 120); });
     find.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); clearTimeout(ft); render(); const b = grid.querySelector('button[data-ch]'); if (b) pickEmoji(b.dataset.ch); }
+      if (e.key === 'Enter') {
+        e.preventDefault(); clearTimeout(ft);
+        const q = find.value.trim().toLowerCase(); if (!q || !groups) return;
+        const my = ++renderSeq;
+        ask({ q }).then(list => { if (list[0]) pickEmoji(list[0][0], list[0][1]); if (my === renderSeq) draw(list, q); renderTabs(); });
+      }
       if (e.key === 'Escape' && find.value) { e.stopPropagation(); find.value = ''; renderTabs(); render(); }
     });
     $('#ydCopy').addEventListener('click', async () => { if (!tray.value) { status.textContent = 'Nothing to copy. Click some emoji first.'; return; } status.textContent = (await copyText(tray.value)) ? 'Copied ' + tray.value : 'Couldn\'t copy. Select the box and press Ctrl+C.'; });
     $('#ydClear').addEventListener('click', () => { tray.value = ''; big.textContent = '🙂'; status.textContent = 'Cleared. Next emoji starts fresh.'; });
-    return { load };
+    // warm up in the background once the page is idle, so opening is instant
+    (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => { load().catch(() => {}); }, { timeout: 6000 });
+    return { load: open };
   })();
 
   /* ---------- Paint ---------- */
