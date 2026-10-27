@@ -2161,8 +2161,8 @@ a.card:visited { color: var(--text); }
       blocks.forEach(b => b.classList.remove('on'));
       scr.hidden = false;
       await wait(75);
-      for (const b of blocks) { b.classList.add('on'); await wait(75  + (Math.random() < .15 ? 125 : 0)); }
-      await wait(100);
+      for (const b of blocks) { b.classList.add('on'); await wait(40  + (Math.random() < .15 ? 70 : 0)); }
+      await wait(80);
       scr.hidden = true;
       crtFlash();
       running = false;
