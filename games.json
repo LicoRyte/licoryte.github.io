@@ -139,6 +139,24 @@
           "url": "https://ezgif.com/",
           "desc": "Make, crop, resize and optimize GIFs.",
           "icon": "filetype-video"
+        },
+        {
+          "name": "Unsplash",
+          "url": "https://unsplash.com/",
+          "desc": "Free high-quality photos.",
+          "icon": "filetype-image"
+        },
+        {
+          "name": "SVG Repo",
+          "url": "https://www.svgrepo.com/",
+          "desc": "Free SVG icons and vectors.",
+          "icon": "filetype-palette"
+        },
+        {
+          "name": "TinEye",
+          "url": "https://tineye.com/",
+          "desc": "Reverse image search: find where a picture came from.",
+          "icon": "search-engine"
         }
       ]
     },
@@ -244,6 +262,24 @@
           "url": "https://opengameart.org/",
           "desc": "Free sprites, music and sounds.",
           "icon": "games"
+        },
+        {
+          "name": "Godot Docs",
+          "url": "https://docs.godotengine.org/",
+          "desc": "Official Godot engine manual and class reference.",
+          "icon": "img/icons/msgbox-information.png"
+        },
+        {
+          "name": "Game UI Database",
+          "url": "https://www.gameuidatabase.com/",
+          "desc": "Screenshots of menus and HUDs from real games.",
+          "icon": "games"
+        },
+        {
+          "name": "Freesound",
+          "url": "https://freesound.org/",
+          "desc": "Huge library of free sound effects.",
+          "icon": "app-sound-player"
         }
       ]
     },
@@ -279,6 +315,12 @@
     {
       "category": "Files & Everyday",
       "tools": [
+        {
+          "name": "Google Drive",
+          "url": "https://drive.google.com/",
+          "desc": "Your files in the cloud.",
+          "icon": "hard-disk"
+        },
         {
           "name": "Wormhole",
           "url": "https://wormhole.app/",
