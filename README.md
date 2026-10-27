@@ -1,4 +1,4 @@
-# Lico's Awesome Archive
+# Not-So-Awesome Archive
 
 My personal corner of the interest. Live at https://licoryte.github.io
 
