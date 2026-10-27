@@ -374,7 +374,7 @@ a.card:visited { color: var(--text); }
 .run-box input { font: 13px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; width: 100%; }
 .run-box .row-btns { display: flex; justify-content: flex-end; gap: 6px; }
 .run-out { margin: 0; min-height: 1.4em; color: #333333; }
-.shutdown { position: fixed; inset: 0; z-index: 100; background: #000000; display: grid; place-items: center; cursor: var(--cur-hand); font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px; }
+.shutdown { position: fixed; inset: 0; z-index: 100001; background: #000000; display: grid; place-items: center; cursor: var(--cur-hand); font-family: var(--f-ui); color: #FFFFFF; font-size: 12px; text-align: center; padding: 24px; }
 .shutdown .sad { display: block; font-size: 22px; margin-bottom: 8px; }
 
 /* Desktop buddies + sparkles */
@@ -508,7 +508,7 @@ a.card:visited { color: var(--text); }
 }
 
 /* Log on + boot sequence */
-.logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 110; }
+.logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
 .logon form { display: grid; justify-items: center; gap: 14px; }
 .logon-avatar { width: 96px; height: 96px; border-radius: 6px; overflow: hidden; background: linear-gradient(180deg, #8C8C8C, #5E5E5E); box-shadow: 0 0 0 1px #9A9A9A inset; }
@@ -519,11 +519,8 @@ a.card:visited { color: var(--text); }
 .bootbar { display: flex; gap: 3px; padding: 4px; border: 2px solid #8A8A8A; border-radius: 2px; }
 .bootbar i { width: 14px; height: 20px; background: #1A1A1A; }
 .bootbar i.on { background: #DADADA; }
-.flash { z-index: 109; background: #FFFFFF; opacity: 0; pointer-events: none; }
+.flash { z-index: 100000; background: #FFFFFF; opacity: 0; pointer-events: none; }
 .flash { background: radial-gradient(ellipse at 50% 50%, #FFFFFF 0%, #FFFFFF 45%, #EAF6FF 100%); }
-.flash.go { animation: crtflash 1.3s ease-out forwards; }
-@keyframes crtflash { 0% { opacity: 1; } 8% { opacity: .55; } 14% { opacity: .95; } 22% { opacity: .7; } 35% { opacity: .5; } 100% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .flash.go { animation: none; } }
 </style>
 </head>
 <body>
@@ -2142,13 +2139,21 @@ a.card:visited { color: var(--text); }
 
     let skipping = false, wake = null, running = false;
     const wait = ms => skipping ? Promise.resolve() : new Promise(r => {
-      const t = setTimeout(() => { wake = null; r(); }, quick ? Math.min(ms, 40) : ms);
+      const t = setTimeout(() => { wake = null; r(); }, ms);
       wake = () => { clearTimeout(t); wake = null; r(); };
     });
     function skip() { if (!running) return; skipping = true; if (wake) wake(); }
     scr.addEventListener('pointerdown', skip);
     addEventListener('keydown', e => { if (running && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); skip(); } });
 
+    /* White flash when the desktop appears. Peak brightness = first opacity, length = duration (ms). Search 'crtFlash'. */
+    function crtFlash() {
+      const frames = quick
+        ? [{ opacity: 0.9 }, { opacity: 0 }]
+        : [{ opacity: 1, offset: 0 }, { opacity: 0.55, offset: 0.08 }, { opacity: 0.95, offset: 0.14 }, { opacity: 0.7, offset: 0.22 }, { opacity: 0.5, offset: 0.35 }, { opacity: 0, offset: 1 }];
+      try { flash.getAnimations().forEach(a => a.cancel()); flash.animate(frames, { duration: quick ? 900 : 1300, easing: 'ease-out' }); }
+      catch (e) { flash.style.transition = 'none'; flash.style.opacity = '1'; void flash.offsetWidth; flash.style.transition = 'opacity 1.2s ease-out'; flash.style.opacity = '0'; }
+    }
     async function boot(done) {
       if (running) return;
       running = true; skipping = false;
@@ -2159,7 +2164,7 @@ a.card:visited { color: var(--text); }
       for (const b of blocks) { b.classList.add('on'); await wait(130 + Math.random() * 120 + (Math.random() < .15 ? 260 : 0)); }
       await wait(300);
       scr.hidden = true;
-      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+      crtFlash();
       running = false;
       if (done) done();
     }
