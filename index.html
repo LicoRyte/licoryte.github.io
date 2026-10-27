@@ -224,6 +224,8 @@ a.btn, a.btn:visited { color: var(--text); }
 .counter { display: inline-block; justify-self: start; background: var(--lcd-bg); color: var(--lcd); font-family: var(--f-mono); font-size: 30px; line-height: 1; letter-spacing: .1em; padding: 2px 6px; font-variant-numeric: tabular-nums; }
 .toggle { display: flex; gap: 6px; align-items: center; cursor: var(--cur-hand); }
 .toggle input { margin: 0; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.snd-test { min-height: 22px; padding: 1px 10px; font-size: 11px; }
 
 /* Recycle bin + dialogs */
 .empty-bin { padding: 24px 14px; text-align: center; font: 12px var(--f-ui); color: #333333; display: grid; gap: 8px; justify-items: center; }
@@ -681,6 +683,7 @@ a.card:visited { color: var(--text); }
   <fieldset>
         <legend>Effects</legend>
         <label class="toggle" for="fxToggle"><input type="checkbox" id="fxToggle"> sparkles &amp; cursor trail</label>
+        <span class="toggle-row"><label class="toggle" for="sndToggle"><input type="checkbox" id="sndToggle"> chime when a window opens</label><button type="button" class="btn snd-test" id="sndTest">Test</button></span>
       </fieldset>
   <fieldset>
         <legend>Desktop friends</legend>
@@ -1312,6 +1315,7 @@ a.card:visited { color: var(--text); }
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
     if (w.hidden) {
+      chime();
       document.body.classList.add('busy'); clearTimeout(openApp.t);
       openApp.t = setTimeout(() => document.body.classList.remove('busy'), 350);
       w.hidden = false;
@@ -2034,6 +2038,37 @@ a.card:visited { color: var(--text); }
     find.addEventListener('input', render);
     return { load(data) { cats = Array.isArray(data) ? data : []; render(); } };
   })();
+
+  /* ---------- Window chime (original sound, made with Web Audio, no audio file) ---------- */
+  let sndOn = true, actx = null, userActed = false;
+  try { sndOn = localStorage.getItem('lico-sound') !== 'off'; } catch (e) {}
+  ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { userActed = true; }, { capture: true, passive: true }));
+  function chime(force) {
+    if ((!sndOn && !force) || !userActed) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      const t0 = actx.currentTime + 0.01;
+      const out = actx.createGain(); out.gain.value = 0.16;
+      const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+      out.connect(lp); lp.connect(actx.destination);
+      [[987.77, 0, 0.30], [1479.98, 0.085, 0.42]].forEach(([f, at, len]) => {
+        [[f, 'sine', 1], [f * 2, 'triangle', 0.18], [f * 3.01, 'sine', 0.06]].forEach(([freq, type, vol]) => {
+          const o = actx.createOscillator(), g = actx.createGain();
+          o.type = type; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.0001, t0 + at);
+          g.gain.exponentialRampToValueAtTime(vol, t0 + at + 0.008);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + len);
+          o.connect(g); g.connect(out);
+          o.start(t0 + at); o.stop(t0 + at + len + 0.05);
+        });
+      });
+    } catch (e) {}
+  }
+  const sndToggle = $('#sndToggle');
+  sndToggle.checked = sndOn;
+  sndToggle.addEventListener('change', () => { sndOn = sndToggle.checked; try { localStorage.setItem('lico-sound', sndOn ? 'on' : 'off'); } catch (e) {} if (sndOn) chime(); });
+  $('#sndTest').addEventListener('click', () => chime(true));
 
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
   const ALIAS = { links: 'texty', internet: 'texty', browser: 'texty', control: 'os', display: 'os' };
