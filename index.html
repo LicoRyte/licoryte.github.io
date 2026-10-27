@@ -44,6 +44,7 @@
   --f-ui: Tahoma, Verdana, "Segoe UI", Geneva, "DejaVu Sans", sans-serif;
   --f-body: Verdana, Tahoma, "DejaVu Sans", Geneva, sans-serif;
   --f-head: "Trebuchet MS", "Lucida Grande", "Segoe UI", Tahoma, sans-serif;
+  --f-emoji: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif;
   --f-mono: "VT323", "Courier New", Courier, monospace;
   --f-comic: "Comic Neue", "Comic Sans MS", "Chalkboard SE", cursive;
   color-scheme: light;
@@ -517,6 +518,24 @@ a.card:visited { color: var(--text); }
   .dave-spot[data-mood="annoyed"] .dave { animation: none; filter: hue-rotate(260deg) saturate(2); }
 }
 
+/* Your Dude (emoji picker) */
+#w-dude { container-type: inline-size; }
+.yd-top { display: flex; align-items: center; gap: 6px; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
+.yd-top input { flex: 1; min-width: 0; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.yd-tabs { display: flex; gap: 1px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+.yd-tabs button { flex: 0 0 auto; width: 30px; height: 26px; padding: 0; font: 15px/1 var(--f-emoji); background: var(--silver); border: 2px solid; border-color: var(--hi) var(--shade) transparent var(--hi); margin-bottom: -2px; }
+.yd-tabs button[aria-selected="true"] { background: #FFFFFF; position: relative; z-index: 1; }
+.yd-grid { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; padding: 4px; display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); align-content: start; gap: 1px; }
+.yd-grid button { height: 34px; padding: 0; font: 22px/1 var(--f-emoji); background: none; border: 1px solid transparent; border-radius: 2px; }
+.yd-grid button:hover, .yd-grid button:focus-visible { background: #E2F2DC; border-color: var(--blue); outline: none; }
+.yd-grid .yd-none { grid-column: 1 / -1; padding: 20px 8px; font: 12px var(--f-ui); color: #555555; text-align: center; }
+.yd-grid h3 { grid-column: 1 / -1; margin: 6px 2px 2px; font: bold 11px var(--f-ui); color: var(--navy); }
+.yd-tray { display: flex; align-items: center; gap: 6px; padding-top: 5px; font: 12px var(--f-ui); flex-shrink: 0; }
+.yd-tray .big { width: 34px; height: 34px; display: grid; place-items: center; font: 26px/1 var(--f-emoji); flex-shrink: 0; }
+.yd-tray input { flex: 1; min-width: 0; font: 16px var(--f-emoji), var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.yd-tray input::placeholder { font: 12px var(--f-ui); color: #777777; }
+@container (max-width: 380px) { .yd-tray .big { display: none; } }
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -547,6 +566,7 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon shortcut" data-open="url:https://twitter.com/" title="Opens Twitter in a new tab"><img src="img/icons/chat.png" alt=""><span>Twitter</span></button>
   <button type="button" class="dicon shortcut" data-open="url:https://www.youtube.com/" title="Opens YouTube in a new tab"><img src="img/icons/app-video-player.png" alt=""><span>YouTube</span></button>
   <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
+  <button type="button" class="dicon" data-open="dude"><img src="img/icons/yourdude.png" alt=""><span>Your Dude</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -636,6 +656,20 @@ a.card:visited { color: var(--text); }
     <div class="ws-list" id="wsList"></div>
   </div>
   <div class="statusbar"><span id="wsStatus">0 object(s)</span><span>Opens in a new tab</span></div>
+</section>
+
+<section class="win raised app" id="w-dude" data-app="dude" data-title="Your Dude" data-icon="img/icons/yourdude-16.png" data-w="440" data-h="480" hidden aria-labelledby="t-dude">
+  <div class="tbar"><span class="name" id="t-dude"></span></div>
+  <div class="yd-top"><label for="ydFind">Find:</label><input id="ydFind" type="search" placeholder="cat, fire, cry, pizza..." autocomplete="off" spellcheck="false"></div>
+  <div class="yd-tabs" id="ydTabs" role="tablist" aria-label="Emoji groups"></div>
+  <div class="yd-grid sunken" id="ydGrid" aria-label="Emoji"></div>
+  <div class="yd-tray">
+    <span class="big" id="ydBig" aria-hidden="true">🙂</span>
+    <input id="ydTray" aria-label="Your emoji (click emoji to add, then copy)" placeholder="emoji you click collect here" spellcheck="false">
+    <button type="button" class="btn" id="ydCopy">Copy</button>
+    <button type="button" class="btn" id="ydClear">Clear</button>
+  </div>
+  <div class="statusbar"><span id="ydStatus">Loading emoji...</span><span id="ydCount"></span></div>
 </section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
@@ -761,6 +795,7 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="dude"><img src="img/icons/yourdude.png" alt="">Your Dude</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1347,6 +1382,7 @@ a.card:visited { color: var(--text); }
     if (id.startsWith('folder-')) folders.ensure(id);
     if (id === 'display' || id === 'control' || id === 'system') { const tab = id === 'control' ? 'system' : id; id = 'os'; osTab(tab === 'system' ? 'system' : 'display'); }
     if (id === 'os') syncDisplayForm();
+    if (id === 'dude') dude.load();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1455,12 +1491,14 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
     texty: () => { openApp('texty'); return 'Opened Texty.'; },
     workstation: () => { openApp('workstation'); return 'Opened Workstation. Time to work. Ugh.'; },
+    dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
+    emoji: () => { openApp('dude'); return 'Opened Your Dude.'; },
     gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
     twitter: () => { openApp('url:https://twitter.com/'); return 'Opening Twitter in a new tab. Good luck in there.'; },
     youtube: () => { openApp('url:https://www.youtube.com/'); return 'Opening YouTube in a new tab. See you in 3 hours.'; },
@@ -1940,6 +1978,71 @@ a.card:visited { color: var(--text); }
     notes.forEach(render);
     addEventListener('resize', () => notes.forEach(n => { const el = box.querySelector(`.sticky[data-id="${n.id}"]`); if (el) clampNote(n, el); }));
     return { add, remove };
+  })();
+
+  /* ---------- Your Dude: emoji picker. Data: data/emoji.json (from unicode-emoji-json + emojilib, MIT). ---------- */
+  const dude = (() => {
+    const grid = $('#ydGrid'), tabsEl = $('#ydTabs'), find = $('#ydFind'), tray = $('#ydTray'), big = $('#ydBig'), status = $('#ydStatus'), count = $('#ydCount');
+    const TAB_ICON = { Recent: '🕘', Smileys: '😀', People: '🧑', Nature: '🐻', Food: '🍔', Travel: '✈️', Activities: '⚽', Objects: '💡', Symbols: '❤️', Flags: '🏁' };
+    const RKEY = 'lico-dude-recent';
+    let groups = null, all = [], byChar = new Map(), tab = 'Smileys', loading = null;
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(RKEY) || '[]').filter(x => typeof x === 'string').slice(0, 32); } catch (e) {}
+    function load() {
+      if (loading) return loading;
+      loading = fetch('data/emoji.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => {
+        groups = data;
+        for (const [g, list] of data) for (const [ch, name, kw] of list) { const e = { ch, name, g, hay: (name + ' ' + (kw || '')).toLowerCase() }; all.push(e); byChar.set(ch, e); }
+        tab = recent.length ? 'Recent' : 'Smileys';
+        renderTabs(); render();
+      }).catch(() => { status.textContent = "Couldn't load the emoji list. Refresh and try again."; loading = null; });
+      return loading;
+    }
+    function renderTabs() {
+      tabsEl.replaceChildren(...['Recent', ...groups.map(g => g[0])].map(name => h('button', {
+        type: 'button', role: 'tab', title: name, 'aria-label': name, 'aria-selected': String(name === tab && !find.value.trim()),
+        onclick: () => { tab = name; find.value = ''; renderTabs(); render(); grid.scrollTop = 0; }
+      }, TAB_ICON[name] || '•')));
+    }
+    function btn(e) { return h('button', { type: 'button', title: e.name, 'aria-label': e.name, 'data-ch': e.ch }, e.ch); }
+    function render() {
+      const q = find.value.trim().toLowerCase();
+      let list;
+      if (q) {
+        const words = q.split(/\s+/);
+        list = all.filter(e => words.every(w => e.hay.includes(w)));
+        // best matches first: exact name, then a whole word in the name, then names starting with it
+        const score = e => { const n = e.name.toLowerCase(); return (n === q) * 8 + n.split(/[\s:-]+/).includes(words[0]) * 4 + n.startsWith(words[0]) * 2 + (` ${e.hay} `.includes(` ${words[0]} `)); };
+        list = list.map((e, i) => [e, score(e), i]).sort((a, b) => b[1] - a[1] || a[2] - b[2]).map(x => x[0]);
+      } else if (tab === 'Recent') list = recent.map(ch => byChar.get(ch) || { ch, name: ch });
+      else list = all.filter(e => e.g === tab);
+      grid.replaceChildren(...(list.length ? list.map(btn) : [h('p', { class: 'yd-none' }, q ? 'No emoji for "' + q + '". Try a simpler word.' : 'Nothing here yet. Emoji you copy show up here.')]));
+      count.textContent = list.length + ' emoji';
+      status.textContent = q ? 'Search results. Enter copies the first one.' : (tab === 'Recent' ? 'Recently copied' : tab) + '. Click one to copy it.';
+    }
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+      try { const t = h('textarea', { style: 'position:fixed;left:-9999px;top:0' }); t.value = text; document.body.append(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok; } catch (e) { return false; }
+    }
+    async function pickEmoji(ch) {
+      const e = byChar.get(ch);
+      tray.value += ch; big.textContent = ch;
+      recent = [ch, ...recent.filter(x => x !== ch)].slice(0, 32);
+      try { localStorage.setItem(RKEY, JSON.stringify(recent)); } catch (err) {}
+      const ok = await copyText(ch);
+      status.textContent = ok ? 'Copied ' + ch + (e ? ' ' + e.name : '') + (tray.value.length > ch.length ? '. Copy button = all of them.' : '') : 'Couldn\'t copy automatically. Select the box below and press Ctrl+C.';
+    }
+    grid.addEventListener('click', e => { const b = e.target.closest('button[data-ch]'); if (b) pickEmoji(b.dataset.ch); });
+    grid.addEventListener('pointerover', e => { const b = e.target.closest('button[data-ch]'); if (b) { big.textContent = b.dataset.ch; status.textContent = b.title; } });
+    let ft = 0;
+    find.addEventListener('input', () => { clearTimeout(ft); ft = setTimeout(() => { renderTabs(); render(); grid.scrollTop = 0; }, 80); });
+    find.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); clearTimeout(ft); render(); const b = grid.querySelector('button[data-ch]'); if (b) pickEmoji(b.dataset.ch); }
+      if (e.key === 'Escape' && find.value) { e.stopPropagation(); find.value = ''; renderTabs(); render(); }
+    });
+    $('#ydCopy').addEventListener('click', async () => { if (!tray.value) { status.textContent = 'Nothing to copy. Click some emoji first.'; return; } status.textContent = (await copyText(tray.value)) ? 'Copied ' + tray.value : 'Couldn\'t copy. Select the box and press Ctrl+C.'; });
+    $('#ydClear').addEventListener('click', () => { tray.value = ''; big.textContent = '🙂'; status.textContent = 'Cleared. Next emoji starts fresh.'; });
+    return { load };
   })();
 
   /* ---------- Paint ---------- */
