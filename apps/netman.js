@@ -19,6 +19,18 @@
   const PIX_PAL = {"k": "#000000", "w": "#FFFFFF", "l": "#DFDFDF", "g": "#C0C0C0", "d": "#808080", "s": "#404040", "G": "#0B4A12", "L": "#5BE35B", "M": "#2E8B22", "y": "#FFD600", "r": "#E8352A", "c": "#2462D8", "b": "#96C4F0"};
   const PIX = {"pc": ["..kkkkkkkkkkkkkkkkkkkkkkkk....", "..kwwwwwwwwwwwwwwwwwwwwwgk....", "..kwgggggggggggggggggggdgk....", "..kwgkkkkkkkkkkkkkkkkkkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGLLGGGGGGGGGGGGGkgdk....", "..kwgkGLGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLLLGGGGGGGGGkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLLLLLLGGGGGGkgdk....", "..kwgkGGGGGGGGGGGGGGGGkgdk....", "..kwgkGGLLLMGGGGGGGGGGkgdk....", "..kwgkkkkkkkkkkkkkkkkkkgdk....", "..kwgggggggggggggggggyggdk....", "..kddddddddddddddddddddddk....", "..kkkkkkkkkkkkkkkkkkkkkkkk....", "..........kwggddk.............", "......kkkkkkkkkkkkkkk.........", ".kkkkkkkkkkkkkkkkkkkkkkkkkk...", ".kwwwwwwwwwwwwwwwwwwwwwwwgk...", ".kwglglglglglglglglglglgdgk...", ".kwgglglglglglglglglglglggk...", ".kwdddddddddddddddddddddddk...", ".kkkkkkkkkkkkkkkkkkkkkkkkkk..."], "server": [".........kkkkkkkkkkkk.........", ".........kwwwwwwwwwgk.........", ".........kwgggggggdgk.........", ".........kwkkkkkkkkgk.........", ".........kwkdddddddgk.........", ".........kwkwwwwwgdgk.........", ".........kwkkkkkkkkgk.........", ".........kwkdddddddgk.........", ".........kwkwwwwwgdgk.........", ".........kwkkkkkkkkgk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwgdgdgdgddk.........", ".........kwggggggggdk.........", ".........kwggggLgyrdk.........", ".........kwggggggggdk.........", ".........kwggggggggdk.........", ".........kddddddddddk.........", ".........kkkkkkkkkkkk.........", "..........kdk......kdk........", "..........kkk......kkk........"], "switch": ["..............................", "..............................", "..............................", "..............................", "..............................", "..............................", "..............................", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", ".kwwwwwwwwwwwwwwwwwwwwwwwwwgk.", ".kwggggggggggggggggggggggggdk.", ".kwgLgLgLgLgLgLgLgLggggMMMgdk.", ".kwggggggggggggggggggggggggdk.", ".kwgkkgkkgkkgkkgkkgkkgkkgkkdk.", ".kwgksgksgksgksgksgksgksgksdk.", ".kwggggggggggggggggggggggggdk.", ".kddddddddddddddddddddddddddk.", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", "..............................", "..............................", "..............................", "..............................", "..............................", "..............................", ".............................."], "router": ["..............................", "..............................", "..............................", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "...kk..................kk.....", "..kddk................kddk....", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", ".kwwwwwwwwwwwwwwwwwwwwwwwwwgk.", ".kwbbbbbbbbbbbbbbbbbbbbbbbbdk.", ".kwbccccccccccccccccccccccbdk.", ".kwbcwcccccccccccccccccccdbdk.", ".kwbcccccccccccccccccccccdbdk.", ".kwbbbbbbbbbbbbbbbbbbbbbbbbdk.", ".kwgLgygLgrgggggggkkgkkgkkgdk.", ".kwggggggggggggggggggggggggdk.", ".kddddddddddddddddddddddddddk.", ".kkkkkkkkkkkkkkkkkkkkkkkkkkkk.", "..............................", "..............................", ".............................."]};
   const pixCache = {};
+  // the letter (envelope) that carries each frame; S = seal, colored by what kind of frame it is
+  const MAIL = ['kkkkkkkkkkkkkkkk','kdwwwwwwwwwwwwdk','kwdwwwwwwwwwwdwk','kwwdwwwwwwwwdwwk','kwwwdwwwwwwdwwwk','kwwwwdwwwwdwwwwk',
+    'kwwwwwdSSdwwwwwk','kwwwwwwSSwwwwwwk','kwwwwwwwwwwwwwwk','kwwwwwwwwwwwwwwk','kllllllllllllllk','kkkkkkkkkkkkkkkk'];
+  const MAIL_SEAL = { arp: '#FF9A1F', req: '#2E8B22', rep: '#2462D8', err: '#E8352A' };
+  function mailURL(kind) {
+    const key = 'mail-' + kind;
+    if (pixCache[key]) return pixCache[key];
+    const c = document.createElement('canvas'); c.width = 16; c.height = 12;
+    const x = c.getContext('2d');
+    MAIL.forEach((r, y) => { for (let i = 0; i < 16; i++) { const ch = r[i]; const col = ch === 'S' ? MAIL_SEAL[kind] : PIX_PAL[ch]; if (col) { x.fillStyle = col; x.fillRect(i, y, 1, 1); } } });
+    return (pixCache[key] = c.toDataURL());
+  }
   function pixURL(type) {
     if (pixCache[type]) return pixCache[type];
     const rows = PIX[type], c = document.createElement('canvas'); c.width = 30; c.height = 24;
@@ -121,13 +133,14 @@
     /* UI skeleton */
     const tools = el('div', { class: 'nm-tools' });
     const svg = sv('svg', { class: 'nm-svg', role: 'application', 'aria-label': 'Network diagram. Click to select, Delete removes, Esc cancels a cable.', tabindex: '0' });
-    const gLinks = sv('g'), gDevs = sv('g'), gLabels = sv('g', { class: 'nm-labels' }), gFx = sv('g');
-    svg.append(gLinks, gDevs, gLabels, gFx);
+    const gLinks = sv('g'), gDevs = sv('g'), gLabels = sv('g', { class: 'nm-labels' }), gMail = sv('g', { class: 'nm-mailbox' }), gFx = sv('g');
+    svg.append(gLinks, gDevs, gLabels, gMail, gFx);
+    const tip = el('div', { class: 'nm-tip', hidden: true, role: 'tooltip' });
     const hint = el('div', { class: 'nm-hint' });
-    const stage = el('div', { class: 'nm-stage sunken' }, svg, hint);
+    const stage = el('div', { class: 'nm-stage sunken' }, svg, hint, tip);
     const tabBtns = {}, tabPanes = {};
     const tabsBar = el('div', { class: 'nm-tabs', role: 'tablist' });
-    ['Device', 'Packet', 'Log'].forEach(t => {
+    ['Device', 'Log'].forEach(t => {
       tabBtns[t] = el('button', { type: 'button', role: 'tab', onclick: () => showTab(t) }, t);
       tabPanes[t] = el('div', { class: 'nm-pane', role: 'tabpanel', hidden: true });
       tabsBar.append(tabBtns[t]);
@@ -239,6 +252,7 @@
       hint.textContent = tool === 'cable' ? (cableFrom ? 'Now click the device to connect to. (Esc cancels)' : 'Cable: click the first device.') : (net.devices.length ? '' : 'Empty. Add a PC, Switch, Router or Server from the toolbar.');
       hint.hidden = !hint.textContent;
       refreshPingSources();
+      if (sim && viewing >= 0 && !animating) { const pinned = tipPinned; renderStep(viewing); if (pinned) hideTip(); }
     }
 
     /* ---------- editing ---------- */
@@ -293,6 +307,7 @@
       } else if (lk) {
         selected = { kind: 'link', id: lk.dataset.id }; renderAll(); renderDevicePane(); showTab('Device');
       } else {
+        hideTip();
         if (tool === 'cable' && cableFrom) { cableFrom = null; renderAll(); return; }
         selected = null; renderAll(); renderDevicePane();
       }
@@ -335,7 +350,7 @@
         P.replaceChildren(el('div', { class: 'nm-help' },
           el('p', {}, el('b', {}, 'Network Man'), ' - build a network, give things IP addresses, then ping and watch every frame.'),
           el('ol', {}, el('li', {}, 'Add devices from the toolbar, drag them around.'), el('li', {}, 'Click ', el('b', {}, 'Cable'), ', then two devices to connect them.'),
-            el('li', {}, 'Click a device to set its IP, mask and gateway.'), el('li', {}, 'Pick a PC, type a destination IP, press ', el('b', {}, 'Ping'), ', then ', el('b', {}, 'Step'), '.')),
+            el('li', {}, 'Click a device to set its IP, mask and gateway.'), el('li', {}, 'Pick a PC, type a destination IP, press ', el('b', {}, 'Ping'), ', then ', el('b', {}, 'Step'), '.'), el('li', {}, 'Hover the little letter (tap on a phone) to see the frame inside.')),
           el('p', {}, 'Every cable and port just works: no hardware settings here.')));
         return;
       }
@@ -424,7 +439,7 @@
     }
     function stopSim(silent) {
       playing = false; playBtn.textContent = 'Play ▸▸';
-      sim = null; gFx.replaceChildren();
+      sim = null; gFx.replaceChildren(); gMail.replaceChildren(); hideTip();
       if (!silent) setStatus('Stopped.');
     }
     let uidSeq = 1;
@@ -440,9 +455,9 @@
       const packet = { uid: uidSeq++, src: info ? info.ip : 0, dst, ttl: 64, icmp: { type: 8, code: 0, id: sim.pingId, seq: 1 } };
       lines.push(`${src.name} wants to ping ${ipStr(dst)}. It builds an ICMP Echo Request ("are you there?") inside an IPv4 packet.`);
       originate(src, packet, lines);
-      record({ title: 'Ping starts at ' + src.name, packet: clone(packet), lines });
-      showTab('Packet'); renderStep(sim.steps.length - 1); renderLog();
-      setStatus('Press Step to move the first frame, or Play to run it all.');
+      record({ title: 'Echo Request created at ' + src.name, packet: clone(packet), lines, at: src.id, mail: 'req' });
+      renderStep(sim.steps.length - 1); renderLog();
+      setStatus('Press Step to send the first frame, or Play to run it all. Hover the letter to see what\'s inside.');
       if (!sim.queue.length) finish();
     }
     function record(s) { s.n = sim.steps.length; sim.steps.push(s); }
@@ -578,16 +593,17 @@
       if (!sim || sim.finished) return;
       sim.finished = true;
       const lines = [];
-      if (sim.result === 'success') lines.push('Ping successful. ' + (sim.steps.length - 1) + ' frames crossed the wires. Ping again to see how the ARP and MAC tables make it shorter, or clear the tables (More...) to start fresh.');
+      if (sim.result === 'success') lines.push('Ping successful: ' + (sim.steps.length - 1) + ' frames. Ping again and the ARP/MAC tables make it shorter.');
       else {
         const waiting = Object.keys(sim.pending);
-        if (waiting.length) { const ip = +waiting[0].split('|')[1]; lines.push(`Nobody answered the ARP Request for ${ipStr(ip)}. Either no device has that IP, or it's not on this network. Ping failed.`); }
+        if (waiting.length) { const ip = +waiting[0].split('|')[1]; lines.push(`Ping failed: nobody answered ARP for ${ipStr(ip)}.`); }
         else if (sim.result && sim.result.startsWith('fail:')) lines.push('Ping failed: ' + sim.result.slice(5) + '.');
-        else lines.push('The packet was lost along the way. Ping failed.');
+        else lines.push('Ping failed: the packet was dropped.');
       }
-      record({ title: sim.result === 'success' ? 'Done: success' : 'Done: failed', lines, done: true, ok: sim.result === 'success' });
+      const lastAt = [...sim.steps].reverse().find(x => x.at);
+      record({ title: sim.result === 'success' ? 'Done: success' : 'Done: failed', lines, done: true, ok: sim.result === 'success', at: lastAt ? lastAt.at : null, ref: lastAt ? lastAt.n : null });
       renderStep(sim.steps.length - 1); renderLog();
-      setStatus(sim.result === 'success' ? 'Ping successful.' : 'Ping failed. Check the last step for why.');
+      setStatus(lines[0]);
       playing = false; playBtn.textContent = 'Play ▸▸';
       if (hooks.onDone) hooks.onDone(sim.result === 'success');
     }
@@ -598,8 +614,10 @@
       if (!sim.queue.length) { finish(); return Promise.resolve(); }
       const ev = sim.queue.shift();
       if (++sim.frames > MAX_FRAMES) {
-        record({ title: 'Stopped: broadcast storm', lines: ['Too many frames! Switches are connected in a loop, so broadcasts circle forever (a broadcast storm). Real switches use Spanning Tree Protocol (STP) to block loops. Remove one cable from the loop.'], done: true, ok: false });
-        sim.finished = true; sim.queue = []; renderStep(sim.steps.length - 1); renderLog(); playing = false; playBtn.textContent = 'Play ▸▸'; setStatus('Stopped: switch loop.');
+        const lastAt = [...sim.steps].reverse().find(x => x.at);
+        record({ title: 'Stopped: broadcast storm', lines: [], done: true, ok: false, at: lastAt ? lastAt.at : null, ref: lastAt ? lastAt.n : null });
+        sim.finished = true; sim.queue = []; renderStep(sim.steps.length - 1); renderLog(); playing = false; playBtn.textContent = 'Play ▸▸';
+        setStatus('Stopped: broadcast storm. Switches are wired in a loop, so broadcasts circle forever. Remove one cable from the loop.');
         return Promise.resolve();
       }
       const kind = ev.frame.arp ? (ev.frame.arp.op === 1 ? 'ARP Request' : 'ARP Reply') : icmpName(ev.frame.ip.icmp.type);
@@ -609,9 +627,9 @@
         if (!sim) return;
         const lines = [`The frame travels ${portName(ev.from)} → ${portName(ev.to)}.`];
         deliver(ev, lines);
-        record({ title: kind + ': ' + dev(ev.from.d).name + ' → ' + dev(ev.to.d).name, frame: clone(ev.frame), lines, link: ev.link });
+        record({ title: kind + ': ' + dev(ev.from.d).name + ' → ' + dev(ev.to.d).name, frame: clone(ev.frame), lines, link: ev.link, at: ev.to.d, mail: mailKind(ev.frame) });
         renderStep(sim.steps.length - 1); renderLog();
-        setStatus('Step ' + (sim.steps.length - 1) + ' · ' + kind + ' · ' + sim.queue.length + ' frame(s) still waiting');
+        setStatus('Step ' + (sim.steps.length - 1) + ' · ' + kind + ' · ' + dev(ev.from.d).name + ' → ' + dev(ev.to.d).name + (sim.queue.length ? ' · ' + sim.queue.length + ' more waiting' : ''));
         if (!sim.queue.length) finish();
       });
     }
@@ -630,8 +648,10 @@
     function animate(ev, kind) {
       const a = dev(ev.from.d), b = dev(ev.to.d);
       if (!a || !b || matchMedia('(prefers-reduced-motion: reduce)').matches) return Promise.resolve();
-      const cls = kind.startsWith('ARP') ? 'arp' : 'icmp';
-      const dot = sv('g', { class: 'nm-pkt ' + cls }, sv('rect', { x: -15, y: -8, width: 30, height: 16, rx: 3 }), sv('text', { x: 0, y: 4 }, cls === 'arp' ? 'ARP' : 'IP'));
+      gMail.replaceChildren(); hideTip();
+      const dot = sv('g', { class: 'nm-pkt' });
+      const im = sv('image', { x: -16, y: -12, width: 32, height: 24, class: 'nm-pix' }); im.setAttribute('href', mailURL(mailKind(ev.frame)));
+      dot.append(im);
       gFx.append(dot);
       const lk = gLinks.querySelector(`.nm-link[data-id="${ev.link}"]`); if (lk) lk.classList.add('busy');
       const dur = +speedSel.value;
@@ -675,52 +695,72 @@
       if (f) L.push({ name: 'FCS', cls: 'fcs', bytes: 4, fields: [['Checksum', 'CRC-32, lets the receiver spot damaged frames']] });
       return L;
     }
-    let viewing = -1;
+    function mailKind(f) { if (f.arp) return 'arp'; const t = f.ip.icmp.type; return t === 8 ? 'req' : t === 0 ? 'rep' : 'err'; }
+    let viewing = -1, tipPinned = false;
     function prevSameUid(i) {
       const s = sim.steps[i]; const uid = s.frame && s.frame.ip ? s.frame.ip.uid : null;
       for (let j = i - 1; j >= 0; j--) { const t = sim.steps[j]; if (uid != null && t.frame && t.frame.ip && t.frame.ip.uid === uid) return t; if (uid != null && t.packet && t.packet.uid === uid) return t; }
       return null;
     }
+    // the letter sits above the device the frame just reached; hover it to see the frame's structure
     function renderStep(i) {
       viewing = i;
-      const P = tabPanes.Packet;
-      if (!sim || !sim.steps[i]) { P.replaceChildren(el('p', { class: 'nm-empty' }, 'No packet yet. Pick a PC in "Ping from", type a destination IP and press Ping.')); return; }
-      const s = sim.steps[i];
-      const nav = el('div', { class: 'nm-nav' },
-        el('button', { type: 'button', class: 'btn', disabled: i === 0, onclick: () => renderStep(i - 1) }, '◂'),
-        el('b', {}, 'Step ' + i + ' of ' + (sim.steps.length - 1)),
-        el('button', { type: 'button', class: 'btn', disabled: i >= sim.steps.length - 1, onclick: () => renderStep(i + 1) }, '▸'));
-      const kids = [nav, el('h3', { class: s.done ? (s.ok ? 'ok' : 'bad') : '' }, s.title)];
-      if (s.frame || s.packet) {
-        const L = layersOf(s);
-        const total = L.reduce((a, l) => a + l.bytes, 0);
-        kids.push(el('p', { class: 'nm-cap' }, s.frame ? 'The frame on the wire (' + total + ' bytes):' : 'The IP packet (not on the wire yet, so no Ethernet frame):'));
-        kids.push(el('div', { class: 'nm-frame' }, L.map(l => el('span', { class: 'seg ' + l.cls, style: 'flex-grow:' + l.bytes, title: l.name + ', ' + l.bytes + ' bytes' }, el('b', {}, l.name), el('small', {}, l.bytes + ' B')))));
-        const prev = prevSameUid(i);
-        const prevVals = prev ? Object.fromEntries(layersOf(prev).flatMap(l => l.fields.map(([k, v]) => [l.name + k, v]))) : null;
-        for (const l of L) {
-          if (l.cls === 'data' || l.cls === 'fcs') continue;
-          kids.push(el('div', { class: 'nm-layer ' + l.cls }, el('div', { class: 'lh' }, l.name),
-            el('dl', {}, l.fields.flatMap(([k, v]) => {
-              const changed = prevVals && prevVals[l.name + k] != null && prevVals[l.name + k] !== v;
-              return [el('dt', { title: FIELD_HELP[k] || '' }, k), el('dd', { class: changed ? 'changed' : '', title: changed ? 'Changed since the last hop (was ' + prevVals[l.name + k] + ')' : '' }, v)];
-            }))));
-        }
-        if (prevVals) kids.push(el('p', { class: 'nm-cap' }, el('span', { class: 'chg-key' }, 'yellow'), ' = changed since this packet\'s previous hop. Hover a field name for what it means.'));
-        else kids.push(el('p', { class: 'nm-cap' }, 'Hover a field name for what it means.'));
-      }
-      kids.push(el('div', { class: 'nm-explain' }, s.lines.map(t => el('p', {}, t))));
-      P.replaceChildren(...kids);
+      gMail.replaceChildren(); hideTip();
       tabPanes.Log.querySelectorAll('li').forEach((li, k) => li.classList.toggle('cur', k === i));
+      if (!sim || !sim.steps[i]) return;
+      let s = sim.steps[i], src = s;
+      if (s.done && s.ref != null) src = sim.steps[s.ref];
+      const d = s.at && dev(s.at); if (!d || !(src.frame || src.packet)) return;
+      const g = sv('g', { class: 'nm-mail', transform: `translate(${d.x},${d.y - 46})`, tabindex: 0, role: 'button', 'aria-label': 'Frame: ' + src.title + '. Hover or tap to see inside.' });
+      const bob = sv('g', { class: 'bob' });
+      const im = sv('image', { x: -16, y: -12, width: 32, height: 24, class: 'nm-pix' }); im.setAttribute('href', mailURL(src.mail || 'req'));
+      bob.append(im);
+      if (s.done) bob.append(sv('text', { x: 20, y: -6, class: 'nm-badge ' + (s.ok ? 'ok' : 'bad') }, s.ok ? '✔' : '✖'));
+      g.append(bob, sv('rect', { x: -20, y: -17, width: 40, height: 33, class: 'hit' }));
+      const show = () => showTip(src, g);
+      g.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') show(); });
+      g.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !tipPinned) hideTip(); });
+      g.addEventListener('focus', show); g.addEventListener('blur', () => { if (!tipPinned) hideTip(); });
+      g.addEventListener('pointerdown', e => { e.stopPropagation(); if (tipPinned) { hideTip(); } else { show(); tipPinned = true; } });
+      gMail.append(g);
+    }
+    function hideTip() { tip.hidden = true; tipPinned = false; }
+    function showTip(s, anchor) {
+      const L = layersOf(s);
+      const total = L.reduce((a, l) => a + l.bytes, 0);
+      const idx = sim.steps.indexOf(s);
+      const prev = idx > 0 ? prevSameUid(idx) : null;
+      const prevVals = prev ? Object.fromEntries(layersOf(prev).flatMap(l => l.fields.map(([k, v]) => [l.name + k, v]))) : null;
+      const kids = [el('div', { class: 'nm-tip-h' }, el('b', {}, s.title), el('small', {}, s.frame ? total + ' bytes on the wire' : 'IP packet, not on the wire yet'))];
+      kids.push(el('div', { class: 'nm-frame' }, L.map(l => el('span', { class: 'seg ' + l.cls, style: 'flex-grow:' + l.bytes }, el('b', {}, l.name), el('small', {}, l.bytes + ' B')))));
+      for (const l of L) {
+        if (l.cls === 'data' || l.cls === 'fcs') continue;
+        kids.push(el('div', { class: 'nm-layer ' + l.cls }, el('div', { class: 'lh' }, l.name),
+          el('dl', {}, l.fields.flatMap(([k, v]) => {
+            const changed = prevVals && prevVals[l.name + k] != null && prevVals[l.name + k] !== v;
+            return [el('dt', {}, k), el('dd', { class: changed ? 'changed' : '' }, v)];
+          }))));
+      }
+      if (prevVals) kids.push(el('p', { class: 'nm-cap' }, el('span', { class: 'chg-key' }, 'yellow'), ' = changed since the last hop'));
+      tip.replaceChildren(...kids);
+      tip.hidden = false;
+      const st = stage.getBoundingClientRect(), r = anchor.getBoundingClientRect();
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      let left = r.right - st.left + 8;
+      if (left + tw > st.width - 4) left = r.left - st.left - tw - 8;
+      left = Math.max(4, Math.min(st.width - tw - 4, left));
+      let top = r.top - st.top - 8;
+      top = Math.max(4, Math.min(st.height - th - 4, top));
+      tip.style.left = left + 'px'; tip.style.top = top + 'px';
     }
     function renderLog() {
       const P = tabPanes.Log;
-      if (!sim) { P.replaceChildren(el('p', { class: 'nm-empty' }, 'Every step of a ping shows up here.')); return; }
-      P.replaceChildren(el('ol', { class: 'nm-log', start: 0 }, sim.steps.map((s, i) => el('li', { class: (s.done ? (s.ok ? 'ok' : 'bad') : '') + (i === viewing ? ' cur' : ''), onclick: () => { renderStep(i); showTab('Packet'); } }, s.title))));
+      if (!sim) { P.replaceChildren(el('p', { class: 'nm-empty' }, 'Every step of a ping shows up here. Click one to move the letter back to that step.')); return; }
+      P.replaceChildren(el('ol', { class: 'nm-log', start: 0 }, sim.steps.map((s, i) => el('li', { class: (s.done ? (s.ok ? 'ok' : 'bad') : '') + (i === viewing ? ' cur' : ''), onclick: () => renderStep(i) }, s.title))));
     }
 
     /* start */
-    showTab('Device'); renderAll(); renderDevicePane(); renderStep(-1); renderLog();
+    showTab('Device'); renderAll(); renderDevicePane(); renderLog();
     setStatus('Ready. Ping from a PC, then press Step.');
     status2.textContent = 'IPv4 · ARP · ICMP';
     return { refresh: () => renderAll() };

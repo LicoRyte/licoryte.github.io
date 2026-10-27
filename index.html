@@ -576,7 +576,17 @@ a.card:visited { color: var(--text); }
 .nm-link.busy .wire { stroke: #E0A000; stroke-width: 3; }
 .nm-labels .port { font-size: 9px; fill: #666666; text-anchor: middle; paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; pointer-events: none; }
 .nm-labels .rport { fill: #1F4E8A; } .nm-labels .rip { font-size: 10px; font-weight: bold; }
-.nm-pkt rect { stroke: #000000; stroke-width: 1; }
+.nm-mail { cursor: var(--cur-hand); outline: none; }
+.nm-mail .hit { fill: transparent; }
+.nm-mail:focus-visible .hit { stroke: var(--blue); stroke-dasharray: 3 2; }
+.nm-mail .bob { animation: nmbob 1.4s ease-in-out infinite; }
+@keyframes nmbob { 50% { transform: translateY(-3px); } }
+.nm-badge { font: bold 14px var(--f-ui); paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; }
+.nm-badge.ok { fill: #1B7A1B; } .nm-badge.bad { fill: #B00020; }
+.nm-tip { position: absolute; z-index: 5; width: min(310px, calc(100% - 8px)); max-height: calc(100% - 8px); overflow: auto; padding: 6px 7px; background: #FFFFFF; border: 1px solid #000000; box-shadow: 3px 3px 0 rgba(0, 0, 0, .3); font: 12px/1.35 var(--f-ui); pointer-events: none; }
+.nm-tip-h { display: grid; margin-bottom: 4px; } .nm-tip-h b { color: var(--navy); } .nm-tip-h small { color: #555555; font-size: 11px; }
+.nm-tip .nm-frame { margin: 2px 0 6px; } .nm-tip .nm-layer { margin-bottom: 4px; } .nm-tip .nm-cap { margin: 2px 0 0; }
+@media (prefers-reduced-motion: reduce) { .nm-mail .bob { animation: none; } }
 .nm-pkt text { font: bold 9px var(--f-ui); text-anchor: middle; fill: #000000; }
 .nm-pkt.arp rect { fill: #FFB347; } .nm-pkt.icmp rect { fill: #7CD67C; }
 .nm-side { min-height: 0; display: flex; flex-direction: column; }
@@ -2244,7 +2254,7 @@ a.card:visited { color: var(--text); }
     if (netmanLoading) return netmanLoading;
     netmanLoading = new Promise((ok, no) => {
       const sc = document.createElement('script');
-      sc.src = 'apps/netman.js?v=2'; sc.onload = ok; sc.onerror = no;
+      sc.src = 'apps/netman.js?v=3'; sc.onload = ok; sc.onerror = no;
       document.head.append(sc);
     }).then(() => {
       // wait one frame so the window has its size before drawing
