@@ -508,41 +508,21 @@ a.card:visited { color: var(--text); }
 }
 
 /* Log on + boot sequence */
-.logon, .bootscr { position: fixed; inset: 0; z-index: 110; }
-.logon { display: grid; place-items: center; padding: 16px; background: radial-gradient(ellipse at 50% 40%, #1E5E22 0%, #0B3A10 55%, #031A06 100%); }
-.logon-box { width: min(420px, 100%); }
-.logon .tbar { background: linear-gradient(90deg, var(--navy), var(--blue)); color: var(--hi); }
-.logon-banner { display: grid; gap: 2px; padding: 12px 14px; margin: 2px 2px 0; background: linear-gradient(90deg, #052A0A, var(--navy) 60%, #3FA82E); color: #FFFFFF; }
-.logon-banner b { font: bold 18px/1.1 var(--f-head); letter-spacing: .01em; }
-.logon-banner span { font: 11px var(--f-ui); color: #CDEBC4; }
-.logon-body { display: grid; grid-template-columns: 76px 1fr; gap: 14px; padding: 14px 12px 4px; font: 12px var(--f-ui); }
-.logon-avatar { width: 76px; height: 76px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: linear-gradient(180deg, #D6D6D6, #A9A9A9); overflow: hidden; }
+.logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 110; }
+.logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
+.logon form { display: grid; justify-items: center; gap: 14px; }
+.logon-avatar { width: 96px; height: 96px; border-radius: 6px; overflow: hidden; background: linear-gradient(180deg, #8C8C8C, #5E5E5E); box-shadow: 0 0 0 1px #9A9A9A inset; }
 .logon-avatar svg { display: block; width: 100%; height: 100%; }
-.logon-fields { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; align-content: start; }
-.logon-fields p { grid-column: 1 / -1; margin: 0 0 4px; color: #222222; }
-.logon-fields input { min-width: 0; font: 13px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
-.logon-fields input:disabled { background: var(--silver); color: #666666; }
-.logon .row-btns { display: flex; justify-content: flex-end; gap: 6px; padding: 10px 12px 12px; }
-.logon .row-btns .btn { min-width: 72px; }
-.bootscr { background: #000000; color: #C8C8C8; cursor: var(--cur-arrow, default); overflow: hidden; }
-.bios { margin: 0; padding: 18px 20px; font: 20px/1.15 var(--f-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-.bios .hi { color: #FFFFFF; } .bios .ok { color: #5BE35B; } .bios .warn { color: #F2C200; }
-.bios-skip { position: absolute; right: 14px; bottom: 10px; font: 16px var(--f-mono); color: #6A6A6A; }
-.splash { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; text-align: center; padding: 16px;
-  background: radial-gradient(ellipse at 50% 45%, #1B5A20 0%, #062A0B 60%, #010C03 100%); color: #FFFFFF; }
-.splash-face { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 3px solid #CDEBC4; box-shadow: 0 0 0 3px #0B4A12, 0 0 28px rgba(120, 230, 110, .35); background: #0B4A12; }
-.splash-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.splash h2 { margin: 6px 0 0; font: bold clamp(22px, 5vw, 34px)/1.05 var(--f-head); text-shadow: 0 2px 0 #031A06; }
-.splash .ed { margin: 0; font: 13px var(--f-ui); color: #CDEBC4; letter-spacing: .08em; }
-.splash .ed b { color: #FFFFFF; font-size: 15px; }
-.splash-bar { position: relative; width: 180px; height: 16px; margin-top: 14px; border: 2px solid; border-color: #3A3A3A #CDEBC4 #CDEBC4 #3A3A3A; background: #031A06; overflow: hidden; }
-.splash-bar i { position: absolute; top: 2px; bottom: 2px; width: 10px; background: #5BE35B; animation: bootblocks 1.6s linear infinite; }
-.splash-bar i:nth-child(2) { animation-delay: .09s; } .splash-bar i:nth-child(3) { animation-delay: .18s; }
-@keyframes bootblocks { from { left: -40px; } to { left: 200px; } }
-.splash-msg { margin: 4px 0 0; min-height: 1.3em; font: 12px var(--f-ui); color: #CDEBC4; }
-.bootscr.fade { opacity: 0; transition: opacity .45s ease; }
-@media (prefers-reduced-motion: reduce) { .splash-bar i { animation-duration: 3s; } .bootscr.fade { transition: none; } }
-@media (max-width: 600px) { .bios { font-size: 16px; padding: 12px; } .logon-body { grid-template-columns: 56px 1fr; } .logon-avatar { width: 56px; height: 56px; } .logon-fields { grid-template-columns: 1fr; } }
+.logon input { width: 220px; max-width: 80vw; padding: 6px 8px; font: 14px var(--f-ui); text-align: center; color: #FFFFFF; background: #111111; border: 1px solid #5E5E5E; border-radius: 3px; outline: none; caret-color: #FFFFFF; }
+.logon input::placeholder { color: #8A8A8A; }
+.logon input:focus { border-color: #BDBDBD; }
+.bootbar { display: flex; gap: 3px; padding: 4px; border: 2px solid #8A8A8A; border-radius: 2px; }
+.bootbar i { width: 14px; height: 20px; background: #1A1A1A; }
+.bootbar i.on { background: #DADADA; }
+.flash { z-index: 109; background: #FFFFFF; opacity: 0; pointer-events: none; }
+.flash.go { animation: crtflash .9s ease-out forwards; }
+@keyframes crtflash { 0% { opacity: .38; } 12% { opacity: .2; } 22% { opacity: .3; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .flash.go { animation: none; } }
 </style>
 </head>
 <body>
@@ -794,34 +774,16 @@ a.card:visited { color: var(--text); }
   <div><span class="sad">:(</span>click to turn it back on</div>
 </div>
 
-<div class="logon" id="logon" role="dialog" aria-modal="true" aria-labelledby="logonTitle">
-  <form class="logon-box raised" id="logonForm" autocomplete="off">
-    <div class="tbar"><span class="name" id="logonTitle">Log On</span></div>
-    <div class="logon-banner"><b>Not-So-Awesome Archive</b><span>Lico 98 · Personal Edition</span></div>
-    <div class="logon-body">
-      <div class="logon-avatar" aria-hidden="true"><svg viewBox="0 0 76 76"><circle cx="38" cy="29" r="14" fill="#E9E9E9"/><path d="M10 76c0-17 12.5-27 28-27s28 10 28 27z" fill="#E9E9E9"/></svg></div>
-      <div class="logon-fields">
-        <p>Type a user name to log on. Any name works. Nobody checks.</p>
-        <label for="logonUser">User name:</label>
-        <input id="logonUser" maxlength="20" spellcheck="false" placeholder="Guest">
-        <label for="logonPass">Password:</label>
-        <input id="logonPass" disabled placeholder="(not needed)">
-      </div>
-    </div>
-    <div class="row-btns"><button type="submit" class="btn">OK</button></div>
+<div class="logon" id="logon" role="dialog" aria-modal="true" aria-label="Log on">
+  <form id="logonForm" autocomplete="off">
+    <div class="logon-avatar" aria-hidden="true"><svg viewBox="0 0 96 96"><circle cx="48" cy="37" r="17" fill="#B4B4B4"/><path d="M13 96c0-21 15.5-34 35-34s35 13 35 34z" fill="#B4B4B4"/></svg></div>
+    <input id="logonUser" maxlength="20" spellcheck="false" placeholder="Enter Your Name" aria-label="Enter Your Name" enterkeyhint="go">
   </form>
 </div>
 <div class="bootscr" id="bootscr" hidden aria-hidden="true">
-  <pre class="bios" id="bios"></pre>
-  <span class="bios-skip">click or press Esc to skip</span>
-  <div class="splash" id="splash" hidden>
-    <div class="splash-face"><img src="img/dave-face.webp" width="240" height="240" alt=""></div>
-    <h2>Not-So-Awesome Archive</h2>
-    <p class="ed">LICO <b>98</b></p>
-    <div class="splash-bar"><i></i><i></i><i></i></div>
-    <p class="splash-msg" id="splashMsg"></p>
-  </div>
+  <div class="bootbar" id="bootbar"></div>
 </div>
+<div class="flash" id="flash" aria-hidden="true"></div>
 
 <script>
 (() => {
@@ -2164,11 +2126,13 @@ a.card:visited { color: var(--text); }
   }
 
   /* ---------- Log on screen + boot sequence ----------
-     Every visit: Log On box -> BIOS text -> splash -> desktop. Turning the site back on after Shut Down plays the boot again (no log on).
-     The name is kept in this visitor's browser only ('lico-user'). Edit the BIOS lines in BIOS_LINES below. */
+     Every visit: name entry -> loading bar -> faint white flash -> desktop. Turning the site back on after Shut Down plays the loading bar again.
+     The name is kept in this visitor's browser only ('lico-user'). BLOCKS = number of blocks in the bar. */
   const system = (() => {
-    const logon = $('#logon'), scr = $('#bootscr'), bios = $('#bios'), splash = $('#splash'), msg = $('#splashMsg');
+    const BLOCKS = 12;
+    const logon = $('#logon'), scr = $('#bootscr'), bar = $('#bootbar'), flash = $('#flash');
     const quick = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    for (let k = 0; k < BLOCKS; k++) bar.append(h('i'));
     let user = '';
     try { user = localStorage.getItem('lico-user') || ''; } catch (e) {}
     const input = $('#logonUser');
@@ -2177,65 +2141,24 @@ a.card:visited { color: var(--text); }
 
     let skipping = false, wake = null, running = false;
     const wait = ms => skipping ? Promise.resolve() : new Promise(r => {
-      const t = setTimeout(() => { wake = null; r(); }, quick ? Math.min(ms, 60) : ms);
+      const t = setTimeout(() => { wake = null; r(); }, quick ? Math.min(ms, 40) : ms);
       wake = () => { clearTimeout(t); wake = null; r(); };
     });
     function skip() { if (!running) return; skipping = true; if (wake) wake(); }
     scr.addEventListener('pointerdown', skip);
     addEventListener('keydown', e => { if (running && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); skip(); } });
 
-    const name = () => user || 'Guest';
-    const BIOS_LINES = () => [
-      ['hi', 'DaveBIOS (C) 1998 Not-So-Awesome Systems, Ltd.'],
-      ['', 'Release 4.20 "Still Here" Edition'],
-      ['', ''],
-      ['', 'Main Processor    : Coffee-Powered 486DX @ 33 MHz'],
-      ['mem', 'Memory Test       : '],
-      ['', ''],
-      ['', 'Detecting IDE drives ...'],
-      ['', '  Primary Master   : GAMES (' + (games.length || 'some') + ' found, all a little dumb)'],
-      ['', '  Primary Slave    : STICKY NOTES'],
-      ['', '  Secondary Master : None'],
-      ['', '  Secondary Slave  : 1 PANCAKE ......... NOT FOUND'],
-      ['', 'Desktop buddies   : Clancies, Mon ..... OK'],
-      ['warn', 'Coffee level      : LOW'],
-      ['', ''],
-      ['', 'User              : ' + name()],
-      ['', 'Press DEL to enter SETUP (it will not help)'],
-      ['hi', 'Starting Lico 98 ...'],
-    ];
-    async function printBios() {
-      bios.textContent = '';
-      for (const [kind, text] of BIOS_LINES()) {
-        const line = h('span', { class: kind === 'mem' || kind === '' ? null : kind }, text);
-        bios.append(line, '\n');
-        if (kind === 'mem') {
-          const n = h('span', { class: 'ok' }, '0K');
-          line.after(n);
-          for (let k = 64; k <= 640; k += 64) { await wait(45); n.textContent = k + 'K'; }
-          n.textContent = '640K OK';
-        }
-        await wait(text ? 85 : 40);
-      }
-      await wait(500);
-    }
-    async function showSplash() {
-      splash.hidden = false;
-      const steps = ['Starting up...', 'Loading your personal settings...', 'Pouring coffee...', 'Applying computer settings...', 'Welcome, ' + name() + '.'];
-      for (const t of steps) { msg.textContent = t; await wait(520); }
-      await wait(300);
-    }
     async function boot(done) {
       if (running) return;
       running = true; skipping = false;
-      splash.hidden = true;
-      scr.classList.remove('fade');
+      const blocks = [...bar.children];
+      blocks.forEach(b => b.classList.remove('on'));
       scr.hidden = false;
-      await printBios();
-      await showSplash();
-      scr.classList.add('fade');
-      await new Promise(r => setTimeout(r, skipping || quick ? 0 : 450));
-      scr.hidden = true; scr.classList.remove('fade');
+      await wait(350);
+      for (const b of blocks) { b.classList.add('on'); await wait(130 + Math.random() * 120 + (Math.random() < .15 ? 260 : 0)); }
+      await wait(300);
+      scr.hidden = true;
+      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
       running = false;
       if (done) done();
     }
@@ -2249,7 +2172,7 @@ a.card:visited { color: var(--text); }
         openStartWindows();
         say(user ? pick([
           'oh. ' + user + '. hi. double-click something.',
-          'Welcome, ' + user + '. Your password was "nothing". Very secure.',
+          'Welcome, ' + user + '. No password. Very secure.',
           'Logged in as ' + user + '. I have no idea who that is. Welcome anyway.',
           'Morning, ' + user + '. Or whatever time it is. I lost track.',
         ]) : 'oh. a guest. sure. double-click something.');
