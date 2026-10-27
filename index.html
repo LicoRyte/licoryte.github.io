@@ -491,39 +491,6 @@ a.card:visited { color: var(--text); }
 .os-about { margin: 0; color: #555555; font-size: 11px; }
 .os-btns { display: flex; justify-content: flex-end; gap: 6px; padding-top: 8px; }
 
-
-/* Kels Video Player */
-#w-kels { container-type: inline-size; }
-.kv-open { display: flex; align-items: center; gap: 6px; padding: 2px 0 5px; font: 12px var(--f-ui); flex-shrink: 0; }
-.kv-open input { flex: 1; min-width: 0; font: 12px var(--f-ui); padding: 3px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
-.kv-open select { font: 12px var(--f-ui); max-width: 120px; }
-.kv-open .btn { min-height: 24px; }
-.kv-screen { position: relative; flex: 1; min-height: 120px; background: #000000; overflow: hidden; }
-.kv-screen iframe, .kv-screen #kvPlayer { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.kv-overlay { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; padding: 16px; text-align: center; color: #CFF5A0; font: 12px var(--f-ui); background: radial-gradient(circle at 50% 40%, #12301A, #000000 70%); }
-.kv-overlay b { font: italic bold 26px var(--f-head); color: #FFFFFF; text-shadow: 0 2px 0 #000000; }
-.kv-overlay img { width: 48px; height: 48px; image-rendering: pixelated; }
-.kv-overlay .err { color: #FFB3B3; max-width: 40ch; }
-.kv-overlay a.btn { color: var(--text); }
-.kv-seek { position: relative; height: 18px; margin: 6px 0 4px; cursor: var(--cur-hand); touch-action: none; flex-shrink: 0; }
-.kv-track { position: absolute; left: 0; right: 0; top: 5px; height: 8px; background: #FFFFFF; }
-.kv-buf { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #C9D8C9; }
-.kv-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, var(--navy), var(--blue)); }
-.kv-thumb { position: absolute; top: 0; width: 11px; height: 18px; margin-left: -5px; left: 0; background: var(--silver); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); box-shadow: inset -1px -1px 0 var(--shade); }
-.kv-seek:focus-visible { outline: 1px dotted var(--text); outline-offset: 2px; }
-.kv-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; flex-shrink: 0; }
-.kv-bar .btn { min-height: 26px; min-width: 30px; padding: 0 7px; justify-content: center; font-size: 12px; }
-.kv-bar .btn img { width: 16px; height: 16px; image-rendering: pixelated; }
-.kv-bar .btn.on { border-color: var(--dark) var(--hi) var(--hi) var(--dark); box-shadow: inset 1px 1px 0 var(--shade); background: repeating-conic-gradient(var(--silver) 0 25%, var(--hi) 0 50%) 0 0 / 2px 2px; }
-.kv-bar .sep { width: 2px; align-self: stretch; margin: 2px 3px; border-left: 1px solid var(--shade); border-right: 1px solid var(--hi); }
-.kv-lcd { font: 20px/1 var(--f-mono); color: var(--lcd); background: var(--lcd-bg); padding: 3px 8px; letter-spacing: .06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.kv-vol { position: relative; width: 70px; height: 18px; cursor: var(--cur-hand); touch-action: none; }
-.kv-vol .kv-track { top: 7px; height: 4px; }
-.kv-vol .kv-thumb { width: 9px; margin-left: -4px; height: 16px; top: 1px; }
-.kv-bar select { font: 12px var(--f-ui); height: 26px; }
-.kv-spacer { flex: 1; }
-@container (max-width: 520px) { .kv-open select { display: none; } .kv-vol { width: 50px; } .kv-lcd { font-size: 17px; } }
-
 /* Phones: windows open full-screen, Dave gets smaller */
 @media (max-width: 600px) {
   .dave img { height: 140px; }
@@ -555,7 +522,6 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon shortcut" data-open="url:https://twitter.com/" title="Opens Twitter in a new tab"><img src="img/icons/chat.png" alt=""><span>Twitter</span></button>
   <button type="button" class="dicon shortcut" data-open="url:https://www.youtube.com/" title="Opens YouTube in a new tab"><img src="img/icons/app-video-player.png" alt=""><span>YouTube</span></button>
   <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
-  <button type="button" class="dicon" data-open="kels"><img src="img/icons/kels.png" alt=""><span>Kels Video Player</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -645,41 +611,6 @@ a.card:visited { color: var(--text); }
     <div class="ws-list" id="wsList"></div>
   </div>
   <div class="statusbar"><span id="wsStatus">0 object(s)</span><span>Opens in a new tab</span></div>
-</section>
-
-<section class="win raised app" id="w-kels" data-app="kels" data-title="Kels Video Player" data-icon="img/icons/kels-16.png" data-w="680" data-h="540" hidden aria-labelledby="t-kels">
-  <div class="tbar"><span class="name" id="t-kels"></span></div>
-  <form class="kv-open" id="kvForm" autocomplete="off">
-    <label for="kvUrl">Open:</label>
-    <input id="kvUrl" type="text" inputmode="url" spellcheck="false" placeholder="paste a YouTube link">
-    <select id="kvRecent" aria-label="Recent videos"><option value="">Recent…</option></select>
-    <button type="submit" class="btn">Play</button>
-  </form>
-  <div class="kv-screen sunken" id="kvScreen">
-    <div id="kvPlayer"></div>
-    <div class="kv-overlay" id="kvIdle"><img src="img/icons/kels.png" alt=""><b>Kels Video Player</b><span>Paste a YouTube link above and press Play.</span></div>
-    <div class="kv-overlay" id="kvErr" hidden><img src="img/icons/kels.png" alt=""><span class="err" id="kvErrText"></span><a class="btn" id="kvErrLink" href="#" target="_blank" rel="noopener noreferrer">Watch on YouTube</a></div>
-  </div>
-  <div class="kv-seek" id="kvSeek" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
-    <div class="kv-track sunken"><div class="kv-buf" id="kvBuf"></div><div class="kv-fill" id="kvFill"></div></div>
-    <div class="kv-thumb" id="kvThumb"></div>
-  </div>
-  <div class="kv-bar">
-    <button type="button" class="btn" id="kvPlay" title="Play (Space)" aria-label="Play"><img src="img/icons/kv/play.png" alt=""></button>
-    <button type="button" class="btn" id="kvStop" title="Stop" aria-label="Stop"><img src="img/icons/kv/stop.png" alt=""></button>
-    <span class="sep" aria-hidden="true"></span>
-    <button type="button" class="btn" id="kvBack" title="Back 10 seconds (Left arrow)" aria-label="Back 10 seconds">&#171; 10</button>
-    <button type="button" class="btn" id="kvFwd" title="Forward 10 seconds (Right arrow)" aria-label="Forward 10 seconds">10 &#187;</button>
-    <span class="sep" aria-hidden="true"></span>
-    <span class="kv-lcd sunken" id="kvTime" aria-live="off">00:00 / 00:00</span>
-    <span class="kv-spacer"></span>
-    <button type="button" class="btn" id="kvLoop" title="Loop" aria-label="Loop" aria-pressed="false">&#8635;</button>
-    <select id="kvSpeed" aria-label="Speed" title="Speed"><option value="0.5">0.5&#215;</option><option value="0.75">0.75&#215;</option><option value="1" selected>1&#215;</option><option value="1.25">1.25&#215;</option><option value="1.5">1.5&#215;</option><option value="2">2&#215;</option></select>
-    <button type="button" class="btn" id="kvMute" title="Mute (M)" aria-label="Mute" aria-pressed="false"><img src="img/icons/kv/audio-volume-high.png" alt=""></button>
-    <div class="kv-vol" id="kvVol" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80"><div class="kv-track sunken"><div class="kv-fill" id="kvVolFill"></div></div><div class="kv-thumb" id="kvVolThumb"></div></div>
-    <button type="button" class="btn" id="kvFull" title="Fullscreen" aria-label="Fullscreen"><img src="img/icons/kv/fullscreen.png" alt=""></button>
-  </div>
-  <div class="statusbar"><span id="kvStatus">Ready</span><span id="kvState">Stopped</span></div>
 </section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
@@ -805,7 +736,6 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="clancies"><span class="ico" style="background:#F49AC2;color:#000">C</span><span data-label="clancies">Hide Clancies</span></button></li>
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="kels"><img src="img/icons/kels.png" alt="">Kels Video Player</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1408,7 +1338,6 @@ a.card:visited { color: var(--text); }
   }
   function closeApp(id) {
     const w = APPS[id]; if (!w) return;
-    if (id === 'kels') kels.stop();
     w.hidden = true; w.classList.remove('active');
     minimized.delete(id);
     const i = openOrder.indexOf(id); if (i >= 0) openOrder.splice(i, 1);
@@ -1490,13 +1419,12 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, kels, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
     texty: () => { openApp('texty'); return 'Opened Texty.'; },
     workstation: () => { openApp('workstation'); return 'Opened Workstation. Time to work. Ugh.'; },
-    kels: () => { openApp('kels'); return 'Opened Kels Video Player.'; },
     gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
     twitter: () => { openApp('url:https://twitter.com/'); return 'Opening Twitter in a new tab. Good luck in there.'; },
     youtube: () => { openApp('url:https://www.youtube.com/'); return 'Opening YouTube in a new tab. See you in 3 hours.'; },
@@ -2159,168 +2087,6 @@ a.card:visited { color: var(--text); }
   sndToggle.checked = sndOn;
   sndToggle.addEventListener('change', () => { sndOn = sndToggle.checked; try { localStorage.setItem('lico-sound', sndOn ? 'on' : 'off'); } catch (e) {} if (sndOn) chime(); });
   $('#sndTest').addEventListener('click', () => chime(true));
-
-  /* ---------- Kels Video Player (YouTube IFrame API + custom controls) ---------- */
-  const kels = (() => {
-    const $k = id => $('#' + id);
-    const urlIn = $k('kvUrl'), recentSel = $k('kvRecent'), statusEl = $k('kvStatus'), stateEl = $k('kvState');
-    let player = null, apiState = 'none', pending = null, ready = false, vid = null, dur = 0, loop = false, vol = 80, muted = false, seeking = null, tick = 0, lastStart = 0;
-    let recent = [];
-    try { recent = JSON.parse(localStorage.getItem('lico-kels-recent') || '[]'); vol = +(localStorage.getItem('lico-kels-vol') || 80); } catch (e) {}
-    const fmt = t => { t = Math.max(0, Math.floor(t || 0)); const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60; return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(s).padStart(2, '0'); };
-
-    function parse(raw) {
-      const t = (raw || '').trim(); if (!t) return null;
-      if (/^[\w-]{11}$/.test(t)) return { id: t, start: 0 };
-      let u; try { u = new URL(/^[a-z]+:\/\//i.test(t) ? t : 'https://' + t); } catch (e) { return null; }
-      const host = u.hostname.replace(/^(www\.|m\.|music\.)/, '');
-      let id = null;
-      if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
-      else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-        id = u.searchParams.get('v');
-        const m = u.pathname.match(/^\/(?:shorts|embed|live|v)\/([\w-]{11})/); if (!id && m) id = m[1];
-      }
-      if (!id || !/^[\w-]{11}$/.test(id)) return null;
-      const tt = u.searchParams.get('t') || u.searchParams.get('start') || '';
-      let start = 0;
-      if (/^\d+$/.test(tt)) start = +tt;
-      else { const m = tt.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/); if (m) start = (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0); }
-      return { id, start };
-    }
-    function renderRecent() {
-      recentSel.replaceChildren(h('option', { value: '' }, recent.length ? 'Recent…' : 'No recent'), ...recent.map(r => h('option', { value: r.id }, (r.title || r.id).slice(0, 60))));
-    }
-    function remember(id, title) {
-      recent = recent.filter(r => r.id !== id); recent.unshift({ id, title: title || '' }); recent = recent.slice(0, 8);
-      try { localStorage.setItem('lico-kels-recent', JSON.stringify(recent)); } catch (e) {}
-      renderRecent();
-    }
-    function showErr(msg) {
-      $k('kvIdle').hidden = true; $k('kvErr').hidden = false; $k('kvErrText').textContent = msg;
-      $k('kvErrLink').href = vid ? 'https://www.youtube.com/watch?v=' + vid : 'https://www.youtube.com/';
-      $k('kvErrLink').hidden = !vid;
-      stateEl.textContent = 'Error';
-    }
-    function loadApi() {
-      if (apiState !== 'none') return;
-      apiState = 'loading'; statusEl.textContent = 'Loading player...';
-      const prev = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => { if (prev) try { prev(); } catch (e) {} apiState = 'ready'; makePlayer(); };
-      const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; sc.async = true;
-      sc.onerror = () => { apiState = 'none'; showErr("Couldn't reach YouTube. Check your connection, or YouTube may be blocked on this network."); };
-      document.head.append(sc);
-    }
-    function makePlayer() {
-      if (player || !window.YT || !YT.Player) return;
-      player = new YT.Player('kvPlayer', {
-        width: '100%', height: '100%',
-        playerVars: { controls: 0, rel: 0, playsinline: 1, iv_load_policy: 3, disablekb: 1, fs: 0, modestbranding: 1, origin: location.origin },
-        events: {
-          onReady: () => { ready = true; player.setVolume(vol); if (muted) player.mute(); if (pending) { const p = pending; pending = null; cue(p); } },
-          onStateChange: onState,
-          onError: e => {
-            const c = e.data;
-            showErr(c === 2 ? "That doesn't look like a valid video link." : c === 5 ? "This video can't play in this browser." : c === 100 ? 'Video not found. It may be private or deleted.' : (c === 101 || c === 150) ? "The uploader doesn't allow this video to play on other websites." : 'Something went wrong playing this video.');
-          }
-        }
-      });
-    }
-    function cue(p) {
-      vid = p.id; lastStart = p.start || 0; dur = 0;
-      $k('kvIdle').hidden = true; $k('kvErr').hidden = true;
-      statusEl.textContent = 'Opening ' + p.id + '...';
-      if (!ready) { pending = p; loadApi(); return; }
-      player.loadVideoById({ videoId: p.id, startSeconds: p.start || 0 });
-      player.setPlaybackRate(+$k('kvSpeed').value || 1);
-    }
-    function onState(e) {
-      const S = window.YT && YT.PlayerState ? YT.PlayerState : { ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
-      const names = { [-1]: 'Ready', [S.ENDED]: 'Ended', [S.PLAYING]: 'Playing', [S.PAUSED]: 'Paused', [S.BUFFERING]: 'Buffering...', [S.CUED]: 'Ready' };
-      stateEl.textContent = names[e.data] || '';
-      const playing = e.data === S.PLAYING || e.data === S.BUFFERING;
-      $k('kvPlay').querySelector('img').src = 'img/icons/kv/' + (playing ? 'pause' : 'play') + '.png';
-      $k('kvPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
-      if (e.data === S.PLAYING) {
-        const d = player.getVideoData ? player.getVideoData() : null;
-        if (d && d.title) { statusEl.textContent = d.title; remember(vid, d.title); }
-        dur = player.getDuration() || dur;
-      }
-      if (e.data === S.ENDED && loop) { player.seekTo(0, true); player.playVideo(); }
-      clearInterval(tick);
-      if (playing) tick = setInterval(update, 250);
-      update();
-    }
-    function setBar(frac, el, thumb) { const f = Math.max(0, Math.min(1, frac || 0)); el.style.width = f * 100 + '%'; if (thumb) thumb.style.left = f * 100 + '%'; }
-    function update() {
-      if (!ready || !player.getCurrentTime) return;
-      dur = player.getDuration() || dur;
-      const cur = seeking != null ? seeking * dur : player.getCurrentTime();
-      $k('kvTime').textContent = fmt(cur) + ' / ' + fmt(dur);
-      setBar(dur ? cur / dur : 0, $k('kvFill'), $k('kvThumb'));
-      setBar(player.getVideoLoadedFraction ? player.getVideoLoadedFraction() : 0, $k('kvBuf'));
-      const sk = $k('kvSeek'); sk.setAttribute('aria-valuemax', Math.floor(dur)); sk.setAttribute('aria-valuenow', Math.floor(cur)); sk.setAttribute('aria-valuetext', fmt(cur));
-    }
-    function renderVol() {
-      setBar(muted ? 0 : vol / 100, $k('kvVolFill'), $k('kvVolThumb'));
-      $k('kvVol').setAttribute('aria-valuenow', muted ? 0 : vol);
-      $k('kvMute').querySelector('img').src = 'img/icons/kv/' + (muted || vol === 0 ? 'audio-volume-muted' : 'audio-volume-high') + '.png';
-      $k('kvMute').classList.toggle('on', muted); $k('kvMute').setAttribute('aria-pressed', String(muted));
-    }
-    const playing = () => ready && player.getPlayerState && player.getPlayerState() === 1;
-    function togglePlay() {
-      if (!vid) { $k('kvForm').requestSubmit(); return; }
-      if (!ready) return;
-      if (playing()) player.pauseVideo(); else player.playVideo();
-    }
-    function seekBy(d) { if (!ready || !vid) return; const t = Math.max(0, Math.min((player.getDuration() || 0) - 0.5, player.getCurrentTime() + d)); player.seekTo(t, true); update(); }
-    function stop() {
-      clearInterval(tick);
-      if (ready && vid) { try { player.pauseVideo(); player.seekTo(lastStart || 0, true); player.pauseVideo(); } catch (e) {} }
-      stateEl.textContent = 'Stopped'; $k('kvPlay').querySelector('img').src = 'img/icons/kv/play.png'; $k('kvPlay').setAttribute('aria-label', 'Play');
-      setTimeout(update, 50);
-    }
-
-    $k('kvForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const p = parse(urlIn.value);
-      if (!p) { statusEl.textContent = urlIn.value.trim() ? "That's not a YouTube link I understand." : 'Paste a YouTube link first.'; return; }
-      cue(p);
-    });
-    recentSel.addEventListener('change', () => { if (!recentSel.value) return; urlIn.value = 'https://youtu.be/' + recentSel.value; cue({ id: recentSel.value, start: 0 }); recentSel.value = ''; });
-    $k('kvPlay').addEventListener('click', togglePlay);
-    $k('kvStop').addEventListener('click', stop);
-    $k('kvBack').addEventListener('click', () => seekBy(-10));
-    $k('kvFwd').addEventListener('click', () => seekBy(10));
-    $k('kvLoop').addEventListener('click', () => { loop = !loop; $k('kvLoop').classList.toggle('on', loop); $k('kvLoop').setAttribute('aria-pressed', String(loop)); });
-    $k('kvSpeed').addEventListener('change', () => { if (ready) player.setPlaybackRate(+$k('kvSpeed').value); });
-    $k('kvMute').addEventListener('click', () => { muted = !muted; if (ready) { if (muted) player.mute(); else player.unMute(); } renderVol(); });
-    $k('kvFull').addEventListener('click', () => {
-      const el = $k('kvScreen'), req = el.requestFullscreen || el.webkitRequestFullscreen;
-      if (document.fullscreenElement) document.exitFullscreen(); else if (req) Promise.resolve(req.call(el)).catch(() => { statusEl.textContent = 'Fullscreen is not available here.'; });
-    });
-    function drag(el, onFrac, onEnd) {
-      let on = false;
-      const frac = e => { const r = el.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
-      el.addEventListener('pointerdown', e => { if (e.button !== 0) return; on = true; el.setPointerCapture(e.pointerId); onFrac(frac(e)); });
-      el.addEventListener('pointermove', e => { if (on) onFrac(frac(e)); });
-      const end = e => { if (!on) return; on = false; onEnd && onEnd(frac(e)); };
-      el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
-    }
-    drag($k('kvSeek'), f => { if (!ready || !dur) return; seeking = f; update(); }, f => { if (!ready || !dur) return; seeking = null; player.seekTo(f * dur, true); update(); });
-    drag($k('kvVol'), f => { vol = Math.round(f * 100); muted = vol === 0 ? muted : false; if (ready) { player.setVolume(vol); if (!muted) player.unMute(); } renderVol(); },
-      () => { try { localStorage.setItem('lico-kels-vol', vol); } catch (e) {} });
-    $k('kvSeek').addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { seekBy(-5); e.preventDefault(); } else if (e.key === 'ArrowRight') { seekBy(5); e.preventDefault(); } });
-    $k('kvVol').addEventListener('keydown', e => { const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 5 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 0; if (!d) return; e.preventDefault(); vol = Math.max(0, Math.min(100, vol + d)); if (ready) player.setVolume(vol); renderVol(); });
-    APPS.kels.addEventListener('keydown', e => {
-      if (e.target.closest('input, select, textarea')) return;
-      if (e.key === ' ' || e.key === 'k') { e.preventDefault(); togglePlay(); }
-      else if (e.key === 'ArrowLeft' && !e.target.closest('[role="slider"]')) { e.preventDefault(); seekBy(-5); }
-      else if (e.key === 'ArrowRight' && !e.target.closest('[role="slider"]')) { e.preventDefault(); seekBy(5); }
-      else if (e.key === 'm') $k('kvMute').click();
-    });
-    renderRecent(); renderVol();
-    return { stop, parse };
-  })();
 
   /* Start with a couple of windows open (or the one named in the link, e.g. #games) */
   const ALIAS = { links: 'texty', internet: 'texty', browser: 'texty', control: 'os', display: 'os' };
