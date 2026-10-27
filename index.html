@@ -1699,7 +1699,7 @@ a.card:visited { color: var(--text); }
         const u = /^[a-z][a-z0-9+.-]*:\/\//i.test(t) ? t : 'https://' + t;
         try { const p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : null; } catch (e) { return null; }
       }
-      return 'https://duckduckgo.com/?q=' + encodeURIComponent(t);
+      return 'https://www.google.com/search?q=' + encodeURIComponent(t);
     }
     function renderHist() {
       histEl.replaceChildren(...(hist.length ? hist.map(u => h('li', {}, h('a', { href: u, target: '_blank', rel: 'noopener noreferrer' }, u.replace(/^https?:\/\//, '').replace(/\/$/, '')))) : [h('li', { class: 'none' }, 'nothing yet')]));
