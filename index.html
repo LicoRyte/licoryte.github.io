@@ -2160,9 +2160,9 @@ a.card:visited { color: var(--text); }
       const blocks = [...bar.children];
       blocks.forEach(b => b.classList.remove('on'));
       scr.hidden = false;
-      await wait(75);
-      for (const b of blocks) { b.classList.add('on'); await wait(40  + (Math.random() < .15 ? 70 : 0)); }
-      await wait(80);
+      await wait(60);
+      for (const b of blocks) { b.classList.add('on'); await wait(20); }
+      await wait(60);
       scr.hidden = true;
       crtFlash();
       running = false;
