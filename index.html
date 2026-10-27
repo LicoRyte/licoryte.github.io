@@ -540,6 +540,96 @@ a.card:visited { color: var(--text); }
 .yd-tray input::placeholder { font: 12px var(--f-ui); color: #777777; }
 @container (max-width: 380px) { .yd-tray .big { display: none; } }
 
+/* Network Man */
+#w-netman { container-type: inline-size; }
+#nmRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.nm-tools { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
+.nm-group { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+.nm-tools .btn { padding: 2px 7px; display: inline-flex; gap: 4px; align-items: center; }
+.nm-tools .btn[aria-pressed="true"] { border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #DCDCDC; font-weight: bold; }
+.nm-tools input, .nm-tools select { font: 12px var(--f-ui); padding: 1px 3px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.nm-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 6px; }
+.nm-stage { position: relative; min-height: 0; background: #FFFFFF; background-image: radial-gradient(#D6DED3 1px, transparent 1px); background-size: 16px 16px; overflow: hidden; }
+.nm-stage.cabling { outline: 2px dashed var(--blue); outline-offset: -4px; }
+.nm-svg { display: block; width: 100%; height: 100%; outline: none; touch-action: none; user-select: none; -webkit-user-select: none; font-family: var(--f-ui); }
+.nm-hint { position: absolute; left: 8px; bottom: 6px; padding: 2px 6px; font: 11px var(--f-ui); background: #FFFFE1; border: 1px solid #000000; pointer-events: none; }
+.nm-glyph .body { fill: #D4D0C8; stroke: #404040; stroke-width: 1.5; }
+.nm-glyph .side { stroke: none; } .nm-glyph .top { fill: #E8E5DE; stroke: #404040; stroke-width: 1.5; }
+.nm-glyph .screen { fill: #1B5E20; stroke: #404040; }
+.nm-glyph .slot { fill: #5A5A5A; } .nm-glyph .led { fill: #3FE04A; }
+.nm-glyph .arrow { fill: none; stroke: #0B4A12; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nm-router .body, .nm-router .top { fill: #CFE3F5; } .nm-router .arrow { stroke: #1F4E8A; }
+.nm-switch .body { fill: #DDEBD6; }
+.nm-dev { cursor: var(--cur-grab); outline: none; }
+.nm-dev .halo { fill: transparent; stroke: none; }
+.nm-dev.sel .halo, .nm-dev:focus-visible .halo { fill: rgba(46, 139, 34, .12); stroke: var(--blue); stroke-dasharray: 3 2; }
+.nm-dev.from .halo { fill: rgba(255, 200, 0, .25); stroke: #B08A00; }
+.nm-dev text { text-anchor: middle; }
+.nm-dev .name { font-size: 11px; font-weight: bold; fill: #111111; paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; }
+.nm-dev .ip { font-size: 10px; fill: #1F4E8A; paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; }
+.nm-dev .ip.warn { fill: #B00020; }
+.nm-link .wire { stroke: #3A3A3A; stroke-width: 2; }
+.nm-link .hit { stroke: transparent; stroke-width: 14; cursor: var(--cur-hand); }
+.nm-link.sel .wire { stroke: var(--blue); stroke-width: 3; stroke-dasharray: 6 3; }
+.nm-link.busy .wire { stroke: #E0A000; stroke-width: 3; }
+.nm-labels .port { font-size: 9px; fill: #666666; text-anchor: middle; paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; pointer-events: none; }
+.nm-labels .rport { fill: #1F4E8A; } .nm-labels .rip { font-size: 10px; font-weight: bold; }
+.nm-pkt rect { stroke: #000000; stroke-width: 1; }
+.nm-pkt text { font: bold 9px var(--f-ui); text-anchor: middle; fill: #000000; }
+.nm-pkt.arp rect { fill: #FFB347; } .nm-pkt.icmp rect { fill: #7CD67C; }
+.nm-side { min-height: 0; display: flex; flex-direction: column; }
+.nm-tabs { display: flex; gap: 1px; flex-shrink: 0; }
+.nm-tabs button { font: 12px var(--f-ui); padding: 3px 10px; background: var(--silver); border: 2px solid; border-color: var(--hi) var(--shade) transparent var(--hi); margin-bottom: -2px; }
+.nm-tabs button[aria-selected="true"] { background: #FFFFFF; position: relative; z-index: 1; font-weight: bold; }
+.nm-pane { flex: 1; min-height: 0; overflow: auto; padding: 8px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px/1.4 var(--f-ui); }
+.nm-pane h3 { margin: 2px 0 6px; font: bold 13px var(--f-ui); color: var(--navy); }
+.nm-pane h3.ok { color: #1B7A1B; } .nm-pane h3.bad { color: #B00020; }
+.nm-pane h4 { margin: 10px 0 4px; font: bold 12px var(--f-ui); color: #333333; border-bottom: 1px solid var(--silver); }
+.nm-pane p { margin: 4px 0; }
+.nm-help ol { margin: 4px 0; padding-left: 18px; } .nm-help li { margin: 3px 0; }
+.nm-field { display: grid; gap: 1px; margin: 4px 0; }
+.nm-field span { font-size: 11px; color: #333333; }
+.nm-field input, .nm-addroute input { font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; min-width: 0; }
+.nm-field input.bad { background: #FFE5E5; }
+.nm-msg { color: #B00020; font-size: 11px; min-height: 0; }
+.nm-msg:empty { display: none; }
+.nm-kv { display: flex; gap: 6px; font-size: 11px; } .nm-kv span { color: #555555; min-width: 44px; }
+.nm-kv code, .nm-route code, .nm-table td, .nm-layer dd { font: 11px "Consolas", "Lucida Console", "Courier New", monospace; }
+.nm-port { margin: 6px 0; padding: 4px 6px 6px; border: 1px solid #BBBBBB; } .nm-port.off { opacity: .6; }
+.nm-port legend { font: bold 11px var(--f-ui); padding: 0 3px; }
+.nm-route { display: flex; gap: 4px; align-items: center; justify-content: space-between; margin: 2px 0; }
+.nm-route .btn { padding: 0 6px; }
+.nm-addroute { display: grid; gap: 3px; margin-top: 4px; }
+.nm-table { width: 100%; border-collapse: collapse; }
+.nm-table th { text-align: left; font: bold 11px var(--f-ui); background: var(--silver); padding: 2px 4px; }
+.nm-table td { padding: 2px 4px; border-bottom: 1px solid #EEEEEE; overflow-wrap: anywhere; }
+.nm-empty { color: #666666; font-size: 11px; }
+.nm-nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+.nm-nav .btn { padding: 0 8px; }
+.nm-cap { font-size: 11px; color: #555555; }
+.chg-key { background: #FFF27A; padding: 0 3px; }
+.nm-frame { display: flex; height: 38px; border: 1px solid #000000; margin: 4px 0 8px; font: 10px/1.1 var(--f-ui); }
+.nm-frame .seg { min-width: 30px; display: grid; place-content: center; text-align: center; border-right: 1px solid #000000; overflow: hidden; }
+.nm-frame .seg:last-child { border-right: 0; }
+.nm-frame .seg small { font-size: 9px; color: #333333; }
+.seg.eth, .nm-layer.eth .lh { background: #9CC8F0; } .seg.arp, .nm-layer.arp .lh { background: #FFB347; }
+.seg.ip, .nm-layer.ip .lh { background: #8FD88F; } .seg.icmp, .nm-layer.icmp .lh { background: #D5A6F0; }
+.seg.data { background: #EEEEEE; } .seg.fcs { background: #BDBDBD; }
+.nm-layer { border: 1px solid #888888; margin: 0 0 6px; }
+.nm-layer .lh { font: bold 11px var(--f-ui); padding: 2px 6px; border-bottom: 1px solid #888888; }
+.nm-layer dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 8px; margin: 0; padding: 4px 6px; }
+.nm-layer dt { font-size: 11px; color: #444444; cursor: help; } .nm-layer dd { margin: 0; overflow-wrap: anywhere; }
+.nm-layer dd.changed { background: #FFF27A; }
+.nm-explain { border-top: 1px solid var(--silver); margin-top: 6px; padding-top: 4px; }
+.nm-explain p { margin: 0 0 6px; }
+.nm-log { margin: 0; padding-left: 26px; } .nm-log li { padding: 2px 4px; cursor: var(--cur-hand); }
+.nm-log li:hover { background: #E2F2DC; } .nm-log li.cur { background: var(--select, #0B4A12); color: #FFFFFF; }
+.nm-log li.ok { font-weight: bold; color: #1B7A1B; } .nm-log li.bad { font-weight: bold; color: #B00020; } .nm-log li.cur.ok, .nm-log li.cur.bad { color: #FFFFFF; }
+@container (max-width: 700px) {
+  .nm-main { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 1fr) minmax(220px, 45%); }
+  .nm-ping input { width: 110px; }
+}
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -571,6 +661,7 @@ a.card:visited { color: var(--text); }
   <button type="button" class="dicon shortcut" data-open="url:https://www.youtube.com/" title="Opens YouTube in a new tab"><img src="img/icons/app-video-player.png" alt=""><span>YouTube</span></button>
   <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
   <button type="button" class="dicon" data-open="dude"><img src="img/icons/yourdude.png" alt=""><span>Your Dude</span></button>
+  <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -674,6 +765,11 @@ a.card:visited { color: var(--text); }
     <button type="button" class="btn" id="ydClear">Clear</button>
   </div>
   <div class="statusbar"><span id="ydStatus">Loading emoji...</span><span id="ydCount"></span></div>
+</section>
+
+<section class="win raised app" id="w-netman" data-app="netman" data-title="Network Man" data-icon="img/icons/netman-16.png" data-w="980" data-h="640" hidden aria-labelledby="t-netman">
+  <div class="tbar"><span class="name" id="t-netman"></span></div>
+  <div id="nmRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Network Man...</p></div>
 </section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
@@ -800,6 +896,7 @@ a.card:visited { color: var(--text); }
     <li><button type="button" role="menuitem" data-act="buddy" data-buddy="mon"><span class="ico" style="background:#3A3561">M</span><span data-label="mon">Hide Mon</span></button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="dude"><img src="img/icons/yourdude.png" alt="">Your Dude</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1390,6 +1487,7 @@ a.card:visited { color: var(--text); }
     if (id === 'display' || id === 'control' || id === 'system') { const tab = id === 'control' ? 'system' : id; id = 'os'; osTab(tab === 'system' ? 'system' : 'display'); }
     if (id === 'os') syncDisplayForm();
     if (id === 'dude') dude.load();
+    if (id === 'netman') loadNetMan();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1498,13 +1596,15 @@ a.card:visited { color: var(--text); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
     texty: () => { openApp('texty'); return 'Opened Texty.'; },
     workstation: () => { openApp('workstation'); return 'Opened Workstation. Time to work. Ugh.'; },
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
+    netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
+    ping: () => { openApp('netman'); return 'Pong. (Open Network Man to ping for real.)'; },
     emoji: () => { openApp('dude'); return 'Opened Your Dude.'; },
     gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
     twitter: () => { openApp('url:https://twitter.com/'); return 'Opening Twitter in a new tab. Good luck in there.'; },
@@ -2135,6 +2235,21 @@ a.card:visited { color: var(--text); }
     (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => { load().catch(() => {}); }, { timeout: 6000 });
     return { load: open };
   })();
+
+  /* ---------- Network Man (code lives in apps/netman.js, loaded the first time the window opens) ---------- */
+  let netmanLoading = null;
+  function loadNetMan() {
+    if (netmanLoading) return netmanLoading;
+    netmanLoading = new Promise((ok, no) => {
+      const sc = document.createElement('script');
+      sc.src = 'apps/netman.js?v=1'; sc.onload = ok; sc.onerror = no;
+      document.head.append(sc);
+    }).then(() => {
+      // wait one frame so the window has its size before drawing
+      requestAnimationFrame(() => window.NetMan.mount($('#nmRoot'), { onDone: okPing => say(okPing ? pick(['Ping worked. Packets: delivered. Me: still tired.', 'See? Networking is just shouting "who has this IP" until someone answers.', 'Ping successful. Nice. Now do it without me watching.']) : pick(['Ping failed. Check the gateway. It\'s always the gateway.', 'Request timed out. Story of my life.', 'No reply. Check IPs, masks and gateways. In that order.'])) }));
+    }).catch(() => { $('#nmRoot').textContent = "Couldn't load Network Man. Check your connection and open it again."; netmanLoading = null; });
+    return netmanLoading;
+  }
 
   /* ---------- Paint ---------- */
   const paint = (() => {
