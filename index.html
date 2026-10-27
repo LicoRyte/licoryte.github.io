@@ -520,8 +520,9 @@ a.card:visited { color: var(--text); }
 .bootbar i { width: 14px; height: 20px; background: #1A1A1A; }
 .bootbar i.on { background: #DADADA; }
 .flash { z-index: 109; background: #FFFFFF; opacity: 0; pointer-events: none; }
-.flash.go { animation: crtflash .9s ease-out forwards; }
-@keyframes crtflash { 0% { opacity: .38; } 12% { opacity: .2; } 22% { opacity: .3; } 100% { opacity: 0; } }
+.flash { background: radial-gradient(ellipse at 50% 50%, #FFFFFF 0%, #FFFFFF 45%, #EAF6FF 100%); }
+.flash.go { animation: crtflash 1.3s ease-out forwards; }
+@keyframes crtflash { 0% { opacity: 1; } 8% { opacity: .55; } 14% { opacity: .95; } 22% { opacity: .7; } 35% { opacity: .5; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .flash.go { animation: none; } }
 </style>
 </head>
