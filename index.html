@@ -14,24 +14,27 @@
 
 /* Layout: a late-90s desktop — wallpaper, a column of desktop icons, fixed draggable windows, Dave in the bottom-right corner, taskbar with Start menu */
 :root {
-  --desk: #021A08;
+  --desk: #008080;
   --silver: #C0C0C0;
   --silver-lt: #DFDFDF;
   --hi: #FFFFFF;
   --shade: #808080;
   --dark: #0A0A0A;
-  --navy: #0B4A12;
-  --blue: #2E8B22;
+  --navy: #000080;
+  --blue: #1084D0;
+  --deep: #00003C;
+  --accent: #3A8EE6;
+  --hover: #DCE8F8;
   --inactive-a: #808080;
   --inactive-b: #B5B5B5;
-  --select: #0B4A12;
+  --select: #000080;
   --text: #000000;
   --paper: #FFFFFF;
-  --link: #006E00;
+  --link: #0000EE;
   --visited: #4B3A7A;
   --lcd-bg: #001A00;
   --lcd: #33FF33;
-  --sky: #CFF5A0;
+  --sky: #BFE0FF;
   --tb-h: 32px;
   /* Lico's arrow is used for every cursor state. To bring back a different one for a state, point that line at another file in img/cursors/. */
   --cur-arrow: url("img/cursors/arrow.png") 2 2, default;
@@ -309,7 +312,7 @@ a.card:visited { color: var(--text); }
 .dave-spot[data-mood="happy"] .dave { filter: saturate(1.3) brightness(1.06); }
 .dave-spot[data-mood="annoyed"] .dave { animation: glitch .18s steps(2) infinite; }
 @keyframes glitch { 0% { filter: hue-rotate(0deg); transform: translateX(0); } 50% { filter: hue-rotate(260deg) saturate(2.2); transform: translateX(3px); } 100% { filter: hue-rotate(0deg); transform: translateX(-2px); } }
-.zzz { position: absolute; z-index: 3; right: 10px; top: -6px; display: none; pointer-events: none; font-family: var(--f-head); font-weight: bold; color: #CFF5A0; font-size: 22px; text-shadow: 2px 2px 0 #011005; }
+.zzz { position: absolute; z-index: 3; right: 10px; top: -6px; display: none; pointer-events: none; font-family: var(--f-head); font-weight: bold; color: var(--sky); font-size: 22px; text-shadow: 2px 2px 0 #011005; }
 .zzz span { display: inline-block; animation: zz 2.4s ease-in-out infinite; }
 .zzz span:nth-child(2) { font-size: .8em; animation-delay: .4s; }
 .zzz span:nth-child(3) { font-size: .6em; animation-delay: .8s; }
@@ -344,22 +347,22 @@ a.card:visited { color: var(--text); }
 }
 .profile {
   grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 10px;
-  background: linear-gradient(180deg, #052A0A 0%, var(--navy) 50%, #3FA82E 100%); color: #FFFFFF;
+  background: linear-gradient(180deg, var(--deep) 0%, var(--navy) 50%, var(--accent) 100%); color: #FFFFFF;
 }
-.profile h1 { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 17px; line-height: 1.1; color: #E2FFA0; text-shadow: 2px 2px 0 #011005; text-wrap: balance; }
+.profile h1 { margin: 0; font-family: var(--f-head); font-weight: bold; font-size: 17px; line-height: 1.1; color: #FFFFFF; text-shadow: 2px 2px 0 var(--deep); text-wrap: balance; }
 .profile p { margin: 3px 0 0; font-size: 11px; line-height: 1.35; color: var(--sky); font-style: italic; }
 .hex {
   --hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
   width: 56px; height: 64px; flex-shrink: 0; display: block; clip-path: var(--hex); background: #B6E33B; padding: 3px;
 }
-.hex-in { display: block; width: 100%; height: 100%; overflow: hidden; clip-path: var(--hex); background: radial-gradient(circle at 50% 40%, #2E8B22, #052A0A 75%); }
+.hex-in { display: block; width: 100%; height: 100%; overflow: hidden; clip-path: var(--hex); background: radial-gradient(circle at 50% 40%, var(--blue), var(--deep) 75%); }
 .hex-in img { width: 100%; height: 100%; max-width: none; display: block; object-fit: cover; object-position: 50% 30%; }
 .start-menu .side-band {
   writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 4px;
   background: linear-gradient(0deg, var(--navy), var(--blue)); color: #FFFFFF;
   font-family: var(--f-head); font-weight: bold; font-size: 18px; letter-spacing: .04em;
 }
-.start-menu .side-band span { color: #CFF5A0; font-weight: normal; }
+.start-menu .side-band span { color: var(--sky); font-weight: normal; }
 .start-menu ul { list-style: none; margin: 0; padding: 2px; min-width: 0; }
 .start-menu li.sep { height: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 3px 2px; }
 .start-menu button {
@@ -531,7 +534,7 @@ a.card:visited { color: var(--text); }
 .yd-grid { flex: 1; min-height: 0; overflow: auto; overflow-anchor: none; contain: strict; background: #FFFFFF; padding: 4px; position: relative; }
 .yd-inner { position: relative; }
 .yd-grid button { position: absolute; height: 34px; padding: 0; font: 22px/1 var(--f-emoji); background: none; border: 1px solid transparent; border-radius: 2px; }
-.yd-grid button:hover, .yd-grid button:focus-visible { background: #E2F2DC; border-color: var(--blue); outline: none; }
+.yd-grid button:hover, .yd-grid button:focus-visible { background: var(--hover); border-color: var(--blue); outline: none; }
 .yd-grid .yd-none { margin: 0; padding: 20px 8px; font: 12px var(--f-ui); color: #555555; text-align: center; }
 
 .yd-tray { display: flex; align-items: center; gap: 6px; padding-top: 5px; font: 12px var(--f-ui); flex-shrink: 0; }
@@ -635,7 +638,7 @@ a.card:visited { color: var(--text); }
 .nm-explain { border-top: 1px solid var(--silver); margin-top: 6px; padding-top: 4px; }
 .nm-explain p { margin: 0 0 6px; }
 .nm-log { margin: 0; padding-left: 26px; } .nm-log li { padding: 2px 4px; cursor: var(--cur-hand); }
-.nm-log li:hover { background: #E2F2DC; } .nm-log li.cur { background: var(--select, #0B4A12); color: #FFFFFF; }
+.nm-log li:hover { background: var(--hover); } .nm-log li.cur { background: var(--select, #0B4A12); color: #FFFFFF; }
 .nm-log li.ok { font-weight: bold; color: #1B7A1B; } .nm-log li.bad { font-weight: bold; color: #B00020; } .nm-log li.cur.ok, .nm-log li.cur.bad { color: #FFFFFF; }
 @container (max-width: 700px) {
   .nm-main { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 1fr) minmax(220px, 45%); }
@@ -824,15 +827,15 @@ a.card:visited { color: var(--text); }
       <div class="dp-monitor"><div class="dp-screen sunken" id="dpScreen"><i></i></div></div>
       <fieldset>
         <legend>Wallpaper</legend>
-        <label><input type="radio" name="dpWall" value="site" checked> Forest (Lico's pick)</label>
-        <label><input type="radio" name="dpWall" value="teal"> Classic teal</label>
+        <label><input type="radio" name="dpWall" value="teal" checked> Classic teal</label>
+        <label><input type="radio" name="dpWall" value="site"> Forest photo</label>
         <label><input type="radio" name="dpWall" value="night"> Night</label>
         <label><input type="radio" name="dpWall" value="paint" id="dpWallPaint"> My Paint drawing</label>
       </fieldset>
       <fieldset>
         <legend>Window color</legend>
-        <label><input type="radio" name="dpTheme" value="forest" checked><span class="swatch" style="background:linear-gradient(90deg,#0B4A12,#2E8B22)"></span> Forest</label>
-        <label><input type="radio" name="dpTheme" value="blue"><span class="swatch" style="background:linear-gradient(90deg,#000080,#1084D0)"></span> Classic blue</label>
+        <label><input type="radio" name="dpTheme" value="blue" checked><span class="swatch" style="background:linear-gradient(90deg,#000080,#1084D0)"></span> Classic blue</label>
+        <label><input type="radio" name="dpTheme" value="forest"><span class="swatch" style="background:linear-gradient(90deg,#0B4A12,#2E8B22)"></span> Forest</label>
         <label><input type="radio" name="dpTheme" value="maroon"><span class="swatch" style="background:linear-gradient(90deg,#5A0A0A,#B03A3A)"></span> Maroon</label>
         <label><input type="radio" name="dpTheme" value="slate"><span class="swatch" style="background:linear-gradient(90deg,#2B3440,#6A7F99)"></span> Slate</label>
       </fieldset>
@@ -967,8 +970,8 @@ a.card:visited { color: var(--text); }
   const src = f => /^(https?:|data:)/.test(f) ? f : encodeURI(f);
 
   /* Background: the image in img/background/ (or site.background in games.json) */
-  let siteBg = null, wallChoice = 'site';
-  try { wallChoice = localStorage.getItem('lico-wall') || 'site'; } catch (e) {}
+  let siteBg = null, wallChoice = 'teal';
+  try { wallChoice = localStorage.getItem('lico-wall') || 'teal'; } catch (e) {}
   function applyBg(path) {
     if (!path) return;
     siteBg = path;
@@ -1977,19 +1980,21 @@ a.card:visited { color: var(--text); }
   })();
 
   /* ---------- OS > Display (saved in this browser) ---------- */
+  // Window colors. The default is 'blue' (Classic blue). Each one also colors the Start menu, links and highlights.
   const THEMES = {
-    forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12' },
-    blue:   { navy: '#000080', blue: '#1084D0', select: '#000080' },
-    maroon: { navy: '#5A0A0A', blue: '#B03A3A', select: '#800000' },
-    slate:  { navy: '#2B3440', blue: '#6A7F99', select: '#2B3440' }
+    blue:   { navy: '#000080', blue: '#1084D0', select: '#000080', deep: '#00003C', accent: '#3A8EE6', sky: '#BFE0FF', hover: '#DCE8F8', link: '#0000EE' },
+    forest: { navy: '#0B4A12', blue: '#2E8B22', select: '#0B4A12', deep: '#052A0A', accent: '#3FA82E', sky: '#CFF5A0', hover: '#E2F2DC', link: '#006E00' },
+    maroon: { navy: '#5A0A0A', blue: '#B03A3A', select: '#800000', deep: '#2A0404', accent: '#D46A6A', sky: '#FFD0C8', hover: '#F5E0E0', link: '#8B0000' },
+    slate:  { navy: '#2B3440', blue: '#6A7F99', select: '#2B3440', deep: '#151A20', accent: '#8EA3BC', sky: '#DCE6F2', hover: '#E4E9EF', link: '#2B4A7A' }
   };
+  const DEFAULT_THEME = 'blue', DEFAULT_WALL = 'teal';
   const WALLS = { teal: '#008080', night: '#0B0F14' };
-  let themeChoice = 'forest', paintWall = null;
-  try { themeChoice = localStorage.getItem('lico-theme') || 'forest'; paintWall = localStorage.getItem('lico-paintwall'); } catch (e) {}
+  let themeChoice = DEFAULT_THEME, paintWall = null;
+  try { themeChoice = localStorage.getItem('lico-theme') || DEFAULT_THEME; paintWall = localStorage.getItem('lico-paintwall'); } catch (e) {}
   function applyTheme(name) {
-    const t = THEMES[name] || THEMES.forest; themeChoice = THEMES[name] ? name : 'forest';
+    const t = THEMES[name] || THEMES[DEFAULT_THEME]; themeChoice = THEMES[name] ? name : DEFAULT_THEME;
     const r = document.documentElement.style;
-    r.setProperty('--navy', t.navy); r.setProperty('--blue', t.blue); r.setProperty('--select', t.select);
+    for (const [k, v] of Object.entries(t)) r.setProperty('--' + k, v);
   }
   function applyWall(name) {
     const bg = document.querySelector('.bg');
@@ -2012,7 +2017,7 @@ a.card:visited { color: var(--text); }
   document.querySelectorAll('input[name="dpTheme"]').forEach(r => r.addEventListener('change', () => { applyTheme(r.value); try { localStorage.setItem('lico-theme', themeChoice); } catch (e) {} }));
   $('#dpOk').addEventListener('click', () => closeApp('os'));
   $('#dpReset').addEventListener('click', () => {
-    applyTheme('forest'); applyWall('site');
+    applyTheme(DEFAULT_THEME); applyWall(DEFAULT_WALL);
     try { localStorage.removeItem('lico-theme'); localStorage.removeItem('lico-wall'); } catch (e) {}
     syncDisplayForm();
   });
