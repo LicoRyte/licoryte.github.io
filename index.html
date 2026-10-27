@@ -2163,7 +2163,7 @@ a.card:visited { color: var(--text); }
      Every visit: name entry -> loading bar -> faint white flash -> desktop. Turning the site back on after Shut Down plays the loading bar again.
      The name is kept in this visitor's browser only ('lico-user'). BLOCKS = number of blocks in the bar. */
   const system = (() => {
-    const BLOCKS = 12;
+    const BLOCKS = 10;
     const logon = $('#logon'), scr = $('#bootscr'), bar = $('#bootbar'), flash = $('#flash');
     const quick = matchMedia('(prefers-reduced-motion: reduce)').matches;
     for (let k = 0; k < BLOCKS; k++) bar.append(h('i'));
@@ -2187,7 +2187,7 @@ a.card:visited { color: var(--text); }
       const frames = quick
         ? [{ opacity: 0.9 }, { opacity: 0 }]
         : [{ opacity: 1, offset: 0 }, { opacity: 0.55, offset: 0.08 }, { opacity: 0.95, offset: 0.14 }, { opacity: 0.7, offset: 0.22 }, { opacity: 0.5, offset: 0.35 }, { opacity: 0, offset: 1 }];
-      try { flash.getAnimations().forEach(a => a.cancel()); flash.animate(frames, { duration: quick ? 900 : 1300, easing: 'ease-out' }); }
+      try { flash.getAnimations().forEach(a => a.cancel()); flash.animate(frames, { duration: quick ? 600 : 900, easing: 'ease-out' }); }
       catch (e) { flash.style.transition = 'none'; flash.style.opacity = '1'; void flash.offsetWidth; flash.style.transition = 'opacity 1.2s ease-out'; flash.style.opacity = '0'; }
     }
     async function boot(done) {
@@ -2197,9 +2197,9 @@ a.card:visited { color: var(--text); }
       const blocks = [...bar.children];
       blocks.forEach(b => b.classList.remove('on'));
       scr.hidden = false;
-      await wait(350);
-      for (const b of blocks) { b.classList.add('on'); await wait(130 + Math.random() * 120 + (Math.random() < .15 ? 260 : 0)); }
-      await wait(300);
+      await wait(60);
+      for (const b of blocks) { b.classList.add('on'); await wait(25); }
+      await wait(60);
       scr.hidden = true;
       crtFlash();
       startupSound();
