@@ -691,6 +691,70 @@ a.card:visited { color: var(--text); }
 html.crt43 { --scr-w: min(100vw, calc(100dvh * 4 / 3)); --scr-h: min(100dvh, calc(100vw * 3 / 4)); background: #000000; }
 html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dvh - var(--scr-h)) / 2) auto 0; position: relative; overflow: hidden; transform: translateZ(0); }
 
+/* Readworm (Markdown reader) */
+#w-readworm { container-type: inline-size; }
+#rwRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+#rwRoot.rw-drop::after { content: "Drop it. I'm hungry."; position: absolute; inset: 30px 0 22px; display: grid; place-items: center; font: bold 16px var(--f-ui); color: var(--navy); background: rgba(255, 255, 255, .85); border: 3px dashed var(--blue); pointer-events: none; }
+.rw-tools { display: flex; gap: 6px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; min-width: 0; }
+.rw-tools .btn { padding: 2px 10px; }
+.rw-tools .btn[aria-pressed="true"] { border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #DCDCDC; }
+.rw-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 6px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.rw-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 6px; }
+.rw-main.no-outline { grid-template-columns: minmax(0, 1fr); } .rw-main.no-outline .rw-outline { display: none; }
+.rw-outline { min-height: 0; overflow: auto; padding: 6px 4px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px var(--f-ui); }
+.rw-ol-h { font-weight: bold; color: var(--navy); padding: 0 4px 4px; }
+.rw-outline ul { list-style: none; margin: 0; padding: 0; }
+.rw-outline button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 2px 4px; font: 12px var(--f-ui); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: var(--cur-hand); }
+.rw-outline button:hover { background: var(--hover); }
+.rw-outline .lv1 button { font-weight: bold; } .rw-outline .lv2 button { padding-left: 12px; } .rw-outline .lv3 button { padding-left: 22px; } .rw-outline .lv4 button { padding-left: 32px; color: #444444; }
+.rw-muted { color: #666666; font-size: 11px; padding: 0 4px; }
+.rw-scroll { min-height: 0; overflow: auto; background: #FFFFFF; outline: none; }
+.rw-doc { max-width: 74ch; margin: 0 auto; padding: 18px 26px 40px; font: 14px/1.65 var(--f-body); color: #1A1A1A; overflow-wrap: break-word; }
+.rw-doc > :first-child { margin-top: 0; }
+.rw-doc h1, .rw-doc h2, .rw-doc h3, .rw-doc h4, .rw-doc h5, .rw-doc h6 { font-family: var(--f-head); color: var(--navy); line-height: 1.25; margin: 1.4em 0 .5em; }
+.rw-doc h1 { font-size: 1.9em; padding-bottom: 6px; border-bottom: 3px solid; border-image: linear-gradient(90deg, var(--navy), var(--blue), transparent) 1; }
+.rw-doc h2 { font-size: 1.45em; padding-bottom: 3px; border-bottom: 1px solid var(--silver); }
+.rw-doc h3 { font-size: 1.2em; } .rw-doc h4 { font-size: 1.05em; } .rw-doc h5, .rw-doc h6 { font-size: .95em; color: #444444; }
+.rw-doc p, .rw-doc ul, .rw-doc ol, .rw-doc pre, .rw-doc .rw-table, .rw-doc blockquote { margin: 0 0 .9em; }
+.rw-doc ul, .rw-doc ol { padding-left: 1.6em; } .rw-doc li { margin: .15em 0; } .rw-doc li > ul, .rw-doc li > ol { margin: .15em 0; }
+.rw-doc li.rw-task { list-style: none; margin-left: -1.3em; } .rw-doc li.rw-task input { margin: 0 6px 0 0; vertical-align: -2px; }
+.rw-doc a { color: var(--link); } .rw-doc a:visited { color: var(--visited); }
+.rw-doc .rw-wiki { color: var(--link); text-decoration: underline dotted; cursor: help; }
+.rw-doc code { font: .9em "Consolas", "Lucida Console", "Courier New", monospace; background: #F0F0F0; border: 1px solid #DCDCDC; padding: 0 3px; }
+.rw-doc pre { padding: 10px 12px; overflow: auto; background: #F7F7F7; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); line-height: 1.45; }
+.rw-doc pre code { background: none; border: 0; padding: 0; font-size: 13px; }
+.rw-doc blockquote { padding: 6px 12px; border-left: 4px solid var(--blue); background: var(--hover); color: #333333; }
+.rw-doc blockquote > :last-child { margin-bottom: 0; }
+.rw-doc mark { background: #FFF27A; padding: 0 2px; }
+.rw-doc hr { height: 0; border: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 1.6em 0; }
+.rw-doc img { max-width: 100%; height: auto; border: 1px solid #CCCCCC; }
+.rw-doc .rw-missing { display: inline-block; padding: 4px 8px; font: 12px var(--f-ui); color: #555555; border: 1px dashed #999999; background: #FAFAFA; }
+.rw-table { overflow-x: auto; }
+.rw-doc table { border-collapse: collapse; font-size: .95em; }
+.rw-doc th, .rw-doc td { border: 1px solid #A0A0A0; padding: 4px 10px; text-align: left; vertical-align: top; }
+.rw-doc th { background: var(--silver); font-family: var(--f-ui); }
+.rw-doc tr:nth-child(even) td { background: #F6F6F6; }
+.rw-props { margin: 0 0 1.4em; border: 1px solid #A0A0A0; font: 12px var(--f-ui); }
+.rw-props-h { padding: 3px 8px; background: var(--silver); font-weight: bold; }
+.rw-props dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 12px; margin: 0; padding: 6px 8px; }
+.rw-props dt { color: #555555; } .rw-props dd { margin: 0; overflow-wrap: anywhere; }
+.rw-co { margin: 0 0 .9em; border: 1px solid; border-left-width: 4px; }
+.rw-co-h { display: flex; gap: 6px; align-items: center; padding: 4px 10px; font: bold 13px var(--f-ui); }
+summary.rw-co-h { cursor: var(--cur-hand); }
+.rw-co-i { display: grid; place-items: center; width: 16px; height: 16px; font: bold 11px var(--f-ui); color: #FFFFFF; border-radius: 2px; }
+.rw-co-b { padding: 2px 12px 4px; } .rw-co-b > :last-child { margin-bottom: 6px; }
+.rw-co-blue { border-color: #2462D8; background: #EEF3FD; } .rw-co-blue .rw-co-i { background: #2462D8; } .rw-co-blue .rw-co-h { color: #1A47A0; }
+.rw-co-teal { border-color: #138A8A; background: #E9F6F6; } .rw-co-teal .rw-co-i { background: #138A8A; } .rw-co-teal .rw-co-h { color: #0D6464; }
+.rw-co-green { border-color: #2E8B22; background: #ECF7EA; } .rw-co-green .rw-co-i { background: #2E8B22; } .rw-co-green .rw-co-h { color: #1F6417; }
+.rw-co-yellow { border-color: #C9A400; background: #FFF9DC; } .rw-co-yellow .rw-co-i { background: #C9A400; } .rw-co-yellow .rw-co-h { color: #7A6300; }
+.rw-co-orange { border-color: #E07B00; background: #FFF2E2; } .rw-co-orange .rw-co-i { background: #E07B00; } .rw-co-orange .rw-co-h { color: #9A5400; }
+.rw-co-red { border-color: #C62828; background: #FDECEC; } .rw-co-red .rw-co-i { background: #C62828; } .rw-co-red .rw-co-h { color: #8E1B1B; }
+.rw-co-purple { border-color: #7B3FC0; background: #F4EEFB; } .rw-co-purple .rw-co-i { background: #7B3FC0; } .rw-co-purple .rw-co-h { color: #5A2C90; }
+.rw-co-gray { border-color: #808080; background: #F4F4F4; } .rw-co-gray .rw-co-i { background: #808080; } .rw-co-gray .rw-co-h { color: #444444; }
+.rw-empty { text-align: center; padding: 40px 10px; font-family: var(--f-ui); }
+.rw-worm { font: bold 26px "Courier New", monospace; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
+@container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -724,6 +788,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
   <button type="button" class="dicon" data-open="dude"><img src="img/icons/yourdude.png" alt=""><span>Your Dude</span></button>
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="venture"><img src="img/icons/venture.png" alt=""><span>Venture</span></button>
+  <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -837,6 +902,11 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 <section class="win raised app" id="w-venture" data-app="venture" data-title="Venture" data-icon="img/icons/venture-16.png" data-w="940" data-h="600" hidden aria-labelledby="t-venture">
   <div class="tbar"><span class="name" id="t-venture"></span></div>
   <div id="vtRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Venture...</p></div>
+</section>
+
+<section class="win raised app" id="w-readworm" data-app="readworm" data-title="Readworm" data-icon="img/icons/readworm-16.png" data-w="860" data-h="600" hidden aria-labelledby="t-readworm">
+  <div class="tbar"><span class="name" id="t-readworm"></span></div>
+  <div id="rwRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Readworm...</p></div>
 </section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
@@ -970,6 +1040,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
     <li><button type="button" role="menuitem" data-act="open" data-app="dude"><img src="img/icons/yourdude.png" alt="">Your Dude</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="venture"><img src="img/icons/venture.png" alt="">Venture</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1570,6 +1641,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
     if (id === 'dude') dude.load();
     if (id === 'netman') loadNetMan();
     if (id === 'venture') loadVenture();
+    if (id === 'readworm') loadReadworm();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1678,7 +1750,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, venture, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, venture, readworm, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1687,6 +1759,8 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     venture: () => { openApp('venture'); return 'Opened Venture. Space. Very big. Very quiet. Nice.'; },
+    readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
+    md: () => { openApp('readworm'); return 'Opened Readworm.'; },
     space: () => { openApp('venture'); return 'Opened Venture.'; },
     ping: () => { openApp('netman'); return 'Pong. (Open Network Man to ping for real.)'; },
     emoji: () => { openApp('dude'); return 'Opened Your Dude.'; },
@@ -2332,6 +2406,18 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
     (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => { load().catch(() => {}); }, { timeout: 6000 });
     return { load: open };
   })();
+
+  /* ---------- Readworm (apps/readworm.js + apps/vendor: marked and DOMPurify, loaded the first time the window opens) ---------- */
+  let readwormLoading = null;
+  function loadScript(src) { return new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.append(sc); }); }
+  function loadReadworm() {
+    if (readwormLoading) return readwormLoading;
+    readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
+      .then(() => loadScript('apps/readworm.js?v=2'))
+      .then(() => window.Readworm.mount($('#rwRoot')))
+      .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
+    return readwormLoading;
+  }
 
   /* ---------- Venture (code lives in apps/venture.js, loaded the first time the window opens) ---------- */
   let ventureLoading = null, ventureApp = null;
