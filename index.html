@@ -137,7 +137,7 @@ a.btn, a.btn:visited { color: var(--text); }
 .win { padding: 3px; min-width: 0; }
 .app {
   position: fixed; z-index: 10; display: flex; flex-direction: column;
-  max-width: calc(100vw - 8px); max-height: calc(100% - var(--tb-h) - 8px - env(safe-area-inset-bottom, 0px));
+  max-width: calc(var(--scr-w, 100vw) - 8px); max-height: calc(100% - var(--tb-h) - 8px - env(safe-area-inset-bottom, 0px));
 }
 .app.max { left: 0 !important; top: 0 !important; width: 100% !important; max-width: none; height: calc(100% - var(--tb-h) - env(safe-area-inset-bottom, 0px)) !important; max-height: none; }
 .tbar {
@@ -273,8 +273,8 @@ a.card:visited { color: var(--text); }
   padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
 .lb .win { width: min(100%, 880px); max-height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
 .lb-view { background: #000000; display: grid; place-items: center; min-height: 0; overflow: hidden; margin: 3px 0; }
-.lb-view img { max-width: 100%; max-height: min(72vh, 900px); width: auto; height: auto; display: block; object-fit: contain; }
-.lb-view img.pixel { width: 100%; height: min(72vh, 900px); image-rendering: pixelated; background: #F4F4F4; padding: 12px; box-sizing: border-box; }
+.lb-view img { max-width: 100%; max-height: min(calc(var(--scr-h, 100vh) * .72), 900px); width: auto; height: auto; display: block; object-fit: contain; }
+.lb-view img.pixel { width: 100%; height: min(calc(var(--scr-h, 100vh) * .72), 900px); image-rendering: pixelated; background: #F4F4F4; padding: 12px; box-sizing: border-box; }
 .lb-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 4px 3px; }
 .lb-note { flex: 1 1 200px; min-width: 0; font-size: 12px; margin: 0; }
 .lb-count { font-family: var(--f-ui); font-size: 11px; color: #333333; }
@@ -345,7 +345,7 @@ a.card:visited { color: var(--text); }
 /* Start menu */
 .start-menu {
   position: fixed; z-index: 55; left: max(4px, env(safe-area-inset-left, 0px)); bottom: calc(var(--tb-h) - 2px + env(safe-area-inset-bottom, 0px));
-  width: min(300px, calc(100vw - 8px)); display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto 1fr;
+  width: min(300px, calc(var(--scr-w, 100vw) - 8px)); display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto 1fr;
 }
 .profile {
   grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 10px;
@@ -376,7 +376,7 @@ a.card:visited { color: var(--text); }
 .start-menu button .ico { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; font: bold 12px/1 var(--f-ui); color: #FFFFFF; border: 1px solid #000000; }
 .start-menu button:hover, .start-menu button:focus-visible { background: var(--select); color: #FFFFFF; outline: none; }
 
-.run-box { position: fixed; z-index: 70; left: 50%; top: 30%; transform: translateX(-50%); width: min(380px, calc(100vw - 24px)); }
+.run-box { position: fixed; z-index: 70; left: 50%; top: 30%; transform: translateX(-50%); width: min(380px, calc(var(--scr-w, 100vw) - 24px)); }
 .run-box form { display: grid; gap: 8px; padding: 10px; font-family: var(--f-ui); font-size: 12px; }
 .run-box .run-top { display: flex; gap: 10px; align-items: flex-start; }
 .run-box .run-top img { width: 32px; height: 32px; image-rendering: pixelated; }
@@ -513,7 +513,7 @@ a.card:visited { color: var(--text); }
 /* Phones: windows open full-screen, Dave gets smaller */
 @media (max-width: 600px) {
   .dave img { height: 140px; }
-  .bubble { position: fixed; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--tb-h) + 150px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: min(260px, calc(100vw - 20px)); font-size: 13px; }
+  .bubble { position: fixed; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--tb-h) + 150px + env(safe-area-inset-bottom, 0px)); margin: 0; max-width: min(260px, calc(var(--scr-w, 100vw) - 20px)); font-size: 13px; }
   .bubble::after { right: 40px; top: auto; bottom: -12px; margin: 0; border-width: 12px 8px 0 8px; border-color: #000000 transparent transparent transparent; }
   .bubble::before { right: 42px; top: auto; bottom: -8px; margin: 0; border-width: 9px 6px 0 6px; border-color: #FFFFFF transparent transparent transparent; }
   .desk { height: 26px; }
@@ -685,6 +685,11 @@ a.card:visited { color: var(--text); }
 .vt-small { font-size: 11px; color: #555555; }
 @container (max-width: 680px) { .vt-main { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 1fr) minmax(200px, 42%); } }
 @media (prefers-reduced-motion: reduce) { .vt-lock.snap { animation: none; } }
+
+/* 4:3 screen mode (OS > Display > Screen): the page becomes a centered 4:3 "monitor".
+   transform on <body> makes every fixed element (windows, taskbar, buddies...) measure from the 4:3 box. */
+html.crt43 { --scr-w: min(100vw, calc(100dvh * 4 / 3)); --scr-h: min(100dvh, calc(100vw * 3 / 4)); background: #000000; }
+html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dvh - var(--scr-h)) / 2) auto 0; position: relative; overflow: hidden; transform: translateZ(0); }
 
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
@@ -886,6 +891,11 @@ a.card:visited { color: var(--text); }
         <label><input type="radio" name="dpTheme" value="maroon"><span class="swatch" style="background:linear-gradient(90deg,#5A0A0A,#B03A3A)"></span> Maroon</label>
         <label><input type="radio" name="dpTheme" value="slate"><span class="swatch" style="background:linear-gradient(90deg,#2B3440,#6A7F99)"></span> Slate</label>
       </fieldset>
+      <fieldset>
+        <legend>Screen</legend>
+        <label><input type="radio" name="dpScreen" value="wide" checked> Fill the browser (widescreen)</label>
+        <label><input type="radio" name="dpScreen" value="43"> 4:3, like an old monitor</label>
+      </fieldset>
       </div>
       <div class="panel" role="tabpanel" id="pane-system" aria-labelledby="tab-system" hidden>
   <fieldset>
@@ -994,6 +1004,13 @@ a.card:visited { color: var(--text); }
 
 <script>
 (() => {
+  /* Screen size helpers: the 4:3 mode shrinks the "screen" to a box, so measure that instead of the browser window */
+  let crt43 = false;
+  try { crt43 = localStorage.getItem('lico-screen') === '43'; } catch (e) {}
+  document.documentElement.classList.toggle('crt43', crt43);
+  const SW = () => crt43 ? document.body.clientWidth : window.innerWidth;
+  const SH = () => crt43 ? document.body.clientHeight : window.innerHeight;
+  const OFF = () => { if (!crt43) return [0, 0]; const r = document.body.getBoundingClientRect(); return [r.left, r.top]; }; // page -> screen coordinates
   const $ = s => document.querySelector(s);
   function h(tag, attrs = {}, ...kids) {
     const el = document.createElement(tag);
@@ -1456,13 +1473,14 @@ a.card:visited { color: var(--text); }
   });
   function sizeFx() {
     dpr = Math.min(2, devicePixelRatio || 1);
-    fx.width = Math.round(innerWidth * dpr); fx.height = Math.round(innerHeight * dpr);
+    fx.width = Math.round(SW() * dpr); fx.height = Math.round(SH() * dpr);
     fxc.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   sizeFx(); addEventListener('resize', sizeFx);
 
   function addPart(x, y, kind) {
     if (parts.length > 260) parts.shift();
+    const [ox, oy] = OFF(); x -= ox; y -= oy;
     if (kind === 'trail') {
       parts.push({ x: x + (Math.random() - .5) * 6, y: y + (Math.random() - .5) * 6, vx: (Math.random() - .5) * .4, vy: .3 + Math.random() * .5,
         life: 1, decay: .03 + Math.random() * .02, size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: false });
@@ -1480,7 +1498,7 @@ a.card:visited { color: var(--text); }
     fxc.fillRect(x - s * 3, y - s, s * 6, s * 2);
   }
   function tick() {
-    fxc.clearRect(0, 0, innerWidth, innerHeight);
+    fxc.clearRect(0, 0, SW(), SH());
     parts = parts.filter(p => p.life > 0);
     for (const p of parts) {
       p.x += p.vx; p.y += p.vy;
@@ -1510,20 +1528,20 @@ a.card:visited { color: var(--text); }
   const APPS = {};
   document.querySelectorAll('.app').forEach(w => { APPS[w.dataset.app] = w; });
   const tasksEl = $('#tasks');
-  const isPhone = () => innerWidth <= 600;
+  const isPhone = () => SW() <= 600;
   const tbH = () => $('#taskbar').offsetHeight;
   let zTop = 10, cascade = 0, activeApp = null;
   const openOrder = [], minimized = new Set();
 
   function place(w, x, y) {
-    const maxY = innerHeight - tbH() - 26;
-    x = Math.max(60 - w.offsetWidth, Math.min(innerWidth - 60, x));
+    const maxY = SH() - tbH() - 26;
+    x = Math.max(60 - w.offsetWidth, Math.min(SW() - 60, x));
     y = Math.max(0, Math.min(maxY, y));
     w.style.left = Math.round(x) + 'px'; w.style.top = Math.round(y) + 'px';
   }
   function sizeFor(w) {
-    w.style.width = Math.min(+w.dataset.w, innerWidth - 16) + 'px';
-    w.style.height = Math.min(+w.dataset.h, innerHeight - tbH() - 16) + 'px';
+    w.style.width = Math.min(+w.dataset.w, SW() - 16) + 'px';
+    w.style.height = Math.min(+w.dataset.h, SH() - tbH() - 16) + 'px';
   }
   function renderTasks() {
     tasksEl.replaceChildren(...openOrder.map(id => {
@@ -1563,7 +1581,7 @@ a.card:visited { color: var(--text); }
       if (!w.dataset.placed) {
         sizeFor(w);
         const step = cascade++ % 6;
-        place(w, Math.min(108 + step * 26, innerWidth - w.offsetWidth - 8), 12 + step * 24);
+        place(w, Math.min(108 + step * 26, SW() - w.offsetWidth - 8), 12 + step * 24);
         w.dataset.placed = '1';
       }
       w.classList.toggle('max', isPhone() || w.classList.contains('max'));
@@ -1598,8 +1616,8 @@ a.card:visited { color: var(--text); }
     let st = null;
     bar.addEventListener('pointerdown', e => {
       if (e.button !== 0 || e.target.closest('button') || w.classList.contains('max') || isPhone()) return;
-      const r = w.getBoundingClientRect();
-      st = { px: e.clientX, py: e.clientY, x: r.left, y: r.top };
+      const r = w.getBoundingClientRect(), [ox, oy] = OFF();
+      st = { px: e.clientX, py: e.clientY, x: r.left - ox, y: r.top - oy };
       bar.setPointerCapture(e.pointerId);
     });
     bar.addEventListener('pointermove', e => { if (st) place(w, st.x + e.clientX - st.px, st.y + e.clientY - st.py); });
@@ -1612,7 +1630,7 @@ a.card:visited { color: var(--text); }
   addEventListener('resize', () => Object.values(APPS).forEach(w => {
     if (w.hidden) return;
     if (isPhone()) w.classList.add('max');
-    const r = w.getBoundingClientRect(); place(w, r.left, r.top);
+    const r = w.getBoundingClientRect(), [ox, oy] = OFF(); place(w, r.left - ox, r.top - oy);
   }));
 
   /* Desktop icons: click selects, double-click opens (one tap on touch screens) */
@@ -1685,7 +1703,7 @@ a.card:visited { color: var(--text); }
     pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
     notepad: () => { openApp('about'); return 'Opened about_me.txt.'; },
     minesweeper: 'You clicked a mine. Game over. That was fast.',
-    rain: () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * innerWidth, 0, 14), i * 120); return 'It is now raining sparkles. Indoors.'; },
+    rain: () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(OFF()[0] + Math.random() * SW(), OFF()[1], 14), i * 120); return 'It is now raining sparkles. Indoors.'; },
     quit: 'Quit what? Your job? Same.',
     sudo: 'Nice try. You are not in the sudoers file. This incident will be reported to Dave.',
     'rm -rf': 'Absolutely not.'
@@ -1736,7 +1754,7 @@ a.card:visited { color: var(--text); }
       rows: { down: 0, left: 1, right: 2, up: 3 }, walkCycle: [0, 1, 2, 1], idleCol: 1, fps: 7
     }
   };
-  const ground = () => innerHeight - $('#taskbar').offsetHeight;
+  const ground = () => SH() - $('#taskbar').offsetHeight;
 
   function makeBuddy(id, cfg) {
     const el = h('div', { class: 'buddy', role: 'img', title: cfg.fullName || cfg.name, 'aria-label': `${cfg.fullName || cfg.name}. You can drag and throw her.` });
@@ -1750,7 +1768,7 @@ a.card:visited { color: var(--text); }
     if (cfg.layout === 'strip') Object.entries(cfg.anims).forEach(([k, a]) => load(k, a.src)); else load('sheet', cfg.src);
 
     const b = { x: 0, y: -200, vx: 0, vy: 0, state: 'fall', face: 1, until: 0, sq: 0, sqv: 0, held: null, hist: [], landUntil: 0, off: false };
-    b.x = Math.max(0, Math.min(innerWidth - W, innerWidth * cfg.start));
+    b.x = Math.max(0, Math.min(SW() - W, SW() * cfg.start));
 
     function draw(t) {
       cx.clearRect(0, 0, cv.width, cv.height);
@@ -1808,7 +1826,7 @@ a.card:visited { color: var(--text); }
       if (b.state === 'fall') {
         b.vy += 2200 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= 0.995;
         if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx) * 0.5; }
-        if (b.x > innerWidth - W) { b.x = innerWidth - W; b.vx = -Math.abs(b.vx) * 0.5; }
+        if (b.x > SW() - W) { b.x = SW() - W; b.vx = -Math.abs(b.vx) * 0.5; }
         if (b.y + H >= g) {
           const impact = Math.min(1, b.vy / 1400);
           b.y = g - H;
@@ -1819,7 +1837,7 @@ a.card:visited { color: var(--text); }
         b.y = g - H;
         if (b.state === 'walk') {
           b.x += b.vx * dt;
-          if (b.x < 0 || b.x > innerWidth - W) { b.vx *= -1; b.face *= -1; b.x = Math.max(0, Math.min(innerWidth - W, b.x)); }
+          if (b.x < 0 || b.x > SW() - W) { b.vx *= -1; b.face *= -1; b.x = Math.max(0, Math.min(SW() - W, b.x)); }
         }
         if (now > b.until) pickBehavior(now);
       }
@@ -1831,7 +1849,7 @@ a.card:visited { color: var(--text); }
       el.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px) scale(${(sx * flip).toFixed(3)}, ${sy.toFixed(3)})`;
       draw(now);
     };
-    b.drop = () => { b.x = Math.random() * Math.max(1, innerWidth - W); b.y = -H - 20; b.vx = 0; b.vy = 0; b.state = 'fall'; };
+    b.drop = () => { b.x = Math.random() * Math.max(1, SW() - W); b.y = -H - 20; b.vx = 0; b.vy = 0; b.state = 'fall'; };
     const label = () => document.querySelector(`[data-label="${id}"]`);
     b.setOff = off => {
       b.off = off; el.hidden = off;
@@ -1841,7 +1859,7 @@ a.card:visited { color: var(--text); }
     };
     b.toggle = () => { b.setOff(!b.off); if (!b.off) b.drop(); };
     b.summon = () => { if (b.off) b.setOff(false); b.drop(); };
-    b.fit = () => { if (b.x > innerWidth - W) b.x = Math.max(0, innerWidth - W); };
+    b.fit = () => { if (b.x > SW() - W) b.x = Math.max(0, SW() - W); };
     let stored = null;
     try { stored = localStorage.getItem('lico-buddy-' + id) || (id === 'clancies' ? localStorage.getItem('lico-clancies') : null); } catch (e) {}
     b.setOff(stored === 'off');
@@ -1910,14 +1928,15 @@ a.card:visited { color: var(--text); }
   /* ---------- Right-click menu ---------- */
   const ctx = $('#ctx'), ctxList = $('#ctxList');
   function showMenu(x, y, items) {
+    { const [ox, oy] = OFF(); x -= ox; y -= oy; }
     ctxList.replaceChildren(...items.map(it => it === '-' ? h('li', { class: 'sep', role: 'separator' }) :
       h('li', {}, h('button', { type: 'button', role: 'menuitem', disabled: it.disabled || null, onclick: () => { hideMenu(); it.run && it.run(); } },
         it.icon ? h('img', { src: it.icon, alt: '' }) : h('span', { class: 'noimg' }),
         it.bold ? h('b', {}, it.label) : it.label))));
     ctx.hidden = false;
     const r = ctx.getBoundingClientRect();
-    ctx.style.left = Math.max(2, Math.min(x, innerWidth - r.width - 2)) + 'px';
-    ctx.style.top = Math.max(2, Math.min(y, innerHeight - tbH() - r.height - 2)) + 'px';
+    ctx.style.left = Math.max(2, Math.min(x, SW() - r.width - 2)) + 'px';
+    ctx.style.top = Math.max(2, Math.min(y, SH() - tbH() - r.height - 2)) + 'px';
     const first = ctx.querySelector('button:not(:disabled)'); if (first) first.focus({ preventScroll: true });
   }
   function hideMenu() { ctx.hidden = true; }
@@ -1956,7 +1975,7 @@ a.card:visited { color: var(--text); }
       { label: 'Refresh', run: refreshDesktop },
       '-',
       { label: 'New Folder', icon: 'img/icons/folder-16.png', run: () => folders.create() },
-      { label: 'New Sticky Note', icon: 'img/icons/sticky-16.png', run: () => stickies.add(e.clientX, e.clientY) },
+      { label: 'New Sticky Note', icon: 'img/icons/sticky-16.png', run: () => stickies.add(e.clientX - OFF()[0], e.clientY - OFF()[1]) },
       '-',
       { label: 'Properties', icon: 'img/icons/display-16.png', run: () => { openApp('os'); osTab('display'); } },
     ]);
@@ -2062,14 +2081,23 @@ a.card:visited { color: var(--text); }
   function syncDisplayForm() {
     document.querySelectorAll('input[name="dpWall"]').forEach(r => { r.checked = r.value === wallChoice; });
     document.querySelectorAll('input[name="dpTheme"]').forEach(r => { r.checked = r.value === themeChoice; });
+    document.querySelectorAll('input[name="dpScreen"]').forEach(r => { r.checked = r.value === (crt43 ? '43' : 'wide'); });
     $('#dpWallPaint').disabled = !paintWall;
     $('#dpWallPaint').parentElement.title = paintWall ? '' : 'Draw something in Paint and press "Set as wallpaper" first.';
   }
   document.querySelectorAll('input[name="dpWall"]').forEach(r => r.addEventListener('change', () => { applyWall(r.value); try { localStorage.setItem('lico-wall', wallChoice); } catch (e) {} }));
   document.querySelectorAll('input[name="dpTheme"]').forEach(r => r.addEventListener('change', () => { applyTheme(r.value); try { localStorage.setItem('lico-theme', themeChoice); } catch (e) {} }));
+  function applyScreen(mode) {
+    crt43 = mode === '43';
+    document.documentElement.classList.toggle('crt43', crt43);
+    try { if (crt43) localStorage.setItem('lico-screen', '43'); else localStorage.removeItem('lico-screen'); } catch (e) {}
+    dispatchEvent(new Event('resize')); // windows, buddies, notes and sparkles re-fit to the new screen
+    syncDisplayForm();
+  }
+  document.querySelectorAll('input[name="dpScreen"]').forEach(r => r.addEventListener('change', () => applyScreen(r.value)));
   $('#dpOk').addEventListener('click', () => closeApp('os'));
   $('#dpReset').addEventListener('click', () => {
-    applyTheme(DEFAULT_THEME); applyWall(DEFAULT_WALL);
+    applyTheme(DEFAULT_THEME); applyWall(DEFAULT_WALL); if (crt43) applyScreen('wide');
     try { localStorage.removeItem('lico-theme'); localStorage.removeItem('lico-wall'); } catch (e) {}
     syncDisplayForm();
   });
@@ -2104,8 +2132,8 @@ a.card:visited { color: var(--text); }
     const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} }, 250); };
     addEventListener('pagehide', () => { clearTimeout(saveT); try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {} });
     const clampNote = (n, el) => {
-      n.x = Math.max(0, Math.min(innerWidth - 60, n.x));
-      n.y = Math.max(0, Math.min(innerHeight - tbH() - 30, n.y));
+      n.x = Math.max(0, Math.min(SW() - 60, n.x));
+      n.y = Math.max(0, Math.min(SH() - tbH() - 30, n.y));
       el.style.left = n.x + 'px'; el.style.top = n.y + 'px';
     };
     function bringUp(el) { box.querySelectorAll('.sticky').forEach(x => x.classList.toggle('top', x === el)); }
@@ -2142,7 +2170,7 @@ a.card:visited { color: var(--text); }
     }
     function add(x, y, color) {
       if (notes.length >= 12) { say('Twelve sticky notes. My whole monitor looks like a printer test page. That\'s the limit.'); return; }
-      const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), x: x ?? (innerWidth / 2 - 95 + (notes.length % 5) * 18), y: y ?? (90 + (notes.length % 5) * 18), text: '', color: COLORS[color] ? color : lastColor };
+      const n = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), x: x ?? (SW() / 2 - 95 + (notes.length % 5) * 18), y: y ?? (90 + (notes.length % 5) * 18), text: '', color: COLORS[color] ? color : lastColor };
       notes.push(n); save();
       const el = render(n); bringUp(el); el.querySelector('textarea').focus();
     }
