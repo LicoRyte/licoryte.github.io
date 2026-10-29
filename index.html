@@ -755,6 +755,25 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .rw-worm { font: bold 26px "Courier New", monospace; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
 @container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
 
+/* Papercut (PDF viewer) */
+#w-papercut { container-type: inline-size; }
+#pcRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+#pcRoot.pc-drop::after { content: "Drop the PDF."; position: absolute; inset: 30px 0 22px; display: grid; place-items: center; font: bold 16px var(--f-ui); color: var(--navy); background: rgba(255, 255, 255, .85); border: 3px dashed var(--blue); pointer-events: none; }
+.pc-tools { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; min-width: 0; }
+.pc-tools .btn { padding: 2px 9px; min-width: 26px; }
+.pc-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 #FFFFFF; }
+.pc-sep { width: 2px; height: 20px; margin: 0 3px; border-left: 1px solid var(--shade); border-right: 1px solid var(--hi); }
+.pc-page { width: 42px; text-align: right; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.pc-tools select { font: 12px var(--f-ui); padding: 1px 2px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.pc-name { flex: 1 1 140px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 6px; margin-left: 4px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.pc-view { flex: 1; min-height: 0; overflow: auto; background: #808080; outline: none; }
+.pc-pages { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 14px 18px 24px; min-width: min-content; }
+.pc-sheet { flex-shrink: 0; background: #FFFFFF; box-shadow: 3px 3px 0 #3A3A3A; outline: 1px solid #000000; }
+.pc-sheet canvas { display: block; }
+.pc-empty { margin-top: 30px; padding: 26px 30px; text-align: center; font: 12px var(--f-ui); background: var(--silver); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); }
+.pc-big { font-size: 34px; margin-bottom: 6px; }
+.pc-muted { color: #555555; font-size: 11px; }
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -789,6 +808,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="venture"><img src="img/icons/venture.png" alt=""><span>Venture</span></button>
   <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
+  <button type="button" class="dicon" data-open="papercut"><img src="img/icons/papercut.png" alt=""><span>Papercut</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -907,6 +927,11 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 <section class="win raised app" id="w-readworm" data-app="readworm" data-title="Readworm" data-icon="img/icons/readworm-16.png" data-w="860" data-h="600" hidden aria-labelledby="t-readworm">
   <div class="tbar"><span class="name" id="t-readworm"></span></div>
   <div id="rwRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Readworm...</p></div>
+</section>
+
+<section class="win raised app" id="w-papercut" data-app="papercut" data-title="Papercut" data-icon="img/icons/papercut-16.png" data-w="760" data-h="620" hidden aria-labelledby="t-papercut">
+  <div class="tbar"><span class="name" id="t-papercut"></span></div>
+  <div id="pcRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Papercut...</p></div>
 </section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
@@ -1041,6 +1066,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="venture"><img src="img/icons/venture.png" alt="">Venture</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="papercut"><img src="img/icons/papercut.png" alt="">Papercut</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1642,6 +1668,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'netman') loadNetMan();
     if (id === 'venture') loadVenture();
     if (id === 'readworm') loadReadworm();
+    if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
     minimized.delete(id);
@@ -1750,7 +1777,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, venture, readworm, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, venture, readworm, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1760,6 +1787,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     venture: () => { openApp('venture'); return 'Opened Venture. Space. Very big. Very quiet. Nice.'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
+    papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
+    pdf: () => { openApp('papercut'); return 'Opened Papercut.'; },
     md: () => { openApp('readworm'); return 'Opened Readworm.'; },
     space: () => { openApp('venture'); return 'Opened Venture.'; },
     ping: () => { openApp('netman'); return 'Pong. (Open Network Man to ping for real.)'; },
@@ -2417,6 +2446,16 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
+  }
+
+  /* ---------- Papercut (apps/papercut.js + apps/vendor/pdfjs, loaded the first time the window opens) ---------- */
+  let papercutLoading = null;
+  function loadPapercut() {
+    if (papercutLoading) return papercutLoading;
+    papercutLoading = loadScript('apps/papercut.js?v=1')
+      .then(() => window.Papercut.mount($('#pcRoot')))
+      .catch(() => { $('#pcRoot').textContent = "Couldn't load Papercut. Check your connection and open it again."; papercutLoading = null; });
+    return papercutLoading;
   }
 
   /* ---------- Venture (code lives in apps/venture.js, loaded the first time the window opens) ---------- */
