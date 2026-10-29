@@ -647,45 +647,6 @@ a.card:visited { color: var(--text); }
   .nm-ping input { width: 110px; }
 }
 
-/* Venture (solar system) */
-#w-venture { container-type: inline-size; }
-#vtRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.vt-tools { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
-.vt-group { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
-.vt-tools .btn { padding: 2px 8px; }
-.vt-tools .btn[aria-pressed="true"] { border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #DCDCDC; font-weight: bold; }
-.vt-date { min-width: 92px; padding: 2px 6px; font: 15px var(--f-mono); color: var(--lcd); background: var(--lcd-bg); border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
-.vt-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 6px; }
-.vt-stage { position: relative; min-height: 0; overflow: hidden; background: #05060C; }
-.vt-canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
-.vt-note { position: absolute; left: 6px; bottom: 4px; font: 10px var(--f-ui); color: #6F7DA0; pointer-events: none; }
-.vt-hover { position: absolute; padding: 1px 5px; font: 11px "Consolas", "Lucida Console", monospace; color: #CFE0FF; background: rgba(5, 6, 12, .8); border: 1px solid #5C79C8; pointer-events: none; white-space: nowrap; }
-.vt-lock { position: absolute; pointer-events: none; }
-.vt-lock i { position: absolute; width: 12px; height: 12px; border: 0 solid #7FA6FF; filter: drop-shadow(0 0 3px rgba(110, 150, 255, .8)); }
-.vt-lock .tl { left: 0; top: 0; border-left-width: 3px; border-top-width: 3px; }
-.vt-lock .tr { right: 0; top: 0; border-right-width: 3px; border-top-width: 3px; }
-.vt-lock .bl { left: 0; bottom: 0; border-left-width: 3px; border-bottom-width: 3px; }
-.vt-lock .br { right: 0; bottom: 0; border-right-width: 3px; border-bottom-width: 3px; }
-.vt-lock.snap { animation: vtsnap .35s cubic-bezier(.2, .9, .3, 1.2); }
-@keyframes vtsnap { from { transform: scale(1.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.vt-label { position: absolute; display: grid; gap: 1px; font: 12px/1.25 "Consolas", "Lucida Console", "Courier New", monospace; color: #8FB4FF; text-shadow: 0 0 4px rgba(80, 120, 255, .7); pointer-events: none; white-space: nowrap; }
-.vt-label b { color: #CFE0FF; letter-spacing: .06em; text-transform: uppercase; }
-.vt-panel { min-height: 0; overflow: auto; padding: 8px 10px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px/1.4 var(--f-ui); }
-.vt-panel h3 { margin: 0; font: bold 15px var(--f-head); color: var(--navy); }
-.vt-panel h4 { margin: 10px 0 4px; font: bold 12px var(--f-ui); color: #333333; border-bottom: 1px solid var(--silver); }
-.vt-panel p { margin: 4px 0; }
-.vt-head { display: flex; gap: 10px; align-items: center; }
-.vt-head small { color: #555555; }
-.vt-portrait { width: 96px; height: 96px; image-rendering: pixelated; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); flex-shrink: 0; }
-.vt-dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; margin: 0; }
-.vt-dl dt { color: #555555; font-size: 11px; } .vt-dl dd { margin: 0; overflow-wrap: anywhere; }
-.vt-fact { padding: 6px 8px; background: #FFFFE1; border: 1px solid #000000; }
-.vt-list { margin: 6px 0; padding-left: 18px; } .vt-list li { margin: 2px 0; } .vt-list small { color: #666666; }
-.vt-panel .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--link); text-decoration: underline; cursor: var(--cur-hand); }
-.vt-small { font-size: 11px; color: #555555; }
-@container (max-width: 680px) { .vt-main { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 1fr) minmax(200px, 42%); } }
-@media (prefers-reduced-motion: reduce) { .vt-lock.snap { animation: none; } }
-
 /* 4:3 screen mode (OS > Display > Screen): the page becomes a centered 4:3 "monitor".
    transform on <body> makes every fixed element (windows, taskbar, buddies...) measure from the 4:3 box. */
 html.crt43 { --scr-w: min(100vw, calc(100dvh * 4 / 3)); --scr-h: min(100dvh, calc(100vw * 3 / 4)); background: #000000; }
@@ -822,7 +783,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <button type="button" class="dicon" data-open="workstation"><img src="img/icons/workstation.png" alt=""><span>Workstation</span></button>
   <button type="button" class="dicon" data-open="dude"><img src="img/icons/yourdude.png" alt=""><span>Your Dude</span></button>
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
-  <button type="button" class="dicon" data-open="venture"><img src="img/icons/venture.png" alt=""><span>Venture</span></button>
   <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
   <button type="button" class="dicon" data-open="papercut"><img src="img/icons/papercut.png" alt=""><span>Papercut</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
@@ -933,11 +893,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 <section class="win raised app" id="w-netman" data-app="netman" data-title="Network Man" data-icon="img/icons/netman-16.png" data-w="980" data-h="640" hidden aria-labelledby="t-netman">
   <div class="tbar"><span class="name" id="t-netman"></span></div>
   <div id="nmRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Network Man...</p></div>
-</section>
-
-<section class="win raised app" id="w-venture" data-app="venture" data-title="Venture" data-icon="img/icons/venture-16.png" data-w="940" data-h="600" hidden aria-labelledby="t-venture">
-  <div class="tbar"><span class="name" id="t-venture"></span></div>
-  <div id="vtRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Venture...</p></div>
 </section>
 
 <section class="win raised app" id="w-readworm" data-app="readworm" data-title="Readworm" data-icon="img/icons/readworm-16.png" data-w="860" data-h="600" hidden aria-labelledby="t-readworm">
@@ -1080,7 +1035,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <li><button type="button" role="menuitem" data-act="open" data-app="workstation"><img src="img/icons/workstation.png" alt="">Workstation</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="dude"><img src="img/icons/yourdude.png" alt="">Your Dude</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="venture"><img src="img/icons/venture.png" alt="">Venture</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="papercut"><img src="img/icons/papercut.png" alt="">Papercut</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
@@ -1686,7 +1640,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'os') syncDisplayForm();
     if (id === 'dude') dude.load();
     if (id === 'netman') loadNetMan();
-    if (id === 'venture') loadVenture();
     if (id === 'readworm') loadReadworm();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
@@ -1798,7 +1751,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, venture, readworm, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1806,12 +1759,10 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     workstation: () => { openApp('workstation'); return 'Opened Workstation. Time to work. Ugh.'; },
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
-    venture: () => { openApp('venture'); return 'Opened Venture. Space. Very big. Very quiet. Nice.'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
     pdf: () => { openApp('papercut'); return 'Opened Papercut.'; },
     md: () => { openApp('readworm'); return 'Opened Readworm.'; },
-    space: () => { openApp('venture'); return 'Opened Venture.'; },
     ping: () => { openApp('netman'); return 'Pong. (Open Network Man to ping for real.)'; },
     emoji: () => { openApp('dude'); return 'Opened Your Dude.'; },
     gmail: () => { openApp('url:https://mail.google.com/'); return 'Opening Gmail in a new tab. You have 0 new emails. Probably.'; },
@@ -2481,20 +2432,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       .then(() => window.Papercut.mount($('#pcRoot')))
       .catch(() => { $('#pcRoot').textContent = "Couldn't load Papercut. Check your connection and open it again."; papercutLoading = null; });
     return papercutLoading;
-  }
-
-  /* ---------- Venture (code lives in apps/venture.js, loaded the first time the window opens) ---------- */
-  let ventureLoading = null, ventureApp = null;
-  function loadVenture() {
-    if (ventureApp) { ventureApp.resume(); return; }
-    if (ventureLoading) return ventureLoading;
-    ventureLoading = new Promise((ok, no) => {
-      const sc = document.createElement('script');
-      sc.src = 'apps/venture.js?v=4'; sc.onload = ok; sc.onerror = no;
-      document.head.append(sc);
-    }).then(() => requestAnimationFrame(() => { ventureApp = window.Venture.mount($('#vtRoot')); }))
-      .catch(() => { $('#vtRoot').textContent = "Couldn't load Venture. Check your connection and open it again."; ventureLoading = null; });
-    return ventureLoading;
   }
 
   /* ---------- Network Man (code lives in apps/netman.js, loaded the first time the window opens) ---------- */
