@@ -703,6 +703,22 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-main.no-outline { grid-template-columns: minmax(0, 1fr); } .rw-main.no-outline .rw-outline { display: none; }
 .rw-outline { min-height: 0; overflow: auto; padding: 6px 4px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px var(--f-ui); }
 .rw-ol-h { font-weight: bold; color: var(--navy); padding: 0 4px 4px; }
+.rw-outline { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.rw-filebox { flex-shrink: 0; max-height: 52%; overflow: auto; padding: 6px 4px; border-bottom: 2px groove var(--hi); }
+.rw-ol { flex: 1; min-height: 0; overflow: auto; padding: 6px 4px; }
+.rw-fh { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.rw-outline .rw-clear { display: inline; width: auto; padding: 0; font: 11px var(--f-ui); color: var(--link); text-decoration: underline; }
+.rw-outline .rw-clear:hover { background: none; }
+.rw-files li { display: flex; align-items: center; }
+.rw-outline .rw-files .rw-fn { flex: 1; min-width: 0; width: auto; }
+.rw-outline .rw-files .rw-x { flex: 0 0 20px; width: 20px; padding: 2px 0; text-align: center; font: bold 13px/1 var(--f-ui); color: #8A8A8A; }
+.rw-outline .rw-files .rw-x:hover { color: #B00020; background: #FFE5E5; }
+.rw-files li.cur { background: var(--select); }
+.rw-outline .rw-files li.cur button { color: #FFFFFF; } .rw-outline .rw-files li.cur .rw-fn:hover { background: transparent; }
+.rw-outline .rw-files li.cur .rw-x:hover { color: #FFFFFF; background: rgba(255, 255, 255, .2); }
+.rw-doc .rw-wiki.ok { text-decoration: underline; cursor: var(--cur-hand); }
+.rw-tools select.rw-name { font: 12px var(--f-ui); padding: 1px 2px; }
+.rw-tools .rw-name:disabled { color: #666666; }
 .rw-outline ul { list-style: none; margin: 0; padding: 0; }
 .rw-outline button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 2px 4px; font: 12px var(--f-ui); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: var(--cur-hand); }
 .rw-outline button:hover { background: var(--hover); }
@@ -753,7 +769,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .rw-co-gray { border-color: #808080; background: #F4F4F4; } .rw-co-gray .rw-co-i { background: #808080; } .rw-co-gray .rw-co-h { color: #444444; }
 .rw-empty { text-align: center; padding: 40px 10px; font-family: var(--f-ui); }
 .rw-worm { font: bold 26px "Courier New", monospace; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
-@container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
+@container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline, .rw-sidebtn { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
 
 /* Papercut (PDF viewer) */
 #w-papercut { container-type: inline-size; }
@@ -2442,7 +2458,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=2'))
+      .then(() => loadScript('apps/readworm.js?v=4'))
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
