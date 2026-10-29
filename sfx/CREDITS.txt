@@ -1,0 +1,10 @@
+Sound credits
+=============
+
+startup.ogg (and startup.mp3, the same sound converted for older Safari)
+  Startup sound created by NightMargin.
+  Used on this non-commercial personal website (Not-So-Awesome Archive, licoryte.github.io).
+  All rights to the sound belong to NightMargin.
+
+notify.mp3
+  "Notify" sound by denielcz, from Pixabay.
