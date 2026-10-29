@@ -345,8 +345,10 @@ a.card:visited { color: var(--text); }
 /* Start menu */
 .start-menu {
   position: fixed; z-index: 55; left: max(4px, env(safe-area-inset-left, 0px)); bottom: calc(var(--tb-h) - 2px + env(safe-area-inset-bottom, 0px));
-  width: min(300px, calc(var(--scr-w, 100vw) - 8px)); display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto 1fr;
+  width: min(300px, calc(var(--scr-w, 100vw) - 8px)); display: grid; grid-template-columns: 26px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+  max-height: calc(var(--scr-h, 100dvh) - var(--tb-h) - 4px - env(safe-area-inset-bottom, 0px));
 }
+.start-menu ul { overflow-y: auto; overscroll-behavior: contain; }
 .profile {
   grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; padding: 10px;
   background: linear-gradient(180deg, var(--deep) 0%, var(--navy) 50%, var(--accent) 100%); color: #FFFFFF;
@@ -1021,7 +1023,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
           <dt>pancakes eaten</dt><dd id="stPancakes">0</dd>
         </dl>
       </fieldset>
-        <p class="os-about">Lico98 · running on GitHub Pages · coffee level: low</p>
+        <p class="os-about">RetroWorkman98 · running on GitHub Pages · coffee level: low</p>
       </div>
       <div class="panel" role="tabpanel" id="pane-extras" aria-labelledby="tab-extras" hidden>
   <fieldset>
@@ -1074,7 +1076,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <span class="hex"><span class="hex-in"><img src="img/dave-face.webp" width="240" height="240" alt=""></span></span>
     <div><h1 id="heroTitle">Not-So-Awesome Archive</h1><p id="tagline"></p></div>
   </div>
-  <div class="side-band" aria-hidden="true">Lico<span>98</span></div>
+  <div class="side-band" aria-hidden="true">RetroWorkman<span>98</span></div>
   <ul>
     <li><button type="button" role="menuitem" data-act="open" data-app="games"><img src="img/icons/games.png" alt="">My Games</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
