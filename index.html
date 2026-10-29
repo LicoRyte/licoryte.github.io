@@ -2633,14 +2633,14 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   })();
 
   /* ---------- Sounds ----------
-     sfx/startup.mp3 plays when the boot finishes, sfx/notify.mp3 when a window opens.
+     sfx/startup.mp3 plays when the boot finishes, sfx/messagebox.wav when a window opens.
      To change a sound, replace the file (same name). Volumes: SFX_VOL below (0 to 1).
      If a file can't load, the old built-in two-note chime plays instead. */
   let sndOn = true, actx = null, userActed = false, reverbIR = null, quietUntil = 0;
   // startup.ogg is the main file; browsers that can't play Ogg (older Safari) get the startup.mp3 copy instead
   const canOgg = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="vorbis"'); } catch (e) { return false; } })();
-  const SFX = { notify: 'sfx/notify.mp3', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3' };
-  const SFX_VOL = { notify: 0.45, startup: 0.6 };
+  const SFX = { notify: 'sfx/messagebox.wav', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3' };
+  const SFX_VOL = { notify: 0.4, startup: 0.6 };
   const sfxRaw = {}, sfxBuf = {};
   for (const [k, url] of Object.entries(SFX)) sfxRaw[k] = fetch(url).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
   function audio() {
