@@ -751,6 +751,45 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .pc-big { font-size: 34px; margin-bottom: 6px; }
 .pc-muted { color: #555555; font-size: 11px; }
 
+/* Pancakes, hearts, screensaver */
+.pancake { position: fixed; left: 0; top: 0; z-index: 44; width: 48px; height: 48px; image-rendering: pixelated; cursor: var(--cur-grab); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
+.pancake.held { z-index: 47; }
+.heart { position: fixed; left: 0; top: 0; z-index: 48; width: 36px; height: 32px; image-rendering: pixelated; pointer-events: none; animation: heartup 1.3s ease-out forwards; }
+@keyframes heartup { 0% { opacity: 0; transform: translate(var(--hx), var(--hy)) scale(.4); } 15% { opacity: 1; transform: translate(var(--hx), calc(var(--hy) - 8px)) scale(1.15); } 30% { transform: translate(var(--hx), calc(var(--hy) - 14px)) scale(1); } 100% { opacity: 0; transform: translate(var(--hx), calc(var(--hy) - 64px)) scale(1); } }
+.saver { position: fixed; inset: 0; z-index: 100003; background: #000000; cursor: none; }
+.saver canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+.saver-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 3px 0; }
+.saver-row select, .saver-row input { font: 12px var(--f-ui); padding: 1px 3px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.saver-row input { width: 150px; }
+@media (prefers-reduced-motion: reduce) { .heart { animation-duration: .8s; } }
+
+/* Saturn Archive */
+#w-saturn { container-type: inline-size; }
+#saRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sa-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 6px; }
+.sa-viewer { min-height: 0; display: flex; flex-direction: column; gap: 4px; }
+.sa-stage { position: relative; flex: 1; min-height: 160px; background: #05060C; display: grid; place-items: center; overflow: hidden; }
+.sa-big { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.sa-load { position: absolute; font: 12px var(--f-mono); color: #8FB4FF; }
+.sa-bar { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr); gap: 4px 6px; align-items: start; font: 12px var(--f-ui); flex-shrink: 0; }
+.sa-bar .btn { padding: 1px 9px; }
+.sa-count { padding: 2px 4px; min-width: 44px; text-align: center; font: 13px var(--f-mono); color: var(--lcd); background: var(--lcd-bg); border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.sa-cap { display: grid; gap: 1px; padding-left: 4px; line-height: 1.35; }
+.sa-cap b { color: var(--navy); } .sa-cap small { color: #555555; font-size: 11px; }
+.sa-strip { display: flex; gap: 4px; overflow-x: auto; padding: 3px 2px 5px; flex-shrink: 0; }
+.sa-th { flex: 0 0 auto; width: 74px; height: 56px; padding: 0; background: #05060C; border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand); }
+.sa-th img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sa-th[aria-selected="true"] { border-color: var(--dark) var(--hi) var(--hi) var(--dark); outline: 2px solid var(--blue); outline-offset: -2px; }
+.sa-side { min-height: 0; display: flex; flex-direction: column; }
+.sa-tabs { display: flex; flex-wrap: wrap; gap: 1px; flex-shrink: 0; }
+.sa-tabs button { font: 12px var(--f-ui); padding: 3px 7px; background: var(--silver); border: 2px solid; border-color: var(--hi) var(--shade) transparent var(--hi); margin-bottom: -2px; }
+.sa-tabs button[aria-selected="true"] { background: #FFFFFF; position: relative; z-index: 1; font-weight: bold; }
+.sa-pane { flex: 1; min-height: 0; overflow: auto; padding: 8px 10px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px/1.45 var(--f-ui); }
+.sa-pane h3 { margin: 0 0 6px; font: bold 15px var(--f-head); color: var(--navy); }
+.sa-pane dl { margin: 0; display: grid; gap: 2px; }
+.sa-pane dt { font-weight: bold; color: #333333; margin-top: 5px; } .sa-pane dd { margin: 0; }
+@container (max-width: 640px) { .sa-main { display: block; overflow: auto; } .sa-stage { flex: none; height: 240px; } .sa-bar { grid-template-columns: auto auto auto; } .sa-cap { grid-column: 1 / -1; } .sa-side { margin-top: 6px; } .sa-pane { overflow: visible; } }
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -785,6 +824,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
   <button type="button" class="dicon" data-open="papercut"><img src="img/icons/papercut.png" alt=""><span>Papercut</span></button>
+  <button type="button" class="dicon" data-open="pancake"><img src="img/icons/pancake.png" alt=""><span>Pancake</span></button>
+  <button type="button" class="dicon" data-open="saturn"><img src="img/icons/saturn.png" alt=""><span>Saturn Archive</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
   <button type="button" class="dicon" data-open="sticky"><img src="img/icons/sticky.png" alt=""><span>Sticky Notes</span></button>
   <button type="button" class="dicon" data-open="os"><img src="img/icons/app-settings.png" alt=""><span>OS</span></button>
@@ -905,6 +946,11 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <div id="pcRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Papercut...</p></div>
 </section>
 
+<section class="win raised app" id="w-saturn" data-app="saturn" data-title="Saturn Archive" data-icon="img/icons/saturn-16.png" data-w="900" data-h="600" hidden aria-labelledby="t-saturn">
+  <div class="tbar"><span class="name" id="t-saturn"></span></div>
+  <div id="saRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Saturn Archive...</p></div>
+</section>
+
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
   <div class="tbar"><span class="name" id="t-paint"></span></div>
   <div class="pt-top">
@@ -972,6 +1018,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
           <dt>pictures</dt><dd id="stPics">0</dd>
           <dt>updated</dt><dd id="stSave">----</dd>
           <dt>Dave pokes</dt><dd id="stPokes">0</dd>
+          <dt>pancakes eaten</dt><dd id="stPancakes">0</dd>
         </dl>
       </fieldset>
         <p class="os-about">Lico98 · running on GitHub Pages · coffee level: low</p>
@@ -986,6 +1033,13 @@ summary.rw-co-h { cursor: var(--cur-hand); }
         <legend>Desktop friends</legend>
         <label class="toggle"><input type="checkbox" data-buddy-toggle="clancies"> Clancies</label>
         <label class="toggle"><input type="checkbox" data-buddy-toggle="mon"> Mon</label>
+      </fieldset>
+  <fieldset>
+        <legend>Screensaver</legend>
+        <div class="saver-row"><select id="svKind" aria-label="Screensaver"><option value="stars">Starfield</option><option value="friends">Flying friends</option><option value="bounce">Bouncing text</option><option value="none">(None)</option></select>
+          <label>after <select id="svWait" aria-label="Wait"><option value="1">1</option><option value="3">3</option><option value="5">5</option><option value="10">10</option></select> min</label>
+          <button type="button" class="btn" id="svPreview">Preview</button></div>
+        <div class="saver-row" id="svTextRow"><label for="svText">Text:</label><input id="svText" maxlength="40" placeholder="brb, getting coffee"></div>
       </fieldset>
       </div>
     </div>
@@ -1037,6 +1091,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="papercut"><img src="img/icons/papercut.png" alt="">Papercut</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="pancake"><img src="img/icons/pancake.png" alt="">Pancake</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="saturn"><img src="img/icons/saturn.png" alt="">Saturn Archive</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="sticky"><img src="img/icons/sticky.png" alt="">New Sticky Note</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="os"><img src="img/icons/app-settings.png" alt="">OS</button></li>
@@ -1634,6 +1690,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function openApp(id) {
     if (id === 'dave') { pokeDaveFromMenu(); return; }
     if (id === 'sticky') { stickies.add(); return; }
+    if (id === 'pancake') { pancakes.spawn(); return; }
     if (id.startsWith('url:')) { texty.go(id.slice(4)); return; }
     if (id.startsWith('folder-')) folders.ensure(id);
     if (id === 'display' || id === 'control' || id === 'system') { const tab = id === 'control' ? 'system' : id; id = 'os'; osTab(tab === 'system' ? 'system' : 'display'); }
@@ -1641,6 +1698,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'dude') dude.load();
     if (id === 'netman') loadNetMan();
     if (id === 'readworm') loadReadworm();
+    if (id === 'saturn') loadSaturn();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
@@ -1751,7 +1809,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1760,6 +1818,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
+    saturn: () => { openApp('saturn'); return 'Opened Saturn Archive. It would float in a bathtub, you know.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
     pdf: () => { openApp('papercut'); return 'Opened Papercut.'; },
     md: () => { openApp('readworm'); return 'Opened Readworm.'; },
@@ -1775,7 +1834,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     clancies: () => { buddies.clancies.summon(); return 'Clancies has been summoned from the sky.'; },
     mon: () => { buddies.mon.summon(); return 'Mon dropped in. Quietly. Like she was always there.'; },
     monochrome: () => RUN.mon(),
-    pancake: () => 'Pancake not found. Clancies is still looking. (see: HOWL)',
+    pancake: () => { pancakes.spawn(); return 'One pancake, coming down. Clancies is watching.'; },
+    screensaver: () => { saver.start(true); return 'Screensaver on. Move the mouse to come back.'; },
     notepad: () => { openApp('about'); return 'Opened about_me.txt.'; },
     minesweeper: 'You clicked a mine. Game over. That was fast.',
     rain: () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(OFF()[0] + Math.random() * SW(), OFF()[1], 14), i * 120); return 'It is now raining sparkles. Indoors.'; },
@@ -1935,6 +1995,17 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     b.toggle = () => { b.setOff(!b.off); if (!b.off) b.drop(); };
     b.summon = () => { if (b.off) b.setOff(false); b.drop(); };
     b.fit = () => { if (b.x > SW() - W) b.x = Math.max(0, SW() - W); };
+    b.W = W; b.H = H;
+    // happy hop + a pixel heart (used when Clancies eats a pancake)
+    b.happy = () => {
+      if (b.off) return;
+      if (b.state !== 'held') { b.state = 'fall'; b.vy = -620; b.vx = 0; b.sq = -0.25; b.sqv = 0; }
+      const hx = b.x + W / 2 - 18, hy = b.y - 30;
+      const hrt = h('img', { class: 'heart', src: heartURL(), alt: '', style: `--hx:${Math.round(hx)}px;--hy:${Math.round(hy)}px` });
+      document.body.append(hrt);
+      hrt.addEventListener('animationend', () => hrt.remove());
+      setTimeout(() => hrt.remove(), 2000);
+    };
     let stored = null;
     try { stored = localStorage.getItem('lico-buddy-' + id) || (id === 'clancies' ? localStorage.getItem('lico-clancies') : null); } catch (e) {}
     b.setOff(stored === 'off');
@@ -1950,6 +2021,212 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   }
   requestAnimationFrame(buddyTick);
   addEventListener('resize', () => Object.values(buddies).forEach(b => b.fit()));
+
+
+  /* pixel heart (drawn once, 9x8) */
+  let heartCache = null;
+  function heartURL() {
+    if (heartCache) return heartCache;
+    const P = ['.KK...KK.', 'KPPK.KPPK', 'KPWPPPPPK', 'KPPPPPPPK', '.KPPPPPK.', '..KPPPK..', '...KPK...', '....K....'];
+    const c = document.createElement('canvas'); c.width = 9; c.height = 8; const x = c.getContext('2d');
+    const col = { K: '#7A0F3A', P: '#FF4F8B', W: '#FFFFFF' };
+    P.forEach((r, y) => [...r].forEach((ch, i) => { if (col[ch]) { x.fillStyle = col[ch]; x.fillRect(i, y, 1, 1); } }));
+    return (heartCache = c.toDataURL());
+  }
+
+  /* ---------- Pancake: drop pancakes on the desktop. Throw them around. If one touches Clancies, he eats it. ---------- */
+  const pancakes = (() => {
+    const S = 48, MAX = 15, list = [];
+    let running = false, last = 0, eaten = 0;
+    try { eaten = +localStorage.getItem('lico-pancakes-eaten') || 0; } catch (e) {}
+    const showCount = () => { const o = $('#stPancakes'); if (o) o.textContent = eaten; };
+    showCount();
+    function spawn(x) {
+      if (list.length >= MAX) kill(list[0]);
+      const el = h('img', { class: 'pancake', src: 'img/pancake.png', alt: 'Pancake', draggable: 'false', title: 'Pancake. Throw it at Clancies.' });
+      const p = { el, x: x ?? (40 + Math.random() * Math.max(60, SW() - 128)), y: -S - 10, vx: (Math.random() - .5) * 160, vy: 0, rot: 0, held: null, rest: false };
+      // half the time, aim roughly at Clancies so he gets fed
+      const c = buddies.clancies;
+      if (x == null && c && !c.off && Math.random() < .5) p.x = Math.max(0, Math.min(SW() - S, c.x + c.W / 2 - S / 2 + (Math.random() - .5) * 120));
+      document.body.append(el);
+      el.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return; e.preventDefault();
+        el.setPointerCapture(e.pointerId);
+        p.held = { dx: e.clientX - p.x, dy: e.clientY - p.y, hist: [{ x: e.clientX, y: e.clientY, t: performance.now() }] };
+        p.rest = false; el.classList.add('held'); start();
+      });
+      el.addEventListener('pointermove', e => {
+        if (!p.held) return;
+        p.x = e.clientX - p.held.dx; p.y = e.clientY - p.held.dy;
+        p.held.hist.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (p.held.hist.length > 6) p.held.hist.shift();
+      });
+      const drop = () => {
+        if (!p.held) return;
+        const a = p.held.hist[0], b = p.held.hist[p.held.hist.length - 1], dt = Math.max(16, b.t - a.t) / 1000;
+        p.vx = Math.max(-1500, Math.min(1500, (b.x - a.x) / dt)); p.vy = Math.max(-1500, Math.min(1500, (b.y - a.y) / dt));
+        p.held = null; el.classList.remove('held'); start();
+      };
+      el.addEventListener('pointerup', drop); el.addEventListener('pointercancel', drop);
+      list.push(p); place(p); start();
+      return p;
+    }
+    function kill(p) { const i = list.indexOf(p); if (i >= 0) list.splice(i, 1); p.el.remove(); }
+    function place(p) { p.el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px) rotate(${Math.round(p.rot)}deg)`; }
+    function eat(p) {
+      const [ox, oy] = OFF();
+      burst(ox + p.x + S / 2, oy + p.y + S / 2, 10);
+      kill(p);
+      buddies.clancies.happy();
+      eaten++; showCount();
+      try { localStorage.setItem('lico-pancakes-eaten', eaten); } catch (e) {}
+      if (eaten === 1 || eaten % 10 === 0) say(eaten === 1 ? 'Clancies ate a pancake. Look at him. Pure joy. Must be nice.' : `That's ${eaten} pancakes. Clancies has no limit. I have so many questions.`);
+    }
+    function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(step); } }
+    function step(now) {
+      const dt = Math.min(0.04, (now - last) / 1000); last = now;
+      const g = ground(), c = buddies.clancies;
+      for (const p of [...list]) {
+        if (!p.held && !p.rest) {
+          p.vy += 2200 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.995;
+          p.rot += p.vx * dt * 0.9;
+          if (p.x < 0) { p.x = 0; p.vx = Math.abs(p.vx) * 0.55; }
+          if (p.x > SW() - S) { p.x = SW() - S; p.vx = -Math.abs(p.vx) * 0.55; }
+          if (p.y < -400) p.vy = Math.max(p.vy, 0);
+          if (p.y + S >= g) {
+            p.y = g - S;
+            if (p.vy > 260) { p.vy = -p.vy * 0.5; p.vx *= 0.8; } // boing
+            else { p.vy = 0; p.vx *= 0.85; if (Math.abs(p.vx) < 8) { p.vx = 0; p.rest = true; p.rot = 0; } }
+          }
+        }
+        place(p);
+        // Clancies eats any pancake he touches (not while you're holding it)
+        if (!p.held && c && !c.off && c.state !== 'held') {
+          const m = 8; // a little forgiving inside the sprites
+          if (p.x + S - m > c.x + m && p.x + m < c.x + c.W - m && p.y + S - m > c.y + m && p.y + m < c.y + c.H - m) eat(p);
+        }
+      }
+      // keep checking resting pancakes while Clancies walks around; stop the loop when there are none
+      if (list.length) requestAnimationFrame(step); else running = false;
+    }
+    addEventListener('resize', () => list.forEach(p => { p.x = Math.min(p.x, SW() - S); p.rest = false; }));
+    return { spawn };
+  })();
+
+  /* ---------- Screensaver: kicks in after a few idle minutes; any input wakes it. Lives only while it runs. ---------- */
+  const saver = (() => {
+    let cfg = { kind: 'stars', wait: 3, text: '' };
+    try { cfg = Object.assign(cfg, JSON.parse(localStorage.getItem('lico-saver') || '{}')); } catch (e) {}
+    const kindSel = $('#svKind'), waitSel = $('#svWait'), textIn = $('#svText');
+    kindSel.value = cfg.kind; waitSel.value = String(cfg.wait); textIn.value = cfg.text || '';
+    const syncRow = () => { $('#svTextRow').hidden = kindSel.value !== 'bounce'; };
+    syncRow();
+    const saveCfg = () => { cfg = { kind: kindSel.value, wait: +waitSel.value, text: textIn.value.trim() }; syncRow(); try { localStorage.setItem('lico-saver', JSON.stringify(cfg)); } catch (e) {} };
+    kindSel.addEventListener('change', saveCfg); waitSel.addEventListener('change', saveCfg); textIn.addEventListener('input', saveCfg);
+    $('#svPreview').addEventListener('click', () => setTimeout(() => start(true), 150));
+
+    let lastInput = Date.now(), on = null;
+    const bump = () => { lastInput = Date.now(); };
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, bump, { capture: true, passive: true }));
+    let lp = null;
+    addEventListener('pointermove', e => { if (!lp || Math.abs(e.clientX - lp[0]) + Math.abs(e.clientY - lp[1]) > 3) { lp = [e.clientX, e.clientY]; bump(); } }, { capture: true, passive: true });
+    setInterval(() => {
+      if (on || cfg.kind === 'none' || document.hidden) return;
+      if (!$('#logon').hidden || !$('#bootscr').hidden || !$('#shutdown').hidden) return;
+      if (Date.now() - lastInput > cfg.wait * 60000) start(false);
+    }, 5000);
+
+    function start(preview) {
+      if (on) return;
+      const kind = preview && kindSel.value === 'none' ? 'stars' : kindSel.value;
+      if (kind === 'none') return;
+      const cv = document.createElement('canvas'), x = cv.getContext('2d');
+      const wrap = h('div', { class: 'saver', role: 'presentation' }, cv);
+      document.body.append(wrap);
+      const K = 0.5; // half resolution: chunky pixels, less memory
+      const W = cv.width = Math.ceil(SW() * K), H = cv.height = Math.ceil(SH() * K);
+      const t0 = performance.now();
+      let raf = 0, alive = true;
+      const draw = makeScene(kind, x, W, H);
+      const frame = t => { if (!alive) return; draw(t - t0); raf = requestAnimationFrame(frame); };
+      raf = requestAnimationFrame(frame);
+      const stop = () => {
+        if (!alive || performance.now() - t0 < 500) return; // ignore the click/move that started it
+        alive = false; cancelAnimationFrame(raf); wrap.remove(); cv.width = cv.height = 0; on = null; bump();
+        removeEventListener('pointermove', onMove, true); ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => removeEventListener(ev, stopEv, true));
+      };
+      let mp = null;
+      const onMove = e => { if (!mp) { mp = [e.clientX, e.clientY]; return; } if (Math.abs(e.clientX - mp[0]) + Math.abs(e.clientY - mp[1]) > 6) stop(); };
+      const stopEv = e => { if (e.type === 'keydown' || e.type === 'pointerdown') { e.preventDefault(); e.stopPropagation(); } stop(); };
+      addEventListener('pointermove', onMove, true);
+      ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, stopEv, { capture: true, passive: ev === 'wheel' || ev === 'touchstart' }));
+      on = { stop };
+    }
+    function makeScene(kind, x, W, H) {
+      if (kind === 'stars') {
+        const N = Math.round(W * H / 220), st = [];
+        const reset = (s, far) => { s.x = (Math.random() - .5) * W; s.y = (Math.random() - .5) * H; s.z = far ? Math.random() * W : W; };
+        for (let i = 0; i < N; i++) { const s = {}; reset(s, true); st.push(s); }
+        let lt = 0;
+        return t => {
+          const dt = Math.min(50, t - lt) / 1000; lt = t;
+          x.fillStyle = '#000000'; x.fillRect(0, 0, W, H);
+          for (const s of st) {
+            s.z -= W * .35 * dt;
+            if (s.z < 1) reset(s, false);
+            const k = W * .5 / s.z, px = W / 2 + s.x * k, py = H / 2 + s.y * k;
+            if (px < 0 || py < 0 || px >= W || py >= H) { reset(s, false); continue; }
+            const b = Math.min(1, (1 - s.z / W) * 1.4), sz = s.z < W * .2 ? 2 : 1;
+            x.fillStyle = `rgba(255,255,255,${b})`; x.fillRect(px | 0, py | 0, sz, sz);
+          }
+        };
+      }
+      if (kind === 'friends') {
+        // Clancies, Mon and pancakes drift across the screen
+        const imgs = {}; const ld = (k, u) => { const im = new Image(); im.src = u; imgs[k] = im; };
+        ld('c', 'img/clancies/air.png'); ld('m', 'img/friends/mon.png'); ld('p', 'img/pancake.png');
+        const fl = [];
+        const add = () => {
+          const kinds = ['c', 'm', 'p', 'p', 'c', 'p'];
+          const k = kinds[Math.floor(Math.random() * kinds.length)];
+          const sc = 1 + Math.floor(Math.random() * 3);
+          return { k, sc, x: W + Math.random() * W * .8, y: -40 - Math.random() * H * .8, sp: 16 + Math.random() * 22 + sc * 6, ph: Math.random() * 6 };
+        };
+        for (let i = 0; i < Math.max(8, Math.round(W * H / 6000)); i++) { const f = add(); f.x = Math.random() * (W + H); f.y = Math.random() * H - H * .3; fl.push(f); }
+        let lt = 0;
+        return t => {
+          const dt = Math.min(50, t - lt) / 1000; lt = t;
+          x.fillStyle = '#00005A'; x.fillRect(0, 0, W, H);
+          fl.sort((a, b) => a.sc - b.sc);
+          for (const f of fl) {
+            f.x -= f.sp * dt; f.y += f.sp * .55 * dt;
+            if (f.x < -60 || f.y > H + 60) Object.assign(f, add());
+            const im = imgs[f.k]; if (!im.complete || !im.naturalWidth) continue;
+            const bob = Math.round(Math.sin(t / 300 + f.ph) * 2);
+            if (f.k === 'm') x.drawImage(im, (Math.floor(t / 200 + f.ph) % 2 ? 0 : 2) * 32, 32, 32, 32, f.x | 0, (f.y + bob) | 0, 16 * f.sc, 16 * f.sc);
+            else if (f.k === 'c') x.drawImage(im, (Math.floor(t / 120 + f.ph) % 3) * 16, 0, 16, 16, f.x | 0, (f.y + bob) | 0, 16 * f.sc, 16 * f.sc);
+            else x.drawImage(im, f.x | 0, (f.y + bob) | 0, 16 * f.sc / 2 + 8, 16 * f.sc / 2 + 8);
+          }
+        };
+      }
+      // bouncing text
+      const COLS = ['#FF4F4F', '#FFD23F', '#5BE35B', '#4FD8FF', '#B07CFF', '#FF7CE0', '#FFFFFF'];
+      const txt = (textIn.value.trim() || 'brb, getting coffee');
+      const fs = Math.max(10, Math.round(H / 14));
+      x.font = `${fs}px VT323, "Courier New", monospace`;
+      const tw = Math.ceil(x.measureText(txt).width), th = fs;
+      let px = Math.random() * (W - tw), py = th + Math.random() * (H - th * 2), vx = W * .12, vy = H * .14, ci = 0, lt = 0;
+      return t => {
+        const dt = Math.min(50, t - lt) / 1000; lt = t;
+        px += vx * dt; py += vy * dt;
+        if (px < 0) { px = 0; vx = Math.abs(vx); ci++; } if (px + tw > W) { px = W - tw; vx = -Math.abs(vx); ci++; }
+        if (py - th < 0) { py = th; vy = Math.abs(vy); ci++; } if (py > H - 4) { py = H - 4; vy = -Math.abs(vy); ci++; }
+        x.fillStyle = '#000000'; x.fillRect(0, 0, W, H);
+        x.font = `${fs}px VT323, "Courier New", monospace`;
+        x.fillStyle = COLS[ci % COLS.length]; x.fillText(txt, px | 0, py | 0);
+      };
+    }
+    return { start };
+  })();
 
   /* ---------- Texty (mini browser) ---------- */
   function looksLikeUrl(t) { return /^[a-z][a-z0-9+.-]*:\/\//i.test(t) || (/^[^\s]+\.[a-z]{2,}([/:?#].*)?$/i.test(t) && !/\s/.test(t)); }
@@ -2422,6 +2699,15 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
+  }
+
+  /* ---------- Saturn Archive (apps/saturn.js, loaded the first time the window opens) ---------- */
+  let saturnLoading = null;
+  function loadSaturn() {
+    if (saturnLoading) return saturnLoading;
+    saturnLoading = loadScript('apps/saturn.js?v=1').then(() => window.SaturnArchive.mount($('#saRoot')))
+      .catch(() => { $('#saRoot').textContent = "Couldn't load Saturn Archive. Check your connection and open it again."; saturnLoading = null; });
+    return saturnLoading;
   }
 
   /* ---------- Papercut (apps/papercut.js + apps/vendor/pdfjs, loaded the first time the window opens) ---------- */
