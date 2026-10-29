@@ -390,7 +390,7 @@ a.card:visited { color: var(--text); }
 .buddy { position: fixed; left: 0; top: 0; z-index: 45; cursor: var(--cur-hand); touch-action: none; transform-origin: 50% 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 .buddy canvas { display: block; image-rendering: pixelated; pointer-events: none; }
 .buddy.held { cursor: var(--cur-grab); }
-#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; image-rendering: pixelated; image-rendering: crisp-edges; }
 
 
 /* Right-click menu */
@@ -1581,15 +1581,18 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   fxToggle.addEventListener('change', () => {
     fxOn = fxToggle.checked;
     try { localStorage.setItem('lico-fx', fxOn ? '1' : '0'); } catch (e) {}
-    if (!fxOn) { parts = []; fxc.clearRect(0, 0, fx.width, fx.height); }
+    if (!fxOn) { parts = []; freeFx(); }
     else sparkleAt(fxToggle);
   });
+  // Memory saver: sparkles are drawn at half resolution (they're chunky pixels anyway), and the canvas
+  // only holds memory while sparkles are on screen. It shrinks to nothing when they're gone.
+  const FX_SCALE = 0.5;
   function sizeFx() {
-    dpr = Math.min(2, devicePixelRatio || 1);
-    fx.width = Math.round(SW() * dpr); fx.height = Math.round(SH() * dpr);
-    fxc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = Math.ceil(SW() * FX_SCALE), h = Math.ceil(SH() * FX_SCALE);
+    if (fx.width !== w || fx.height !== h) { fx.width = w; fx.height = h; }
   }
-  sizeFx(); addEventListener('resize', sizeFx);
+  function freeFx() { fx.width = 0; fx.height = 0; }
+  freeFx(); addEventListener('resize', () => { if (fxRunning) sizeFx(); });
 
   function addPart(x, y, kind) {
     if (parts.length > 260) parts.shift();
@@ -1602,7 +1605,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, decay: .018 + Math.random() * .015,
         size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: Math.random() < .55 });
     }
-    if (!fxRunning) { fxRunning = true; requestAnimationFrame(tick); }
+    if (!fxRunning) { fxRunning = true; sizeFx(); requestAnimationFrame(tick); }
   }
   function burst(x, y, n = 16) { if (!fxOn) return; for (let i = 0; i < n; i++) addPart(x, y, 'burst'); }
   function sparkleAt(el) { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .3, 22); }
@@ -1611,7 +1614,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     fxc.fillRect(x - s * 3, y - s, s * 6, s * 2);
   }
   function tick() {
-    fxc.clearRect(0, 0, SW(), SH());
+    fxc.clearRect(0, 0, fx.width, fx.height);
+    const k = FX_SCALE;
     parts = parts.filter(p => p.life > 0);
     for (const p of parts) {
       p.x += p.vx; p.y += p.vy;
@@ -1619,12 +1623,12 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       p.vx *= .98; p.life -= p.decay;
       fxc.globalAlpha = Math.max(0, p.life);
       fxc.fillStyle = p.c;
-      const x = Math.round(p.x), y = Math.round(p.y);
-      if (p.star) drawPixelStar(x, y, Math.max(1, Math.round(p.size / 2 * (0.5 + p.life / 2))));
-      else fxc.fillRect(x, y, p.size, p.size);
+      const x = Math.round(p.x * k), y = Math.round(p.y * k);
+      if (p.star) drawPixelStar(x, y, Math.max(1, Math.round(p.size * k / 2 * (0.5 + p.life / 2) + .25)));
+      else { const s = Math.max(1, Math.round(p.size * k)); fxc.fillRect(x, y, s, s); }
     }
     fxc.globalAlpha = 1;
-    if (parts.length) requestAnimationFrame(tick); else fxRunning = false;
+    if (parts.length) requestAnimationFrame(tick); else { fxRunning = false; freeFx(); }
   }
   addEventListener('pointermove', e => {
     if (!fxOn || e.pointerType !== 'mouse') return;
@@ -1714,6 +1718,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     const w = APPS[id]; if (!w) return;
     w.hidden = true; w.classList.remove('active');
     minimized.delete(id);
+    if (id === 'dude') dude.unload();
     const i = openOrder.indexOf(id); if (i >= 0) openOrder.splice(i, 1);
     activeApp = topVisible(); if (activeApp) focusApp(activeApp); else renderTasks();
   }
@@ -2447,9 +2452,13 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     });
     $('#ydCopy').addEventListener('click', async () => { if (!tray.value) { status.textContent = 'Nothing to copy. Click some emoji first.'; return; } status.textContent = (await copyText(tray.value)) ? 'Copied ' + tray.value : 'Couldn\'t copy. Select the box and press Ctrl+C.'; });
     $('#ydClear').addEventListener('click', () => { tray.value = ''; big.textContent = '🙂'; status.textContent = 'Cleared. Next emoji starts fresh.'; });
-    // warm up in the background once the page is idle, so opening is instant
-    (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => { load().catch(() => {}); }, { timeout: 6000 });
-    return { load: open };
+    // Memory saver: the background thread only exists while the window is open
+    function unload() {
+      if (worker) { worker.terminate(); worker = null; }
+      local = null; groups = null; loading = null; shown = false; pending.clear();
+      cur = []; inner.replaceChildren(); tabsEl.replaceChildren();
+    }
+    return { load: open, unload };
   })();
 
   /* ---------- Readworm (apps/readworm.js + apps/vendor: marked and DOMPurify, loaded the first time the window opens) ---------- */
@@ -2675,10 +2684,22 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       const c = audio(), src = c.createBufferSource(), g = c.createGain();
       src.buffer = buf; g.gain.value = SFX_VOL[k];
       src.connect(g); g.connect(c.destination); src.start();
+      napLater(Math.max(9000, buf.duration * 1000 + 4000));
       return true;
     }).catch(() => false);
   }
-  function primeSounds() { if (userActed) { try { loadSfx('startup'); loadSfx('notify'); } catch (e) {} } }
+  function primeSounds() { if (userActed && sndOn) { try { loadSfx('startup'); napLater(); } catch (e) {} } }
+  // Memory saver: after a few quiet seconds the sound engine is closed and decoded sounds are dropped.
+  // The small compressed files stay, so the next sound just wakes it up again.
+  let napT = 0;
+  function napLater(ms = 9000) {
+    clearTimeout(napT);
+    napT = setTimeout(() => {
+      if (actx) { try { actx.close(); } catch (e) {} actx = null; }
+      for (const k in sfxBuf) delete sfxBuf[k];
+      reverbIR = null;
+    }, ms);
+  }
   function startupSound() {
     if (!sndOn || !userActed) return;
     quietUntil = Date.now() + 2500; // the windows that open with the desktop stay quiet so the two sounds don't overlap
@@ -2704,6 +2725,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   try { sndOn = localStorage.getItem('lico-sound') !== 'off'; } catch (e) {}
   ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { userActed = true; }, { capture: true, passive: true }));
   function synthChime() {
+    napLater();
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
       if (actx.state === 'suspended') actx.resume();

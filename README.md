@@ -104,6 +104,8 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--navy` a
 
 ## Sparkles
 
+- Memory: sparkles are drawn at half resolution, and their canvas is freed as soon as the last sparkle fades. The sound engine shuts down a few seconds after the last sound, and Your Dude's background thread only runs while its window is open. Big apps (Network Man, Venture, Readworm, Papercut) only load when opened.
+
 - Sparkles & cursor trail: visitors can turn them off with the checkbox in the "stats" box. They start off for people who set "reduce motion" on their device.
 
 ## The desktop
