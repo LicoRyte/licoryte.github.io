@@ -731,6 +731,24 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .rw-co-purple { border-color: #7B3FC0; background: #F4EEFB; } .rw-co-purple .rw-co-i { background: #7B3FC0; } .rw-co-purple .rw-co-h { color: #5A2C90; }
 .rw-co-gray { border-color: #808080; background: #F4F4F4; } .rw-co-gray .rw-co-i { background: #808080; } .rw-co-gray .rw-co-h { color: #444444; }
 .rw-empty { text-align: center; padding: 40px 10px; font-family: var(--f-ui); }
+.rw-doc .rw-math { font-size: 1.05em; }
+.rw-doc .rw-math-d { display: block; margin: .6em 0; overflow-x: auto; overflow-y: hidden; text-align: center; }
+.rw-doc .rw-math-err { font-family: "Consolas", "Courier New", monospace; color: #B00020; background: #FFF0F0; }
+.rw-doc .katex { font-size: 1.12em; }
+.rw-flow-box { margin: 0 0 .9em; padding: 6px 8px 4px; border: 1px solid #A0A0A0; background: #FAFAFA; }
+.rw-flow-cap { font: bold 11px var(--f-ui); color: var(--navy); margin-bottom: 4px; }
+.rw-doc table.rw-flow { width: 100%; font-size: .93em; }
+.rw-doc .rw-flow td.from { font-weight: bold; background: var(--hover); }
+.rw-doc .rw-flow td.arr { text-align: center; font-weight: bold; color: var(--blue); width: 28px; }
+.rw-doc .rw-flow td.lab { color: #555555; font-style: italic; }
+.rw-doc .rw-flow.nolab .lab { display: none; }
+.rw-flow-code summary { font: 11px var(--f-ui); color: var(--link); cursor: var(--cur-hand); margin-top: 4px; }
+.rw-flow-code pre { margin: 4px 0 2px; }
+.rw-doc .rw-embed { display: block; margin: .4em 0 .9em; border: 1px solid #A0A0A0; border-left: 4px solid var(--blue); background: #FCFCFC; }
+.rw-doc .rw-embed.missing { border-style: dashed; border-left-width: 4px; background: #FAFAFA; }
+.rw-embed-h { padding: 3px 8px; font: bold 12px var(--f-ui); background: var(--silver); }
+.rw-embed .rw-muted { padding: 4px 8px; }
+.rw-embed-b { padding: 6px 12px 2px; } .rw-embed-b > :first-child { margin-top: 0; }
 .rw-worm { font: bold 26px "Courier New", monospace; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
 @container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline, .rw-sidebtn { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
 
@@ -2705,7 +2723,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=4'))
+      .then(() => loadScript('apps/readworm.js?v=7'))
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
