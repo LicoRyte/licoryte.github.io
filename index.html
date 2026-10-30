@@ -2230,6 +2230,14 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     return { start };
   })();
 
+  /* ---------- Ctrl+S / Cmd+S: no "Save page" dialog. In Paint it saves the drawing instead. ---------- */
+  addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || (e.key || '').toLowerCase() !== 's') return;
+    e.preventDefault();
+    if (activeApp === 'paint' && !APPS.paint.hidden) { $('#ptSave').click(); return; }
+    say(pick(['Ctrl+S? Nothing to save here. Everything saves itself. Unlike me.', 'Saved! ...Just kidding. There\'s nothing to save. Relax.', 'Muscle memory, huh. Same. I press it on paper.', 'Your work is safe. It was always safe. Put the keyboard down.']));
+  }, true);
+
   /* ---------- Texty (mini browser) ---------- */
   function looksLikeUrl(t) { return /^[a-z][a-z0-9+.-]*:\/\//i.test(t) || (/^[^\s]+\.[a-z]{2,}([/:?#].*)?$/i.test(t) && !/\s/.test(t)); }
   const texty = (() => {
