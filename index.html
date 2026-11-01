@@ -826,6 +826,18 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .dk-rename { width: 82px; font: 11px var(--f-ui); text-align: center; border: 1px solid #000000; padding: 0 2px; }
 .dk-empty { grid-column: 1 / -1; text-align: center; padding: 28px 12px; font: 12px var(--f-ui); color: #333333; }
 .dk-muted { color: #666666; font-size: 11px; }
+.dk-find { flex: 0 1 170px; min-width: 90px; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
+.dk-sep { width: 2px; align-self: stretch; margin: 1px 2px; border-left: 1px solid var(--shade); border-right: 1px solid var(--hi); }
+.dk-grid.dk-results { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
+.dk-item.dk-hit { display: flex; justify-items: start; align-items: flex-start; gap: 8px; text-align: left; padding: 4px 6px; width: 100%; }
+.dk-item.dk-hit img { flex-shrink: 0; }
+.dk-item.dk-hit .dk-hit-t { display: flex; flex-direction: column; gap: 1px; max-width: none; min-width: 0; -webkit-line-clamp: unset; overflow: hidden; }
+.dk-item.dk-hit .dk-hit-t > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dk-item.dk-hit .dk-snip { white-space: normal; color: #333333; font-size: 11px; }
+.dk-item.dk-hit mark { background: #FFFF66; color: #000000; padding: 0 1px; }
+.dk-item.dk-hit.sel { background: var(--select); }
+.dk-item.dk-hit.sel .dk-hit-t, .dk-item.dk-hit.sel .dk-hit-t * { color: #FFFFFF; background: none; outline: none; }
+.dk-item.dk-hit.sel mark { background: #FFFF66; color: #000000; }
 
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
@@ -2767,7 +2779,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let documentsLoading = null;
   function loadDocuments() {
     if (documentsLoading) return documentsLoading;
-    documentsLoading = loadScript('apps/documents.js?v=1').then(() => window.Documents.mount($('#dkRoot'), {
+    documentsLoading = loadScript('apps/documents.js?v=2').then(() => window.Documents.mount($('#dkRoot'), {
       menu: (x, y, items) => showMenu(x, y, items),
       viewImage,
       openNotes: files => { openApp('readworm'); return loadReadworm().then(api => api && api.openFiles(files)); },
