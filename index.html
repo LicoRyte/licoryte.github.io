@@ -810,6 +810,23 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .sa-pane dt { font-weight: bold; color: #333333; margin-top: 5px; } .sa-pane dd { margin: 0; }
 @container (max-width: 640px) { .sa-main { display: block; overflow: auto; } .sa-stage { flex: none; height: 240px; } .sa-bar { grid-template-columns: auto auto auto; } .sa-cap { grid-column: 1 / -1; } .sa-side { margin-top: 6px; } .sa-pane { overflow: visible; } }
 
+/* Documents */
+#dkRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+#dkRoot.dk-drop::after { content: "Drop to copy into this folder"; position: absolute; inset: 32px 0 22px; display: grid; place-items: center; font: bold 15px var(--f-ui); color: var(--navy); background: rgba(255, 255, 255, .85); border: 3px dashed var(--blue); pointer-events: none; }
+.dk-tools { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
+.dk-tools .btn { padding: 2px 8px; }
+.dk-addr { flex: 1 1 160px; min-width: 0; display: flex; gap: 4px; align-items: center; padding: 2px 6px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dk-addr img { width: 16px; height: 16px; image-rendering: pixelated; flex-shrink: 0; }
+.dk-grid { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 86px); grid-auto-rows: min-content; gap: 6px 4px; align-content: start; outline: none; }
+.dk-item { display: grid; justify-items: center; gap: 3px; padding: 4px 2px; background: none; border: 1px solid transparent; font: 11px/1.25 var(--f-ui); color: var(--text); text-align: center; cursor: var(--cur-hand); }
+.dk-item img { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
+.dk-item span { max-width: 82px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; padding: 0 2px; }
+.dk-item.sel span { background: var(--select); color: #FFFFFF; outline: 1px dotted var(--text); }
+.dk-item.sel img { filter: var(--sel-tint); }
+.dk-rename { width: 82px; font: 11px var(--f-ui); text-align: center; border: 1px solid #000000; padding: 0 2px; }
+.dk-empty { grid-column: 1 / -1; text-align: center; padding: 28px 12px; font: 12px var(--f-ui); color: #333333; }
+.dk-muted { color: #666666; font-size: 11px; }
+
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
 .logon, .bootscr { background: #000000; display: grid; place-content: center; justify-items: center; padding: 16px; }
@@ -833,6 +850,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
 <nav class="desktop" id="desktop" aria-label="Desktop">
   <button type="button" class="dicon" data-open="about"><img src="img/icons/filetype-text.png" alt=""><span>about_me.txt</span></button>
+  <button type="button" class="dicon" data-open="documents"><img src="img/icons/documents.png" alt=""><span>Documents</span></button>
   <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
   <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
   <button type="button" class="dicon" data-open="texty"><img src="img/icons/texty.png" alt=""><span>Texty</span></button>
@@ -971,6 +989,11 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <div id="saRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Saturn Archive...</p></div>
 </section>
 
+<section class="win raised app" id="w-documents" data-app="documents" data-title="Documents" data-icon="img/icons/documents-16.png" data-w="640" data-h="440" hidden aria-labelledby="t-documents">
+  <div class="tbar"><span class="name" id="t-documents"></span></div>
+  <div id="dkRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Documents...</p></div>
+</section>
+
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
   <div class="tbar"><span class="name" id="t-paint"></span></div>
   <div class="pt-top">
@@ -1097,6 +1120,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   </div>
   <div class="side-band" aria-hidden="true">RetroWorkman<span>98</span></div>
   <ul>
+    <li><button type="button" role="menuitem" data-act="open" data-app="documents"><img src="img/icons/documents.png" alt="">Documents</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="games"><img src="img/icons/games.png" alt="">My Games</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="about"><img src="img/icons/filetype-text.png" alt="">About me</button></li>
@@ -1395,9 +1419,18 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     $('#lbClose').focus();
     daveReact('pic');
   }
+  let lbSingle = null; // a picture from Documents (not part of the gallery)
+  function viewImage(url, name) {
+    lbReturn = document.activeElement; lbSingle = url;
+    const img = $('#lbImg'); img.src = url; img.alt = name; img.classList.toggle('pixel', /pixel/i.test(name));
+    $('#lbTitle').textContent = name; $('#lbNote').textContent = 'From Documents'; $('#lbCount').textContent = '';
+    $('#lbFull').href = url; $('#lbPrev').hidden = $('#lbNext').hidden = true;
+    $('#lb').hidden = false; $('#lbClose').focus();
+  }
   function closePic() {
     $('#lb').hidden = true;
     $('#lbImg').src = 'data:,';
+    if (lbSingle) { URL.revokeObjectURL(lbSingle); lbSingle = null; }
     if (lbReturn && lbReturn.focus) lbReturn.focus();
   }
   $('#lbClose').addEventListener('click', closePic);
@@ -1407,8 +1440,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   document.addEventListener('keydown', e => {
     if ($('#lb').hidden) return;
     if (e.key === 'Escape') closePic();
-    else if (e.key === 'ArrowLeft' && pics.length > 1) showPic(lbIndex - 1);
-    else if (e.key === 'ArrowRight' && pics.length > 1) showPic(lbIndex + 1);
+    else if (e.key === 'ArrowLeft' && pics.length > 1 && !lbSingle) showPic(lbIndex - 1);
+    else if (e.key === 'ArrowRight' && pics.length > 1 && !lbSingle) showPic(lbIndex + 1);
   });
 
   /* Dave */
@@ -1719,6 +1752,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'dude') dude.load();
     if (id === 'netman') loadNetMan();
     if (id === 'readworm') loadReadworm();
+    if (id === 'documents') loadDocuments();
     if (id === 'saturn') loadSaturn();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
@@ -1830,7 +1864,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: documents, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1839,6 +1873,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
+    documents: () => { openApp('documents'); return 'Opened Documents. Very organized. I\'m impressed. A little.'; },
+    docs: () => { openApp('documents'); return 'Opened Documents.'; },
     saturn: () => { openApp('saturn'); return 'Opened Saturn Archive. It would float in a bathtub, you know.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
     pdf: () => { openApp('papercut'); return 'Opened Papercut.'; },
@@ -2718,13 +2754,26 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     return { load: open, unload };
   })();
 
+  /* ---------- Documents (apps/documents.js): files kept in this browser; opens notes in Readworm, PDFs in Papercut ---------- */
+  let documentsLoading = null;
+  function loadDocuments() {
+    if (documentsLoading) return documentsLoading;
+    documentsLoading = loadScript('apps/documents.js?v=1').then(() => window.Documents.mount($('#dkRoot'), {
+      menu: (x, y, items) => showMenu(x, y, items),
+      viewImage,
+      openNotes: files => { openApp('readworm'); return loadReadworm().then(api => api && api.openFiles(files)); },
+      openPdf: file => { openApp('papercut'); return loadPapercut().then(api => api && api.openFile(file)); },
+    })).catch(() => { $('#dkRoot').textContent = "Couldn't load Documents. Check your connection and open it again."; documentsLoading = null; });
+    return documentsLoading;
+  }
+
   /* ---------- Readworm (apps/readworm.js + apps/vendor: marked and DOMPurify, loaded the first time the window opens) ---------- */
   let readwormLoading = null;
   function loadScript(src) { return new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.append(sc); }); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=7'))
+      .then(() => loadScript('apps/readworm.js?v=8'))
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
@@ -2743,7 +2792,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let papercutLoading = null;
   function loadPapercut() {
     if (papercutLoading) return papercutLoading;
-    papercutLoading = loadScript('apps/papercut.js?v=1')
+    papercutLoading = loadScript('apps/papercut.js?v=2')
       .then(() => window.Papercut.mount($('#pcRoot')))
       .catch(() => { $('#pcRoot').textContent = "Couldn't load Papercut. Check your connection and open it again."; papercutLoading = null; });
     return papercutLoading;

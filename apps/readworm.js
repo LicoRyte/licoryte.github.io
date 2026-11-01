@@ -95,7 +95,7 @@
     root.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; root.classList.remove('rw-drop'); } });
     root.addEventListener('drop', e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; root.classList.remove('rw-drop'); openFiles([...e.dataTransfer.files]); });
     const hasFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
-    const pathOf = f => f.webkitRelativePath || f.name;
+    const pathOf = f => f.rwPath || f.webkitRelativePath || f.name;
     const baseName = n => n.split('/').pop().replace(/\.(md|markdown|mdown|mkd|txt)$/i, '').toLowerCase();
 
     async function openFiles(list) {
@@ -407,7 +407,7 @@
       const h = [...doc.querySelectorAll('h1, h2, h3, h4, h5, h6')].find(x => x.id === 'rw-' + want || slug(x.textContent) === want);
       if (h) jumpTo(h);
     });
-    return { open: () => {} };
+    return { openFiles };
   }
   window.Readworm = { mount };
 })();

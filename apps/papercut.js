@@ -165,7 +165,7 @@
       lastW = view.clientWidth;
       clearTimeout(rt); rt = setTimeout(() => { const keep = cur; buildSlots(); goto(keep); }, 150);
     }).observe(view);
-    return {};
+    return { openFile };
   }
   window.Papercut = { mount };
 })();
