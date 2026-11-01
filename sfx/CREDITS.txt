@@ -1,9 +1,13 @@
 Sound credits
 =============
 
-All sounds on this site were created by NightMargin.
-They are used on this non-commercial personal website (Not-So-Awesome Archive, licoryte.github.io).
-All rights to the sounds belong to NightMargin.
+These sounds are used on this non-commercial personal website (Not-So-Awesome Archive, licoryte.github.io).
+All rights to each sound belong to its creator.
 
-startup.ogg   startup sound (startup.mp3 is the same sound, converted for older Safari)
-messagebox.wav   window-open sound
+By NightMargin:
+  startup.ogg        startup sound (startup.mp3 is the same sound, converted for older Safari)
+  messagebox.wav     window-open sound
+
+Interface sounds:
+  twm_mouse_click.wav   mouse click
+  twm_notif.wav         tabs and options inside app windows
