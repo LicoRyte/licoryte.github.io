@@ -493,7 +493,7 @@ a.card:visited { color: var(--text); }
 .ws-item span { padding: 1px 2px; overflow-wrap: anywhere; }
 .ws-item::after { content: ""; position: absolute; left: 26px; top: 28px; width: 9px; height: 9px; background: #FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges'%3E%3Cpath d='M2 7 L6 3 M3 2 H7 V6' stroke='%23000' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") center / 9px no-repeat; border: 1px solid #000000; }
 .ws-item.sel span { background: var(--select); color: #FFFFFF; outline: 1px dotted #000000; }
-.ws-item.sel img { filter: brightness(.7) sepia(1) hue-rotate(60deg) saturate(2.5); }
+.ws-item.sel img { filter: var(--sel-tint); }
 .ws-none { padding: 20px; font: 12px var(--f-ui); color: #555555; }
 @container (max-width: 520px) { .ws-main { grid-template-columns: minmax(0, 1fr); } .ws-pane { display: none; } }
 
@@ -571,7 +571,7 @@ a.card:visited { color: var(--text); }
 .nm-switch .body { fill: #DDEBD6; }
 .nm-dev { cursor: var(--cur-grab); outline: none; }
 .nm-dev .halo { fill: transparent; stroke: none; }
-.nm-dev.sel .halo, .nm-dev:focus-visible .halo { fill: rgba(46, 139, 34, .12); stroke: var(--blue); stroke-dasharray: 3 2; }
+.nm-dev.sel .halo, .nm-dev:focus-visible .halo { fill: color-mix(in srgb, var(--blue) 14%, transparent); stroke: var(--blue); stroke-dasharray: 3 2; }
 .nm-dev.from .halo { fill: rgba(255, 200, 0, .25); stroke: #B08A00; }
 .nm-dev text { text-anchor: middle; }
 .nm-dev .name { font-size: 11px; font-weight: bold; fill: #111111; paint-order: stroke; stroke: #FFFFFF; stroke-width: 3px; }
@@ -1637,7 +1637,9 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* Sparkles + cursor trail */
   const fx = $('#fx'), fxc = fx.getContext('2d');
-  const FX_COLORS = ['#B6E33B', '#FFFF66', '#FFFFFF', '#66FFCC', '#33FF33'];
+  // sparkle colors follow the window color scheme (accent, ring, light tint) plus white and a little yellow
+  let fxPal = null;
+  const fxColors = () => fxPal || (fxPal = (() => { const cs = getComputedStyle(document.documentElement); const v = n => cs.getPropertyValue(n).trim(); return [v('--accent'), v('--ring'), v('--sky'), '#FFFFFF', '#FFFF66'].filter(Boolean); })());
   let parts = [], fxOn = !reduced, fxRunning = false, lastTrail = { x: -99, y: -99 }, dpr = 1;
   try { const v = localStorage.getItem('lico-fx'); if (v !== null) fxOn = v === '1'; } catch (e) {}
   const fxToggle = $('#fxToggle');
@@ -1663,11 +1665,11 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     const [ox, oy] = OFF(); x -= ox; y -= oy;
     if (kind === 'trail') {
       parts.push({ x: x + (Math.random() - .5) * 6, y: y + (Math.random() - .5) * 6, vx: (Math.random() - .5) * .4, vy: .3 + Math.random() * .5,
-        life: 1, decay: .03 + Math.random() * .02, size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: false });
+        life: 1, decay: .03 + Math.random() * .02, size: 2 + Math.round(Math.random() * 2), c: pick(fxColors()), star: false });
     } else {
       const a = Math.random() * Math.PI * 2, sp = 1.5 + Math.random() * 3.5;
       parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.2, life: 1, decay: .018 + Math.random() * .015,
-        size: 2 + Math.round(Math.random() * 2), c: pick(FX_COLORS), star: Math.random() < .55 });
+        size: 2 + Math.round(Math.random() * 2), c: pick(fxColors()), star: Math.random() < .55 });
     }
     if (!fxRunning) { fxRunning = true; sizeFx(); requestAnimationFrame(tick); }
   }
@@ -2489,6 +2491,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     const t = THEMES[name] || THEMES[DEFAULT_THEME]; themeChoice = THEMES[name] ? name : DEFAULT_THEME;
     const r = document.documentElement.style;
     for (const [k, v] of Object.entries(t)) r.setProperty('--' + k, v);
+    fxPal = null; // sparkles pick up the new colors
   }
   function applyWall(name) {
     const bg = document.querySelector('.bg');
