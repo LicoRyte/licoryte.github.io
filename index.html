@@ -669,12 +669,12 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-tools .btn { padding: 2px 10px; }
 .rw-tools .btn[aria-pressed="true"] { border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #DCDCDC; }
 .rw-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 6px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
-.rw-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 6px; }
+.rw-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 6px; }
 .rw-main.no-outline { grid-template-columns: minmax(0, 1fr); } .rw-main.no-outline .rw-outline { display: none; }
 .rw-outline { min-height: 0; overflow: auto; padding: 6px 4px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px var(--f-ui); }
 .rw-ol-h { font-weight: bold; color: var(--navy); padding: 0 4px 4px; }
 .rw-outline { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-.rw-filebox { flex-shrink: 0; max-height: 52%; overflow: auto; padding: 6px 4px; border-bottom: 2px groove var(--hi); }
+.rw-filebox { flex-shrink: 0; max-height: 62%; overflow: auto; padding: 6px 4px; border-bottom: 2px groove var(--hi); }
 .rw-ol { flex: 1; min-height: 0; overflow: auto; padding: 6px 4px; }
 .rw-fh { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
 .rw-outline .rw-clear { display: inline; width: auto; padding: 0; font: 11px var(--f-ui); color: var(--link); text-decoration: underline; }
@@ -686,6 +686,18 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-files li.cur { background: var(--select); }
 .rw-outline .rw-files li.cur button { color: #FFFFFF; } .rw-outline .rw-files li.cur .rw-fn:hover { background: transparent; }
 .rw-outline .rw-files li.cur .rw-x:hover { color: #FFFFFF; background: rgba(255, 255, 255, .2); }
+.rw-find { display: block; width: calc(100% - 8px); margin: 0 4px 5px; box-sizing: border-box; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.rw-outline .rw-files li > .rw-fn { padding-left: calc(4px + var(--d, 0) * 12px); }
+.rw-outline .rw-files .rw-dir > .rw-fn { font-weight: bold; color: var(--navy); }
+.rw-tw { display: inline-block; width: 10px; font-size: 10px; }
+.rw-outline .rw-files .rw-fn:has(.rw-snip), .rw-outline .rw-files .rw-fn:has(.rw-where) { white-space: normal; }
+.rw-files .rw-where, .rw-files .rw-snip { display: block; font-size: 10px; line-height: 1.3; font-weight: normal; overflow: hidden; text-overflow: ellipsis; }
+.rw-files .rw-where { white-space: nowrap; }
+.rw-files .rw-snip { color: #333333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rw-files mark { background: #FFFF66; color: #000000; }
+.rw-files li.cur .rw-where, .rw-files li.cur .rw-snip { color: #FFFFFF; }
+.rw-doc mark.rw-found { background: #FFFF66; outline: 2px solid #FFCC00; transition: background 1s, outline-color 1s; }
+.rw-doc mark.rw-found.fade { background: transparent; outline-color: transparent; color: inherit; }
 .rw-doc .rw-wiki.ok { text-decoration: underline; cursor: var(--cur-hand); }
 .rw-tools select.rw-name { font: 12px var(--f-ui); padding: 1px 2px; }
 .rw-tools .rw-name:disabled { color: #666666; }
@@ -817,34 +829,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .sa-pane dt { font-weight: bold; color: #333333; margin-top: 5px; } .sa-pane dd { margin: 0; }
 @container (max-width: 640px) { .sa-main { display: block; overflow: auto; } .sa-stage { flex: none; height: 240px; } .sa-bar { grid-template-columns: auto auto auto; } .sa-cap { grid-column: 1 / -1; } .sa-side { margin-top: 6px; } .sa-pane { overflow: visible; } }
 
-/* Documents */
-#dkRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
-#dkRoot.dk-drop::after { content: "Drop to copy into this folder"; position: absolute; inset: 32px 0 22px; display: grid; place-items: center; font: bold 15px var(--f-ui); color: var(--navy); background: rgba(255, 255, 255, .85); border: 3px dashed var(--blue); pointer-events: none; }
-.dk-tools { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 2px 0 4px; font: 12px var(--f-ui); flex-shrink: 0; }
-.dk-tools .btn { padding: 2px 8px; }
-.dk-addr { flex: 1 1 160px; min-width: 0; display: flex; gap: 4px; align-items: center; padding: 2px 6px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dk-addr img { width: 16px; height: 16px; image-rendering: pixelated; flex-shrink: 0; }
-.dk-grid { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 86px); grid-auto-rows: min-content; gap: 6px 4px; align-content: start; outline: none; }
-.dk-item { display: grid; justify-items: center; gap: 3px; padding: 4px 2px; background: none; border: 1px solid transparent; font: 11px/1.25 var(--f-ui); color: var(--text); text-align: center; cursor: var(--cur-hand); }
-.dk-item img { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
-.dk-item span { max-width: 82px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; padding: 0 2px; }
-.dk-item.sel span { background: var(--select); color: #FFFFFF; outline: 1px dotted var(--text); }
-.dk-item.sel img { filter: var(--sel-tint); }
-.dk-rename { width: 82px; font: 11px var(--f-ui); text-align: center; border: 1px solid #000000; padding: 0 2px; }
-.dk-empty { grid-column: 1 / -1; text-align: center; padding: 28px 12px; font: 12px var(--f-ui); color: #333333; }
-.dk-muted { color: #666666; font-size: 11px; }
-.dk-find { flex: 0 1 170px; min-width: 90px; font: 12px var(--f-ui); padding: 2px 4px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); background: #FFFFFF; }
-.dk-sep { width: 2px; align-self: stretch; margin: 1px 2px; border-left: 1px solid var(--shade); border-right: 1px solid var(--hi); }
-.dk-grid.dk-results { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
-.dk-item.dk-hit { display: flex; justify-items: start; align-items: flex-start; gap: 8px; text-align: left; padding: 4px 6px; width: 100%; }
-.dk-item.dk-hit img { flex-shrink: 0; }
-.dk-item.dk-hit .dk-hit-t { display: flex; flex-direction: column; gap: 1px; max-width: none; min-width: 0; -webkit-line-clamp: unset; overflow: hidden; }
-.dk-item.dk-hit .dk-hit-t > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dk-item.dk-hit .dk-snip { white-space: normal; color: #333333; font-size: 11px; }
-.dk-item.dk-hit mark { background: #FFFF66; color: #000000; padding: 0 1px; }
-.dk-item.dk-hit.sel { background: var(--select); }
-.dk-item.dk-hit.sel .dk-hit-t, .dk-item.dk-hit.sel .dk-hit-t * { color: #FFFFFF; background: none; outline: none; }
-.dk-item.dk-hit.sel mark { background: #FFFF66; color: #000000; }
 
 /* Log on + boot sequence */
 .logon, .bootscr, .flash { position: fixed; inset: 0; z-index: 100001; }
@@ -869,7 +853,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
 <nav class="desktop" id="desktop" aria-label="Desktop">
   <button type="button" class="dicon" data-open="about"><img src="img/icons/filetype-text.png" alt=""><span>about_me.txt</span></button>
-  <button type="button" class="dicon" data-open="documents"><img src="img/icons/documents.png" alt=""><span>Documents</span></button>
   <button type="button" class="dicon" data-open="games"><img src="img/icons/games.png" alt=""><span>My Games</span></button>
   <button type="button" class="dicon" data-open="gallery"><img src="img/icons/app-image-viewer.png" alt=""><span>Gallery</span></button>
   <button type="button" class="dicon" data-open="texty"><img src="img/icons/texty.png" alt=""><span>Texty</span></button>
@@ -1008,10 +991,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <div id="saRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Saturn Archive...</p></div>
 </section>
 
-<section class="win raised app" id="w-documents" data-app="documents" data-title="Documents" data-icon="img/icons/documents-16.png" data-w="640" data-h="440" hidden aria-labelledby="t-documents">
-  <div class="tbar"><span class="name" id="t-documents"></span></div>
-  <div id="dkRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Documents...</p></div>
-</section>
 
 <section class="win raised app" id="w-paint" data-app="paint" data-title="untitled - Paint" data-icon="img/icons/paint-16.png" data-w="700" data-h="520" hidden aria-labelledby="t-paint">
   <div class="tbar"><span class="name" id="t-paint"></span></div>
@@ -1139,7 +1118,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   </div>
   <div class="side-band" aria-hidden="true">RetroWorkman<span>98</span></div>
   <ul>
-    <li><button type="button" role="menuitem" data-act="open" data-app="documents"><img src="img/icons/documents.png" alt="">Documents</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="games"><img src="img/icons/games.png" alt="">My Games</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="gallery"><img src="img/icons/app-image-viewer.png" alt="">Gallery</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="about"><img src="img/icons/filetype-text.png" alt="">About me</button></li>
@@ -1438,18 +1416,9 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     $('#lbClose').focus();
     daveReact('pic');
   }
-  let lbSingle = null; // a picture from Documents (not part of the gallery)
-  function viewImage(url, name) {
-    lbReturn = document.activeElement; lbSingle = url;
-    const img = $('#lbImg'); img.src = url; img.alt = name; img.classList.toggle('pixel', /pixel/i.test(name));
-    $('#lbTitle').textContent = name; $('#lbNote').textContent = 'From Documents'; $('#lbCount').textContent = '';
-    $('#lbFull').href = url; $('#lbPrev').hidden = $('#lbNext').hidden = true;
-    $('#lb').hidden = false; $('#lbClose').focus();
-  }
   function closePic() {
     $('#lb').hidden = true;
     $('#lbImg').src = 'data:,';
-    if (lbSingle) { URL.revokeObjectURL(lbSingle); lbSingle = null; }
     if (lbReturn && lbReturn.focus) lbReturn.focus();
   }
   $('#lbClose').addEventListener('click', closePic);
@@ -1459,8 +1428,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   document.addEventListener('keydown', e => {
     if ($('#lb').hidden) return;
     if (e.key === 'Escape') closePic();
-    else if (e.key === 'ArrowLeft' && pics.length > 1 && !lbSingle) showPic(lbIndex - 1);
-    else if (e.key === 'ArrowRight' && pics.length > 1 && !lbSingle) showPic(lbIndex + 1);
+    else if (e.key === 'ArrowLeft' && pics.length > 1) showPic(lbIndex - 1);
+    else if (e.key === 'ArrowRight' && pics.length > 1) showPic(lbIndex + 1);
   });
 
   /* Dave */
@@ -1779,7 +1748,6 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'dude') dude.load();
     if (id === 'netman') loadNetMan();
     if (id === 'readworm') loadReadworm();
-    if (id === 'documents') loadDocuments();
     if (id === 'saturn') loadSaturn();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
@@ -1886,7 +1854,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       });
     }
     function forget(id, w) { live = Math.max(0, live - 1); URL.revokeObjectURL(w.dataset.url); delete APPS[id]; w.remove(); }
-    // drops: apps with their own drop zones (Documents, Readworm, Papercut) handle theirs first
+    // drops: apps with their own drop zones (Readworm, Papercut) handle theirs first
     const hasFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
     addEventListener('dragover', e => { if (hasFiles(e) && !e.defaultPrevented) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
     addEventListener('drop', e => {
@@ -1955,7 +1923,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: documents, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: library, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -1964,8 +1932,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
-    documents: () => { openApp('documents'); return 'Opened Documents. Very organized. I\'m impressed. A little.'; },
-    docs: () => { openApp('documents'); return 'Opened Documents.'; },
+    library: () => { openApp('readworm'); return 'Opened Readworm, the library. Shh.'; },
     saturn: () => { openApp('saturn'); return 'Opened Saturn Archive. It would float in a bathtub, you know.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
     pdf: () => { openApp('papercut'); return 'Opened Papercut.'; },
@@ -2846,26 +2813,13 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     return { load: open, unload };
   })();
 
-  /* ---------- Documents (apps/documents.js): files kept in this browser; opens notes in Readworm, PDFs in Papercut ---------- */
-  let documentsLoading = null;
-  function loadDocuments() {
-    if (documentsLoading) return documentsLoading;
-    documentsLoading = loadScript('apps/documents.js?v=2').then(() => window.Documents.mount($('#dkRoot'), {
-      menu: (x, y, items) => showMenu(x, y, items),
-      viewImage,
-      openNotes: files => { openApp('readworm'); return loadReadworm().then(api => api && api.openFiles(files)); },
-      openPdf: file => { openApp('papercut'); return loadPapercut().then(api => api && api.openFile(file)); },
-    })).catch(() => { $('#dkRoot').textContent = "Couldn't load Documents. Check your connection and open it again."; documentsLoading = null; });
-    return documentsLoading;
-  }
-
   /* ---------- Readworm (apps/readworm.js + apps/vendor: marked and DOMPurify, loaded the first time the window opens) ---------- */
   let readwormLoading = null;
   function loadScript(src) { return new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = no; document.head.append(sc); }); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=8'))
+      .then(() => loadScript('apps/readworm.js?v=9'))
       .then(() => window.Readworm.mount($('#rwRoot')))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;

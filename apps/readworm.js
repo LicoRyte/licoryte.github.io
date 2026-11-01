@@ -1,5 +1,6 @@
-/* Readworm: open Markdown files (or a whole folder) and read them in the site's theme. Nothing is saved or uploaded:
-   the files live in this window's list until you remove them or close the window/tab.
+/* Readworm: a little Markdown library. Import notes (or whole folders), pick a topic from the sidebar and read it in the
+   site's theme. Find searches every note. Nothing is saved or uploaded: the library only lives in this window until you
+   remove things or close the window/tab.
    Uses marked (MIT) to turn Markdown into HTML and DOMPurify (Apache-2.0/MPL-2.0) to strip anything unsafe.
    Loaded by index.html the first time the Readworm window opens. */
 (() => {
@@ -61,29 +62,33 @@
     const fileSel = el('select', { class: 'rw-name', 'aria-label': 'Open file', disabled: true }, el('option', {}, 'No file open'));
     const sideBtn = el('button', { type: 'button', class: 'btn rw-sidebtn', 'aria-pressed': 'true', title: 'Show or hide the sidebar', onclick: () => { const on = sideBtn.getAttribute('aria-pressed') !== 'true'; sideBtn.setAttribute('aria-pressed', String(on)); main.classList.toggle('no-outline', !on); } }, 'Sidebar');
     const tools = el('div', { class: 'rw-tools' },
-      el('button', { type: 'button', class: 'btn', title: 'Open one or more Markdown files (and their images)', onclick: () => input.click() }, 'Open files...'),
-      el('button', { type: 'button', class: 'btn', title: 'Open every Markdown file in a folder, like an Obsidian vault', onclick: () => folderInput.click() }, 'Open folder...'),
+      el('button', { type: 'button', class: 'btn', title: 'Add one or more Markdown files (and their images) to the library', onclick: () => input.click() }, 'Import files...'),
+      el('button', { type: 'button', class: 'btn', title: 'Add every Markdown file in a folder, subfolders included (like an Obsidian vault)', onclick: () => folderInput.click() }, 'Import folder...'),
       sideBtn, fileSel, input, folderInput);
-    const fileHead = el('div', { class: 'rw-ol-h rw-fh' }, el('span', {}, 'Files'), el('button', { type: 'button', class: 'rw-clear', title: 'Remove every file from the list', onclick: () => removeAll() }, 'Remove all'));
-    const fileList = el('ul', { class: 'rw-files' });
+    const fileHead = el('div', { class: 'rw-ol-h rw-fh' }, el('span', {}, 'Library'), el('button', { type: 'button', class: 'rw-clear', title: 'Empty the whole library', onclick: () => removeAll() }, 'Remove all'));
+    const find = el('input', { type: 'search', class: 'rw-find', placeholder: 'Find in library...', 'aria-label': 'Find in library', spellcheck: 'false' });
+    const fileList = el('ul', { class: 'rw-files', role: 'tree' });
     const outline = el('nav', { class: 'rw-ol', 'aria-label': 'Outline' });
-    const side = el('aside', { class: 'rw-outline' }, el('div', { class: 'rw-filebox' }, fileHead, fileList), outline);
+    const side = el('aside', { class: 'rw-outline' }, el('div', { class: 'rw-filebox' }, fileHead, find, fileList), outline);
     const doc = el('article', { class: 'rw-doc' });
     const scroller = el('div', { class: 'rw-scroll sunken', tabindex: '0' }, doc);
     const main = el('div', { class: 'rw-main' }, side, scroller);
-    const status = el('span', {}, 'Open Markdown files to read them.'), status2 = el('span', {}, 'Nothing is saved');
+    const status = el('span', {}, 'Import Markdown files to start a library.'), status2 = el('span', {}, 'Nothing is saved');
     root.replaceChildren(tools, main, el('div', { class: 'statusbar' }, status, status2));
 
     let files = [], current = null, seq = 0; // files: { id, name, path, text, scroll }
+    const closed = new Set(); // folder paths folded shut in the sidebar
+    let query = '', findT = 0; // Find box text
     renderFileList(); showEmpty();
 
     function showEmpty(msg) {
       outline.replaceChildren();
       doc.replaceChildren(el('div', { class: 'rw-empty' },
         el('div', { class: 'rw-worm', 'aria-hidden': 'true' }, '~~~(o.o)'),
-        el('p', {}, el('b', {}, msg || 'Feed me some Markdown.')),
-        el('p', {}, 'Click ', el('b', {}, 'Open files...'), ' (pick as many as you like), ', el('b', {}, 'Open folder...'), ', or drop .md files here.'),
-        el('p', { class: 'rw-muted' }, 'Pick notes together with their images to see them too. Nothing is saved or uploaded: the files only live in this window until you remove them or close it.')));
+        el('p', {}, el('b', {}, msg || (files.length ? 'Pick a topic from the library.' : 'The library is empty. Feed me some Markdown.'))),
+        files.length ? el('p', {}, files.length + ' note' + (files.length === 1 ? '' : 's') + ' on the shelf. Click one on the left, or use Find.') :
+          el('p', {}, 'Click ', el('b', {}, 'Import files...'), ' (pick as many as you like), ', el('b', {}, 'Import folder...'), ' for a whole folder with its subfolders, or drop .md files here.'),
+        el('p', { class: 'rw-muted' }, 'Import notes together with their images to see them too. Nothing is saved or uploaded: the library only lives in this window until you remove things or close it.')));
     }
 
     input.addEventListener('change', () => { openFiles([...input.files]); input.value = ''; });
@@ -120,37 +125,115 @@
       }
       files.sort((x, y) => x.path.localeCompare(y.path, undefined, { numeric: true, sensitivity: 'base' }));
       renderFileList();
-      if (firstNew) show(firstNew, firstNew === current);
+      if (firstNew && (firstNew === current || added + updated === 1)) show(firstNew, firstNew === current); // one note: open it; many: let you pick
+      else if (!current) showEmpty();
       const bits = [];
       if (added) bits.push('Added ' + added + ' file' + (added > 1 ? 's' : ''));
       if (updated) bits.push('reloaded ' + updated);
       if (skipped) bits.push(skipped + ' skipped (too big, unreadable or over ' + MAX_FILES + ' files)');
       if (bits.length) setTimeout(() => { status.textContent = bits.join(', ') + '.'; }, 1600);
     }
+    const topic = n => n.replace(/\.(md|markdown|mdown|mkd)$/i, '');
     function renderFileList() {
-      fileHead.firstChild.textContent = files.length ? 'Files (' + files.length + ')' : 'Files';
+      fileHead.firstChild.textContent = files.length ? 'Library (' + files.length + ')' : 'Library';
       fileHead.lastChild.hidden = files.length < 2;
-      if (!files.length) fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'No files open.'));
-      else fileList.replaceChildren(...files.map(f => el('li', { class: f.id === current ? 'cur' : '' },
-        el('button', { type: 'button', class: 'rw-fn', title: f.path, onclick: () => show(f.id), 'aria-current': f.id === current ? 'true' : null }, f.name.replace(/\.(md|markdown|mdown|mkd)$/i, '')),
-        el('button', { type: 'button', class: 'rw-x', title: 'Remove ' + f.name + ' from the list', 'aria-label': 'Remove ' + f.name, onclick: () => remove(f.id) }, '×'))));
+      find.hidden = files.length < 2;
+      if (query) { renderHits(); }
+      else if (!files.length) fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'Nothing here yet.'));
+      else {
+        // folders first (as a tree), then loose notes; every row is indented by its depth
+        const root = { dirs: new Map(), notes: [] };
+        for (const f of files) {
+          const parts = f.path.split('/'); parts.pop();
+          let node = root, acc = '';
+          for (const d of parts) { acc += (acc ? '/' : '') + d; if (!node.dirs.has(d)) node.dirs.set(d, { path: acc, dirs: new Map(), notes: [] }); node = node.dirs.get(d); }
+          node.notes.push(f);
+        }
+        const cmp = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        const count = n => n.notes.length + [...n.dirs.values()].reduce((a, d) => a + count(d), 0);
+        const rows = [];
+        const walk = (node, depth) => {
+          for (const [name, d] of [...node.dirs.entries()].sort((a, b) => cmp(a[0], b[0]))) {
+            const shut = closed.has(d.path);
+            rows.push(el('li', { class: 'rw-dir', style: '--d:' + depth },
+              el('button', { type: 'button', class: 'rw-fn', title: d.path, 'aria-expanded': String(!shut), onclick: () => { if (shut) closed.delete(d.path); else closed.add(d.path); renderFileList(); } },
+                el('span', { class: 'rw-tw', 'aria-hidden': 'true' }, shut ? '▸' : '▾'), '📁 ' + name, el('small', { class: 'rw-muted' }, ' ' + count(d))),
+              el('button', { type: 'button', class: 'rw-x', title: 'Remove the folder ' + name + ' from the library', 'aria-label': 'Remove folder ' + name, onclick: () => removeFolder(d.path) }, '×')));
+            if (!shut) walk(d, depth + 1);
+          }
+          for (const f of node.notes.sort((a, b) => cmp(a.name, b.name))) rows.push(noteRow(f, depth));
+        };
+        walk(root, 0);
+        fileList.replaceChildren(...rows);
+      }
       fileSel.disabled = !files.length;
       fileSel.replaceChildren(...(files.length ? files.map(f => el('option', { value: f.id, selected: f.id === current || null }, f.path)) : [el('option', {}, 'No file open')]));
     }
+    function noteRow(f, depth, extra) {
+      return el('li', { class: f.id === current ? 'cur' : '', style: '--d:' + depth },
+        el('button', { type: 'button', class: 'rw-fn', title: f.path, onclick: () => { show(f.id); if (query) jumpToText(query); }, 'aria-current': f.id === current ? 'true' : null }, topic(f.name), extra || null),
+        el('button', { type: 'button', class: 'rw-x', title: 'Remove ' + f.name + ' from the library', 'aria-label': 'Remove ' + f.name, onclick: () => remove(f.id) }, '×'));
+    }
+    function removeFolder(path) {
+      const gone = files.filter(f => f.path.startsWith(path + '/'));
+      if (gone.length > 1 && !window.confirm('Take the folder "' + path.split('/').pop() + '" (' + gone.length + ' notes) out of the library?')) return;
+      files = files.filter(f => !gone.includes(f));
+      if (gone.some(f => f.id === current)) { current = null; showEmpty(); }
+      if (!files.length) { removeAll(); return; }
+      renderFileList(); status.textContent = 'Removed ' + gone.length + ' note' + (gone.length === 1 ? '' : 's') + '.';
+    }
+
+    /* Find: note names and the text inside every note in the library */
+    function renderHits() {
+      const q = query.toLowerCase(), hits = [];
+      for (const f of files) {
+        const inName = f.path.toLowerCase().includes(q), at = f.text.toLowerCase().indexOf(q);
+        if (inName || at >= 0) hits.push({ f, inName, at });
+      }
+      hits.sort((a, b) => (b.inName - a.inName) || a.f.path.localeCompare(b.f.path, undefined, { numeric: true, sensitivity: 'base' }));
+      if (!hits.length) { fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'Nothing found for "' + query + '".')); status.textContent = '0 results'; return; }
+      fileList.replaceChildren(...hits.slice(0, 200).map(({ f, at }) => {
+        const where = f.path.includes('/') ? f.path.slice(0, f.path.lastIndexOf('/')) : '';
+        let snip = null;
+        if (at >= 0) {
+          const a = Math.max(0, at - 30), b = Math.min(f.text.length, at + q.length + 50), c = t => t.replace(/\s+/g, ' ');
+          snip = el('small', { class: 'rw-snip' }, (a ? '…' : '') + c(f.text.slice(a, at)), el('mark', {}, c(f.text.slice(at, at + q.length))), c(f.text.slice(at + q.length, b)) + (b < f.text.length ? '…' : ''));
+        }
+        return noteRow(f, 0, [where ? el('small', { class: 'rw-muted rw-where' }, where) : null, snip]);
+      }));
+      status.textContent = hits.length + ' note' + (hits.length === 1 ? '' : 's') + ' match "' + query + '"';
+    }
+    // after opening a search result, scroll to the first place the words appear and flash it
+    function jumpToText(q) {
+      const want = q.toLowerCase(), walker = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT);
+      let n; while ((n = walker.nextNode())) {
+        const i = n.nodeValue.toLowerCase().indexOf(want); if (i < 0) continue;
+        const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + want.length);
+        const m = el('mark', { class: 'rw-found' }); try { r.surroundContents(m); } catch (e) { return; }
+        scroller.scrollTop = Math.max(0, m.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - scroller.clientHeight / 3);
+        setTimeout(() => m.classList.add('fade'), 1600);
+        return;
+      }
+    }
+    find.addEventListener('input', () => { clearTimeout(findT); findT = setTimeout(() => { query = find.value.trim(); renderFileList(); if (!query) status.textContent = files.length + ' notes in the library'; }, 150); });
+    find.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); find.value = ''; query = ''; renderFileList(); }
+      if (e.key === 'Enter') { e.preventDefault(); const b = fileList.querySelector('.rw-fn'); if (b) b.click(); }
+    });
     function remove(id) {
       const i = files.findIndex(f => f.id === id); if (i < 0) return;
       const [gone] = files.splice(i, 1);
-      if (current === id) { current = null; const next = files[i] || files[i - 1]; if (next) show(next.id); }
+      if (current === id) { current = null; showEmpty(); }
       if (!files.length) { removeAll(); return; }
       renderFileList();
       status.textContent = 'Removed ' + gone.name + '.';
     }
     function removeAll() {
-      files = []; current = null;
+      files = []; current = null; closed.clear(); find.value = ''; query = '';
       for (const u of images.values()) URL.revokeObjectURL(u);
       images = new Map();
       renderFileList(); showEmpty();
-      status.textContent = 'List cleared.';
+      status.textContent = 'Library emptied.';
     }
     function show(id, keepScroll) {
       const f = files.find(x => x.id === id); if (!f) return;
@@ -158,6 +241,7 @@
       if (prev && prev !== f) prev.scroll = scroller.scrollTop;
       const y = keepScroll ? scroller.scrollTop : f.scroll;
       current = f.id;
+      const parts = f.path.split('/'); parts.pop(); let acc = ''; for (const d of parts) { acc += (acc ? '/' : '') + d; closed.delete(acc); }
       render(f.text, f.name);
       scroller.scrollTop = y || 0;
       renderFileList();
