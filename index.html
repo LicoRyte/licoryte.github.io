@@ -696,6 +696,35 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-files .rw-snip { color: #333333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .rw-files mark { background: #FFFF66; color: #000000; }
 .rw-files li.cur .rw-where, .rw-files li.cur .rw-snip { color: #FFFFFF; }
+.rw-tools .rw-nav { padding: 2px 6px; min-width: 24px; }
+.rw-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 var(--hi); }
+.rw-outline .rw-files .rw-pic > .rw-fn { color: #3A3A3A; }
+.rw-scroll.rw-wide .rw-doc { max-width: none; }
+/* paper colors (View menu) */
+.rw-scroll.rw-p-sepia, .rw-peek.rw-p-sepia { background: #F4ECD8; } .rw-p-sepia .rw-doc { color: #3B2F1E; }
+.rw-p-sepia .rw-doc pre, .rw-p-sepia .rw-doc code { background: #EBE1C8; border-color: #D8CBA8; } .rw-p-sepia .rw-doc tr:nth-child(even) td { background: #EFE5CD; }
+.rw-scroll.rw-p-dark, .rw-peek.rw-p-dark { background: #1E1F22; } .rw-p-dark .rw-doc { color: #DADADA; }
+.rw-p-dark .rw-doc h1, .rw-p-dark .rw-doc h2, .rw-p-dark .rw-doc h3, .rw-p-dark .rw-doc h4 { color: #9EC0FF; } .rw-p-dark .rw-doc h5, .rw-p-dark .rw-doc h6 { color: #B8B8B8; }
+.rw-p-dark .rw-doc h2 { border-bottom-color: #3A3A3A; }
+.rw-p-dark .rw-doc a, .rw-p-dark .rw-doc .rw-wiki { color: #8AB4FF; }
+.rw-p-dark .rw-doc code { background: #2B2D31; border-color: #3C3F44; } .rw-p-dark .rw-doc pre { background: #26282C; border-color: #111111 #3C3F44 #3C3F44 #111111; }
+.rw-p-dark .rw-doc blockquote { background: #262B36; color: #CFCFCF; } .rw-p-dark .rw-doc mark { background: #7A6A00; color: #FFFFFF; }
+.rw-p-dark .rw-doc th { background: #34373C; color: #EEEEEE; } .rw-p-dark .rw-doc th, .rw-p-dark .rw-doc td { border-color: #44474C; } .rw-p-dark .rw-doc tr:nth-child(even) td { background: #25272B; }
+.rw-p-dark .rw-doc .rw-co { background: #26282C; } .rw-p-dark .rw-doc .rw-co-h { filter: brightness(1.7); }
+.rw-p-dark .rw-props, .rw-p-dark .rw-doc .rw-embed { background: #25272B; border-color: #44474C; } .rw-p-dark .rw-props-h { background: #34373C; color: #EEEEEE; } .rw-p-dark .rw-props dt { color: #A0A0A0; }
+.rw-p-dark .rw-doc .rw-flow td.from { background: #2C3340; } .rw-p-dark .rw-doc img { border-color: #44474C; }
+.rw-p-dark .rw-empty { color: #CCCCCC; }
+/* wikilink hover card */
+.rw-peek { position: absolute; z-index: 5; width: min(340px, 80%); max-height: 260px; overflow: hidden; background: #FFFFFF; pointer-events: none; padding: 0; box-shadow: 3px 4px 0 rgba(0, 0, 0, .35); }
+.rw-peek-h { padding: 3px 8px; font: bold 12px var(--f-ui); color: var(--hi); background: linear-gradient(90deg, var(--navy), var(--blue)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rw-peek .rw-doc { padding: 8px 12px 10px; font-size: calc(var(--rw-fs, 14.5px) * .88); max-width: none; }
+.rw-peek .rw-doc h1 { font-size: 1.4em; } .rw-peek .rw-doc h2 { font-size: 1.2em; }
+.rw-peek::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: linear-gradient(transparent, #FFFFFF); }
+.rw-peek.rw-p-sepia::after { background: linear-gradient(transparent, #F4ECD8); } .rw-peek.rw-p-dark::after { background: linear-gradient(transparent, #1E1F22); }
+/* popped-out notes */
+.pin-note-body { flex: 1; min-height: 0; display: flex; position: relative; }
+.pin-note-body .rw-scroll { flex: 1; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.pin-note-body .rw-doc { padding: 14px 18px 30px; }
 .rw-doc mark.rw-found { background: #FFFF66; outline: 2px solid #FFCC00; transition: background 1s, outline-color 1s; }
 .rw-doc mark.rw-found.fade { background: transparent; outline-color: transparent; color: inherit; }
 .rw-doc .rw-wiki.ok { text-decoration: underline; cursor: var(--cur-hand); }
@@ -707,7 +736,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-outline .lv1 button { font-weight: bold; } .rw-outline .lv2 button { padding-left: 12px; } .rw-outline .lv3 button { padding-left: 22px; } .rw-outline .lv4 button { padding-left: 32px; color: #444444; }
 .rw-muted { color: #666666; font-size: 11px; padding: 0 4px; }
 .rw-scroll { min-height: 0; overflow: auto; background: #FFFFFF; outline: none; }
-.rw-doc { max-width: 74ch; margin: 0 auto; padding: 18px 26px 40px; font: 14px/1.65 var(--f-body); color: #1A1A1A; overflow-wrap: break-word; }
+.rw-doc { max-width: 74ch; margin: 0 auto; padding: 18px 26px 40px; font: var(--rw-fs, 14.5px)/1.65 var(--f-body); color: #1A1A1A; overflow-wrap: break-word; }
 .rw-doc > :first-child { margin-top: 0; }
 .rw-doc h1, .rw-doc h2, .rw-doc h3, .rw-doc h4, .rw-doc h5, .rw-doc h6 { font-family: var(--f-head); color: var(--navy); line-height: 1.25; margin: 1.4em 0 .5em; }
 .rw-doc h1 { font-size: 1.9em; padding-bottom: 6px; border-bottom: 3px solid; border-image: linear-gradient(90deg, var(--navy), var(--blue), transparent) 1; }
@@ -769,7 +798,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 .rw-embed .rw-muted { padding: 4px 8px; }
 .rw-embed-b { padding: 6px 12px 2px; } .rw-embed-b > :first-child { margin-top: 0; }
 .rw-worm { font: bold 26px "Courier New", monospace; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
-@container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline, .rw-sidebtn { display: none; } .rw-doc { padding: 12px 14px 30px; font-size: 14px; } }
+@container (max-width: 640px) { .rw-main { grid-template-columns: minmax(0, 1fr); } .rw-outline, .rw-sidebtn { display: none; } .rw-doc { padding: 12px 14px 30px; } }
 
 /* Papercut (PDF viewer) */
 #w-papercut { container-type: inline-size; }
@@ -1840,11 +1869,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       fit(); img.addEventListener('load', () => fit(), { once: true });
       img.addEventListener('error', () => { closeApp(id); say('That picture won\'t open. Might not be a picture.'); }, { once: true });
       img.addEventListener('dblclick', () => toggleMax(id));
-      // corner grip: drag to resize
-      let st = null;
-      grip.addEventListener('pointerdown', e => { if (e.button !== 0 || w.classList.contains('max')) return; e.preventDefault(); st = { x: e.clientX, y: e.clientY, w: w.offsetWidth, h: w.offsetHeight }; grip.setPointerCapture(e.pointerId); });
-      grip.addEventListener('pointermove', e => { if (!st) return; w.style.width = Math.max(140, st.w + e.clientX - st.x) + 'px'; w.style.height = Math.max(90, st.h + e.clientY - st.y) + 'px'; });
-      const end = () => { st = null; }; grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+      resizeGrip(w, grip);
       w.querySelector('.tbar').addEventListener('contextmenu', e => {
         e.preventDefault(); e.stopPropagation();
         showMenu(e.clientX, e.clientY, [
@@ -1853,7 +1878,36 @@ summary.rw-co-h { cursor: var(--cur-hand); }
           '-', { label: 'Close', run: () => closeApp(id) }]);
       });
     }
-    function forget(id, w) { live = Math.max(0, live - 1); URL.revokeObjectURL(w.dataset.url); delete APPS[id]; w.remove(); }
+    // corner grip: drag to resize
+    function resizeGrip(w, grip) {
+      let st = null;
+      grip.addEventListener('pointerdown', e => { if (e.button !== 0 || w.classList.contains('max')) return; e.preventDefault(); st = { x: e.clientX, y: e.clientY, w: w.offsetWidth, h: w.offsetHeight }; grip.setPointerCapture(e.pointerId); });
+      grip.addEventListener('pointermove', e => { if (!st) return; w.style.width = Math.max(180, st.w + e.clientX - st.x) + 'px'; w.style.height = Math.max(90, st.h + e.clientY - st.y) + 'px'; });
+      const end = () => { st = null; }; grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+    }
+    /* a note popped out of Readworm: same idea, a throwaway window holding whatever Readworm hands over */
+    const cleanup = new Map();
+    function note({ title, node, onClose }) {
+      if (live >= MAX) { say('That\'s ' + MAX + ' extra windows. Close some first.'); return; }
+      const id = 'note-' + (++n), grip = h('div', { class: 'pin-grip', title: 'Drag to resize', 'aria-hidden': 'true' });
+      const w = h('section', { class: 'win raised app pin pin-note', id: 'w-' + id, 'data-app': id, 'data-title': title, 'data-icon': 'img/icons/readworm-16.png', 'data-w': 460, 'data-h': 540, 'data-temp': '1', hidden: true },
+        h('div', { class: 'tbar' }, h('span', { class: 'name' })), h('div', { class: 'pin-note-body' }, node), grip);
+      document.body.insertBefore(w, $('#ctx'));
+      registerApp(w); live++; w.dataset.placed = '1';
+      if (onClose) cleanup.set(id, onClose);
+      openApp(id);
+      w.style.width = Math.min(460, SW() - 16) + 'px'; w.style.height = Math.min(540, SH() - tbH() - 16) + 'px';
+      const step = n % 6;
+      place(w, Math.max(4, Math.min(SW() - w.offsetWidth - 4, SW() * .55 + step * 24 - w.offsetWidth / 2)), Math.max(4, Math.min(SH() - tbH() - w.offsetHeight - 4, 30 + step * 24)));
+      resizeGrip(w, grip);
+      node.focus({ preventScroll: true });
+    }
+    function forget(id, w) {
+      live = Math.max(0, live - 1);
+      if (w.dataset.url) URL.revokeObjectURL(w.dataset.url);
+      const fn = cleanup.get(id); if (fn) { cleanup.delete(id); try { fn(); } catch (e) {} }
+      delete APPS[id]; w.remove();
+    }
     // drops: apps with their own drop zones (Readworm, Papercut) handle theirs first
     const hasFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
     addEventListener('dragover', e => { if (hasFiles(e) && !e.defaultPrevented) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
@@ -1870,7 +1924,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(isImg); if (!f) return;
       e.preventDefault(); open(f);
     });
-    return { open, forget };
+    return { open, note, forget };
   })();
   addEventListener('resize', () => Object.values(APPS).forEach(w => {
     if (w.hidden) return;
@@ -2819,8 +2873,13 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=9'))
-      .then(() => window.Readworm.mount($('#rwRoot')))
+      .then(() => loadScript('apps/readworm.js?v=10'))
+      .then(() => window.Readworm.mount($('#rwRoot'), {
+        menu: (x, y, items) => showMenu(x, y, items),
+        pinImage: (file, x, y) => pins.open(file, x, y), // pictures in the library open like dropped ones
+        popNote: o => pins.note(o),
+        focusMain: () => openApp('readworm'),
+      }))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });
     return readwormLoading;
   }

@@ -9,7 +9,8 @@
   const IMG_RE = /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i;
   const MD_RE = /\.(md|markdown|mdown|mkd|txt)$/i;
 
-  function mount(root) {
+  function mount(root, hooks) {
+    hooks = hooks || {};
     const el = (tag, attrs, ...kids) => {
       const e = document.createElement(tag);
       for (const [k, v] of Object.entries(attrs || {})) { if (v == null || v === false) continue; if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? '' : v); }
@@ -61,10 +62,14 @@
     const folderInput = el('input', { type: 'file', multiple: true, hidden: true, webkitdirectory: true });
     const fileSel = el('select', { class: 'rw-name', 'aria-label': 'Open file', disabled: true }, el('option', {}, 'No file open'));
     const sideBtn = el('button', { type: 'button', class: 'btn rw-sidebtn', 'aria-pressed': 'true', title: 'Show or hide the sidebar', onclick: () => { const on = sideBtn.getAttribute('aria-pressed') !== 'true'; sideBtn.setAttribute('aria-pressed', String(on)); main.classList.toggle('no-outline', !on); } }, 'Sidebar');
-    const tools = el('div', { class: 'rw-tools' },
+    const backB = el('button', { type: 'button', class: 'btn rw-nav', title: 'Back (Alt + ←)', 'aria-label': 'Back', disabled: true, onclick: () => goBack() }, '◂');
+    const fwdB = el('button', { type: 'button', class: 'btn rw-nav', title: 'Forward (Alt + →)', 'aria-label': 'Forward', disabled: true, onclick: () => goFwd() }, '▸');
+    const popB = el('button', { type: 'button', class: 'btn', title: 'Open this note in its own window', disabled: true, onclick: () => current && popOut(current) }, 'Pop out');
+    const viewB = el('button', { type: 'button', class: 'btn', title: 'Text size, column width and paper color', onclick: e => viewMenu(e) }, 'View ▾');
+    const tools = el('div', { class: 'rw-tools' }, backB, fwdB,
       el('button', { type: 'button', class: 'btn', title: 'Add one or more Markdown files (and their images) to the library', onclick: () => input.click() }, 'Import files...'),
       el('button', { type: 'button', class: 'btn', title: 'Add every Markdown file in a folder, subfolders included (like an Obsidian vault)', onclick: () => folderInput.click() }, 'Import folder...'),
-      sideBtn, fileSel, input, folderInput);
+      sideBtn, popB, viewB, fileSel, input, folderInput);
     const fileHead = el('div', { class: 'rw-ol-h rw-fh' }, el('span', {}, 'Library'), el('button', { type: 'button', class: 'rw-clear', title: 'Empty the whole library', onclick: () => removeAll() }, 'Remove all'));
     const find = el('input', { type: 'search', class: 'rw-find', placeholder: 'Find in library...', 'aria-label': 'Find in library', spellcheck: 'false' });
     const fileList = el('ul', { class: 'rw-files', role: 'tree' });
@@ -77,6 +82,9 @@
     root.replaceChildren(tools, main, el('div', { class: 'statusbar' }, status, status2));
 
     let files = [], current = null, seq = 0; // files: { id, name, path, text, scroll }
+    let pics = []; // pictures in the library: { id, name, path, file, url }
+    let back = [], fwd = []; // note history for Back / Forward
+    const pops = new Set(); // popped-out note windows (their scroll boxes), so View settings reach them too
     const closed = new Set(); // folder paths folded shut in the sidebar
     let query = '', findT = 0; // Find box text
     renderFileList(); showEmpty();
@@ -105,11 +113,18 @@
 
     async function openFiles(list) {
       const imgs = list.filter(f => IMG_RE.test(f.name) || /^image\//.test(f.type));
-      for (const f of imgs) { const k = f.name.toLowerCase(); if (images.has(k)) URL.revokeObjectURL(images.get(k)); images.set(k, URL.createObjectURL(f)); }
+      // pictures only keep a link to the file on your disk (no copy); the browser loads them when they're shown
+      for (const f of imgs) {
+        const path = pathOf(f), old = pics.find(x => x.path === path), url = URL.createObjectURL(f);
+        if (old) { if (images.get(old.name.toLowerCase()) === old.url) images.delete(old.name.toLowerCase()); URL.revokeObjectURL(old.url); Object.assign(old, { file: f, url }); }
+        else if (pics.length < MAX_FILES) pics.push({ id: 'p' + (++seq), name: f.name, path, file: f, url });
+        else { URL.revokeObjectURL(url); continue; }
+        images.set(f.name.toLowerCase(), url);
+      }
       const mds = list.filter(f => MD_RE.test(f.name) || (/^text\//.test(f.type) && !IMG_RE.test(f.name)));
       if (!mds.length) {
-        if (imgs.length) { status.textContent = 'Added ' + imgs.length + ' image' + (imgs.length > 1 ? 's' : '') + '.'; if (current) show(current, true); }
-        else status.textContent = list.length ? 'No Markdown files in there. Pick .md files.' : '';
+        if (imgs.length) { renderFileList(); status.textContent = 'Added ' + imgs.length + ' picture' + (imgs.length > 1 ? 's' : '') + '.'; if (current) show(current, true, true); else showEmpty(); }
+        else status.textContent = list.length ? 'Nothing I can read in there. Notes (.md, .txt) and pictures only.' : '';
         return;
       }
       let added = 0, updated = 0, skipped = 0, firstNew = null;
@@ -125,32 +140,34 @@
       }
       files.sort((x, y) => x.path.localeCompare(y.path, undefined, { numeric: true, sensitivity: 'base' }));
       renderFileList();
-      if (firstNew && (firstNew === current || added + updated === 1)) show(firstNew, firstNew === current); // one note: open it; many: let you pick
+      if (firstNew && (firstNew === current || added + updated === 1)) show(firstNew, firstNew === current, firstNew === current); // one note: open it; many: let you pick
       else if (!current) showEmpty();
       const bits = [];
-      if (added) bits.push('Added ' + added + ' file' + (added > 1 ? 's' : ''));
+      if (added) bits.push('Added ' + added + ' note' + (added > 1 ? 's' : ''));
+      if (imgs.length) bits.push(imgs.length + ' picture' + (imgs.length > 1 ? 's' : ''));
       if (updated) bits.push('reloaded ' + updated);
       if (skipped) bits.push(skipped + ' skipped (too big, unreadable or over ' + MAX_FILES + ' files)');
       if (bits.length) setTimeout(() => { status.textContent = bits.join(', ') + '.'; }, 1600);
     }
     const topic = n => n.replace(/\.(md|markdown|mdown|mkd)$/i, '');
     function renderFileList() {
-      fileHead.firstChild.textContent = files.length ? 'Library (' + files.length + ')' : 'Library';
-      fileHead.lastChild.hidden = files.length < 2;
-      find.hidden = files.length < 2;
+      const total = files.length + pics.length;
+      fileHead.firstChild.textContent = total ? 'Library (' + total + ')' : 'Library';
+      fileHead.lastChild.hidden = total < 2;
+      find.hidden = total < 2;
       if (query) { renderHits(); }
-      else if (!files.length) fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'Nothing here yet.'));
+      else if (!total) fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'Nothing here yet.'));
       else {
         // folders first (as a tree), then loose notes; every row is indented by its depth
-        const root = { dirs: new Map(), notes: [] };
-        for (const f of files) {
+        const root = { dirs: new Map(), notes: [], pics: [] };
+        for (const f of [...files, ...pics]) {
           const parts = f.path.split('/'); parts.pop();
           let node = root, acc = '';
-          for (const d of parts) { acc += (acc ? '/' : '') + d; if (!node.dirs.has(d)) node.dirs.set(d, { path: acc, dirs: new Map(), notes: [] }); node = node.dirs.get(d); }
-          node.notes.push(f);
+          for (const d of parts) { acc += (acc ? '/' : '') + d; if (!node.dirs.has(d)) node.dirs.set(d, { path: acc, dirs: new Map(), notes: [], pics: [] }); node = node.dirs.get(d); }
+          (f.url ? node.pics : node.notes).push(f);
         }
         const cmp = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-        const count = n => n.notes.length + [...n.dirs.values()].reduce((a, d) => a + count(d), 0);
+        const count = n => n.notes.length + n.pics.length + [...n.dirs.values()].reduce((a, d) => a + count(d), 0);
         const rows = [];
         const walk = (node, depth) => {
           for (const [name, d] of [...node.dirs.entries()].sort((a, b) => cmp(a[0], b[0]))) {
@@ -162,6 +179,7 @@
             if (!shut) walk(d, depth + 1);
           }
           for (const f of node.notes.sort((a, b) => cmp(a.name, b.name))) rows.push(noteRow(f, depth));
+          for (const pc of node.pics.sort((a, b) => cmp(a.name, b.name))) rows.push(picRow(pc, depth));
         };
         walk(root, 0);
         fileList.replaceChildren(...rows);
@@ -169,18 +187,37 @@
       fileSel.disabled = !files.length;
       fileSel.replaceChildren(...(files.length ? files.map(f => el('option', { value: f.id, selected: f.id === current || null }, f.path)) : [el('option', {}, 'No file open')]));
     }
+    function picRow(pc, depth, extra) {
+      return el('li', { class: 'rw-pic', style: '--d:' + depth },
+        el('button', { type: 'button', class: 'rw-fn', title: pc.path + ' (opens in its own window)', onclick: e => openPic(pc, e) }, '🖼 ' + pc.name, extra || null),
+        el('button', { type: 'button', class: 'rw-x', title: 'Remove ' + pc.name + ' from the library', 'aria-label': 'Remove ' + pc.name, onclick: () => removePic(pc.id) }, '×'));
+    }
+    function openPic(pc, e) {
+      if (hooks.pinImage) hooks.pinImage(pc.file, e && e.clientX, e && e.clientY);
+      else window.open(pc.url, '_blank', 'noopener');
+    }
+    function dropPic(pc) { if (images.get(pc.name.toLowerCase()) === pc.url) images.delete(pc.name.toLowerCase()); URL.revokeObjectURL(pc.url); }
+    function removePic(id) {
+      const pc = pics.find(x => x.id === id); if (!pc) return;
+      pics = pics.filter(x => x !== pc); dropPic(pc);
+      if (!files.length && !pics.length) { removeAll(); return; }
+      renderFileList(); status.textContent = 'Removed ' + pc.name + '.';
+    }
     function noteRow(f, depth, extra) {
-      return el('li', { class: f.id === current ? 'cur' : '', style: '--d:' + depth },
+      return el('li', { class: f.id === current ? 'cur' : '', style: '--d:' + depth, 'data-id': f.id },
         el('button', { type: 'button', class: 'rw-fn', title: f.path, onclick: () => { show(f.id); if (query) jumpToText(query); }, 'aria-current': f.id === current ? 'true' : null }, topic(f.name), extra || null),
         el('button', { type: 'button', class: 'rw-x', title: 'Remove ' + f.name + ' from the library', 'aria-label': 'Remove ' + f.name, onclick: () => remove(f.id) }, '×'));
     }
     function removeFolder(path) {
-      const gone = files.filter(f => f.path.startsWith(path + '/'));
-      if (gone.length > 1 && !window.confirm('Take the folder "' + path.split('/').pop() + '" (' + gone.length + ' notes) out of the library?')) return;
+      const inside = x => x.path.startsWith(path + '/');
+      const gone = files.filter(inside), gonePics = pics.filter(inside), n = gone.length + gonePics.length;
+      if (n > 1 && !window.confirm('Take the folder "' + path.split('/').pop() + '" (' + n + ' items) out of the library?')) return;
       files = files.filter(f => !gone.includes(f));
+      gonePics.forEach(dropPic); pics = pics.filter(x => !gonePics.includes(x));
+      forgetHistory(gone.map(f => f.id));
       if (gone.some(f => f.id === current)) { current = null; showEmpty(); }
-      if (!files.length) { removeAll(); return; }
-      renderFileList(); status.textContent = 'Removed ' + gone.length + ' note' + (gone.length === 1 ? '' : 's') + '.';
+      if (!files.length && !pics.length) { removeAll(); return; }
+      renderFileList(); status.textContent = 'Removed ' + n + ' item' + (n === 1 ? '' : 's') + '.';
     }
 
     /* Find: note names and the text inside every note in the library */
@@ -190,6 +227,7 @@
         const inName = f.path.toLowerCase().includes(q), at = f.text.toLowerCase().indexOf(q);
         if (inName || at >= 0) hits.push({ f, inName, at });
       }
+      for (const pc of pics) if (pc.path.toLowerCase().includes(q)) hits.push({ f: pc, inName: true, at: -1 });
       hits.sort((a, b) => (b.inName - a.inName) || a.f.path.localeCompare(b.f.path, undefined, { numeric: true, sensitivity: 'base' }));
       if (!hits.length) { fileList.replaceChildren(el('li', { class: 'rw-muted' }, 'Nothing found for "' + query + '".')); status.textContent = '0 results'; return; }
       fileList.replaceChildren(...hits.slice(0, 200).map(({ f, at }) => {
@@ -199,9 +237,9 @@
           const a = Math.max(0, at - 30), b = Math.min(f.text.length, at + q.length + 50), c = t => t.replace(/\s+/g, ' ');
           snip = el('small', { class: 'rw-snip' }, (a ? '…' : '') + c(f.text.slice(a, at)), el('mark', {}, c(f.text.slice(at, at + q.length))), c(f.text.slice(at + q.length, b)) + (b < f.text.length ? '…' : ''));
         }
-        return noteRow(f, 0, [where ? el('small', { class: 'rw-muted rw-where' }, where) : null, snip]);
+        return (f.url ? picRow : noteRow)(f, 0, [where ? el('small', { class: 'rw-muted rw-where' }, where) : null, snip]);
       }));
-      status.textContent = hits.length + ' note' + (hits.length === 1 ? '' : 's') + ' match "' + query + '"';
+      status.textContent = hits.length + (hits.length === 1 ? ' match' : ' matches') + ' for "' + query + '"';
     }
     // after opening a search result, scroll to the first place the words appear and flash it
     function jumpToText(q) {
@@ -223,30 +261,92 @@
     function remove(id) {
       const i = files.findIndex(f => f.id === id); if (i < 0) return;
       const [gone] = files.splice(i, 1);
+      forgetHistory([id]);
       if (current === id) { current = null; showEmpty(); }
-      if (!files.length) { removeAll(); return; }
+      if (!files.length && !pics.length) { removeAll(); return; }
       renderFileList();
       status.textContent = 'Removed ' + gone.name + '.';
     }
     function removeAll() {
-      files = []; current = null; closed.clear(); find.value = ''; query = '';
+      files = []; pics = []; current = null; closed.clear(); find.value = ''; query = ''; back = []; fwd = []; navBtns();
       for (const u of images.values()) URL.revokeObjectURL(u);
       images = new Map();
       renderFileList(); showEmpty();
       status.textContent = 'Library emptied.';
     }
-    function show(id, keepScroll) {
+    function show(id, keepScroll, noHistory) {
       const f = files.find(x => x.id === id); if (!f) return;
       const prev = files.find(x => x.id === current);
       if (prev && prev !== f) prev.scroll = scroller.scrollTop;
+      if (!noHistory && prev && prev !== f) { back.push(prev.id); if (back.length > 100) back.shift(); fwd = []; }
       const y = keepScroll ? scroller.scrollTop : f.scroll;
       current = f.id;
       const parts = f.path.split('/'); parts.pop(); let acc = ''; for (const d of parts) { acc += (acc ? '/' : '') + d; closed.delete(acc); }
       render(f.text, f.name);
       scroller.scrollTop = y || 0;
-      renderFileList();
+      renderFileList(); navBtns(); popB.disabled = false;
       const cur = fileList.querySelector('li.cur'); if (cur) cur.scrollIntoView({ block: 'nearest' });
     }
+    /* Back / Forward through the notes you've read (Alt + ← / →) */
+    function navBtns() { backB.disabled = !back.length; fwdB.disabled = !fwd.length; if (!current) popB.disabled = true; }
+    function goBack() { if (!back.length) return; if (current) fwd.push(current); show(back.pop(), false, true); }
+    function goFwd() { if (!fwd.length) return; if (current) back.push(current); show(fwd.pop(), false, true); }
+    function forgetHistory(ids) { back = back.filter(x => !ids.includes(x)); fwd = fwd.filter(x => !ids.includes(x)); navBtns(); }
+    root.addEventListener('keydown', e => {
+      if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.target.closest('input, select, textarea')) return;
+      e.preventDefault(); if (e.key === 'ArrowLeft') goBack(); else goFwd();
+    });
+    root.addEventListener('mouseup', e => { if (e.button === 3) { e.preventDefault(); goBack(); } else if (e.button === 4) { e.preventDefault(); goFwd(); } }); // mouse side buttons
+
+    /* Pop out: the current note in its own window (needs the desktop's window maker) */
+    function popOut(id) {
+      const f = files.find(x => x.id === id); if (!f || !hooks.popNote) return;
+      const pdoc = el('article', { class: 'rw-doc' }), box = el('div', { class: 'rw-scroll rw-pop', tabindex: '0' }, pdoc);
+      const { props, body } = frontmatter(f.text);
+      const wrap = buildHtml(body, 0, f.name);
+      pdoc.replaceChildren(...wrap.childNodes);
+      markWikis(pdoc); typesetMath(pdoc); wireDoc(pdoc, box); applyView(box);
+      pops.add(box);
+      hooks.popNote({ title: topic(f.name), node: box, onClose: () => pops.delete(box) });
+    }
+    function rowMenu(e) {
+      const li = e.target.closest('li[data-id]'); if (!li || !hooks.menu) return;
+      e.preventDefault(); e.stopPropagation();
+      const id = li.dataset.id;
+      hooks.menu(e.clientX, e.clientY, [{ label: 'Read here', bold: true, run: () => show(id) }, { label: 'Open in new window', run: () => popOut(id) }, '-', { label: 'Remove from library', run: () => remove(id) }]);
+    }
+    fileList.addEventListener('contextmenu', rowMenu);
+
+    /* View: text size, column width, paper color. Remembered in this browser (just the settings, not your notes). */
+    const VIEW_KEY = 'lico-rw-view';
+    let view = { size: 1, wide: false, paper: 'white' };
+    try { Object.assign(view, JSON.parse(localStorage.getItem(VIEW_KEY) || '{}')); } catch (e) {}
+    const SIZES = ['Small', 'Normal', 'Large', 'Huge'], PAPERS = [['white', 'White paper'], ['sepia', 'Old paper'], ['dark', 'Night']];
+    function applyView(box) {
+      box.style.setProperty('--rw-fs', [13, 14.5, 16.5, 19][view.size] + 'px');
+      box.classList.toggle('rw-wide', !!view.wide);
+      PAPERS.forEach(([k]) => box.classList.toggle('rw-p-' + k, view.paper === k));
+    }
+    function setView(patch) {
+      Object.assign(view, patch);
+      try { localStorage.setItem(VIEW_KEY, JSON.stringify(view)); } catch (e) {}
+      applyView(scroller); pops.forEach(applyView);
+    }
+    function viewMenu(e) {
+      const r = e.currentTarget.getBoundingClientRect(), dot = on => (on ? '● ' : '\u2003');
+      const items = [
+        ...SIZES.map((t, i) => ({ label: dot(view.size === i) + 'Text: ' + t, run: () => setView({ size: i }) })), '-',
+        { label: dot(!view.wide) + 'Narrow column', run: () => setView({ wide: false }) },
+        { label: dot(view.wide) + 'Wide column', run: () => setView({ wide: true }) }, '-',
+        ...PAPERS.map(([k, t]) => ({ label: dot(view.paper === k) + t, run: () => setView({ paper: k }) }))];
+      if (hooks.menu) hooks.menu(r.left, r.bottom, items);
+    }
+    root.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey) || e.target.closest('input, select, textarea')) return;
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); setView({ size: Math.min(3, view.size + 1) }); }
+      if (e.key === '-') { e.preventDefault(); setView({ size: Math.max(0, view.size - 1) }); }
+    });
+    applyView(scroller);
     // Alt + ↑ / ↓ switches files
     root.addEventListener('keydown', e => {
       if (!e.altKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') || !files.length) return;
@@ -285,9 +385,10 @@
       const kids = [];
       if (props) kids.push(el('div', { class: 'rw-props' }, el('div', { class: 'rw-props-h' }, 'Properties'), el('dl', {}, props.flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, v || '—')]))));
       doc.replaceChildren(...kids, ...wrap.childNodes);
+      hidePeek();
       buildOutline();
-      markWikis();
-      typesetMath();
+      markWikis(doc);
+      typesetMath(doc);
       scroller.scrollTop = 0;
       const words = (body.replace(/```[\s\S]*?```/g, ' ').match(/[\p{L}\p{N}]+/gu) || []).length;
       status.textContent = words.toLocaleString() + ' words · about ' + Math.max(1, Math.round(words / 230)) + ' min read';
@@ -322,8 +423,8 @@
         .catch(() => { katexLoading = null; throw new Error('katex'); });
       return katexLoading;
     }
-    function typesetMath() {
-      const nodes = [...doc.querySelectorAll('.rw-math[data-tex]')];
+    function typesetMath(where) {
+      const nodes = [...where.querySelectorAll('.rw-math[data-tex]')];
       if (!nodes.length) return;
       loadKatex().then(() => nodes.forEach(n => {
         if (!n.isConnected || !n.dataset.tex) return;
@@ -465,11 +566,11 @@
       outline.replaceChildren(el('div', { class: 'rw-ol-h' }, 'Outline'), el('ul', {}, hs.map(h => el('li', { class: 'lv' + h.tagName[1] },
         el('button', { type: 'button', title: h.textContent, onclick: () => jumpTo(h) }, h.textContent)))));
     }
-    function jumpTo(h) { scroller.scrollTo({ top: h.offsetTop - 8, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+    function jumpTo(h, box) { (box || scroller).scrollTo({ top: h.offsetTop - 8, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
     // [[wikilinks]] and links to other .md files open that file if it's in the list
     function findNote(target) { const want = baseName(target); return want ? files.find(f => baseName(f.path) === want) : null; }
-    function markWikis() {
-      doc.querySelectorAll('.rw-wiki[data-wiki]').forEach(w => {
+    function markWikis(where) {
+      where.querySelectorAll('.rw-wiki[data-wiki]').forEach(w => {
         const [t, h] = w.dataset.wiki.split('#');
         const ok = !t ? true : !!findNote(t);
         w.classList.toggle('ok', ok);
@@ -477,20 +578,58 @@
         else w.title = (t || '') + ' isn\'t open. Open it too and this link will work.';
       });
     }
-    function followWiki(w) {
+    // a wikilink in a popped-out note opens in the main Readworm window
+    function followWiki(w, fromPop) {
       const [t, h] = w.dataset.wiki.split('#');
+      if (fromPop && !t) { const want = slug(h || ''); const box = w.closest('.rw-scroll'); const hd = [...box.querySelectorAll('h1, h2, h3, h4, h5, h6')].find(x => slug(x.textContent) === want); if (hd) jumpTo(hd, box); return; }
+      if (fromPop && hooks.focusMain) hooks.focusMain();
       if (t) { const f = findNote(t); if (!f) return; if (f.id !== current) show(f.id); }
       if (h) { const want = slug(h); const hd = [...doc.querySelectorAll('h1, h2, h3, h4, h5, h6')].find(x => slug(x.textContent) === want); if (hd) jumpTo(hd); }
     }
-    doc.addEventListener('keydown', e => { const w = e.target.closest && e.target.closest('.rw-wiki.ok'); if (w && e.key === 'Enter') followWiki(w); });
-    doc.addEventListener('click', e => {
-      const w = e.target.closest('.rw-wiki.ok'); if (w) { e.preventDefault(); followWiki(w); return; }
-      const a = e.target.closest('a[data-jump]'); if (!a) return;
-      e.preventDefault();
-      const want = slug(decodeURIComponent(a.dataset.jump));
-      const h = [...doc.querySelectorAll('h1, h2, h3, h4, h5, h6')].find(x => x.id === 'rw-' + want || slug(x.textContent) === want);
-      if (h) jumpTo(h);
-    });
+    function wireDoc(d, box) {
+      const pop = d !== doc;
+      d.addEventListener('keydown', e => { const w = e.target.closest && e.target.closest('.rw-wiki.ok'); if (w && e.key === 'Enter') { hidePeek(); followWiki(w, pop); } });
+      d.addEventListener('click', e => {
+        const w = e.target.closest('.rw-wiki.ok'); if (w) { e.preventDefault(); hidePeek(); followWiki(w, pop); return; }
+        const a = e.target.closest('a[data-jump]'); if (!a) return;
+        e.preventDefault();
+        const want = slug(decodeURIComponent(a.dataset.jump));
+        const h = [...d.querySelectorAll('h1, h2, h3, h4, h5, h6')].find(x => x.id === 'rw-' + want || slug(x.textContent) === want || slug(x.textContent) === want.replace(/^rw-/, ''));
+        if (h) jumpTo(h, box);
+      });
+      // hover a [[wikilink]] for a moment: a little card shows the start of that note
+      d.addEventListener('pointerover', e => {
+        if (e.pointerType !== 'mouse') return;
+        const w = e.target.closest('.rw-wiki.ok'); if (!w || w === peekFor) return;
+        clearTimeout(peekT); peekT = setTimeout(() => showPeek(w), 380);
+      });
+      d.addEventListener('pointerout', e => { const w = e.target.closest('.rw-wiki.ok'); if (w && !w.contains(e.relatedTarget)) { clearTimeout(peekT); hidePeek(); } });
+      box.addEventListener('scroll', hidePeek, { passive: true });
+    }
+    let peekT = 0, peekEl = null, peekFor = null;
+    function hidePeek() { clearTimeout(peekT); if (peekEl) { peekEl.remove(); peekEl = null; } peekFor = null; }
+    function showPeek(w) {
+      hidePeek();
+      if (!w.isConnected || !w.closest('.app')) return; // the note changed under the mouse
+      const [t, hsh] = w.dataset.wiki.split('#');
+      const f = t ? findNote(t) : files.find(x => x.id === current); if (!f) return;
+      let body = frontmatter(f.text).body;
+      if (hsh) { const want = slug(hsh), lines = body.split(/\r?\n/), i = lines.findIndex(l => /^#{1,6}\s/.test(l) && slug(l.replace(/^#+\s*/, '')) === want); if (i >= 0) body = lines.slice(i).join('\n'); }
+      if (body.length > 1800) body = body.slice(0, 1800).replace(/\n[^\n]*$/, '') + '\n\n…';
+      const inner = el('div', { class: 'rw-doc' }, ...buildHtml(body, 1, f.name).childNodes);
+      const card = el('div', { class: 'rw-peek raised', role: 'tooltip' }, el('div', { class: 'rw-peek-h' }, '📄 ' + topic(f.name) + (hsh ? ' › ' + hsh : '')), inner);
+      const host = w.closest('.app') || root;
+      host.append(card); applyView(card);
+      typesetMath(card);
+      const hr = host.getBoundingClientRect(), r = w.getBoundingClientRect();
+      const cw = card.offsetWidth, ch = card.offsetHeight;
+      let x = r.left - hr.left, y = r.bottom - hr.top + 6;
+      if (x + cw > hr.width - 6) x = Math.max(6, hr.width - cw - 6);
+      if (y + ch > hr.height - 6) y = Math.max(6, r.top - hr.top - ch - 6);
+      card.style.left = x + 'px'; card.style.top = y + 'px';
+      peekEl = card; peekFor = w;
+    }
+    wireDoc(doc, scroller);
     return { openFiles };
   }
   window.Readworm = { mount };
