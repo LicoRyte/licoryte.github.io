@@ -755,6 +755,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-doc mark { background: #FFF27A; padding: 0 2px; }
 .rw-doc hr { height: 0; border: 0; border-top: 1px solid var(--shade); border-bottom: 1px solid var(--hi); margin: 1.6em 0; }
 .rw-doc img { max-width: 100%; height: auto; border: 1px solid #CCCCCC; }
+.rw-doc img.rw-pending { min-width: 120px; min-height: 80px; background: repeating-linear-gradient(45deg, #EEEEEE 0 8px, #F8F8F8 8px 16px); }
 .rw-doc .rw-missing { display: inline-block; padding: 4px 8px; font: 12px var(--f-ui); color: #555555; border: 1px dashed #999999; background: #FAFAFA; }
 .rw-table { overflow-x: auto; }
 .rw-doc table { border-collapse: collapse; font-size: .95em; }
@@ -1841,13 +1842,36 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Pinned pictures: drop (or paste) an image anywhere on the desktop and it gets its own window.
      Handy as references next to notes and PDFs. Nothing is saved: closing the window (or the tab) forgets it. ---------- */
+  /* Shrink a picture to at most maxSide pixels on its long edge (one at a time, so only one big photo is unpacked at once).
+     Returns { blob (null = already small enough, or a GIF/SVG we leave alone), w, h } with the original size. */
+  let shrinkQueue = Promise.resolve();
+  function shrinkPic(file, maxSide) {
+    const job = shrinkQueue.then(async () => {
+      if (/gif|svg/i.test(file.type) || /\.(gif|svg)$/i.test(file.name || '') || !('createImageBitmap' in window)) return null;
+      const bmp = await createImageBitmap(file);
+      const w = bmp.width, hgt = bmp.height, k = maxSide / Math.max(w, hgt);
+      if (k >= 1) { bmp.close(); return { blob: null, w, h: hgt }; }
+      const cw = Math.round(w * k), ch = Math.round(hgt * k);
+      const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+      const cx = cv.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(bmp, 0, 0, cw, ch); bmp.close();
+      const blob = await new Promise(ok => cv.toBlob(ok, /png/i.test(file.type) ? 'image/png' : 'image/jpeg', .92));
+      cv.width = cv.height = 0; // let the canvas memory go right away
+      return { blob, w, h: hgt };
+    });
+    shrinkQueue = job.catch(() => {});
+    return job;
+  }
   const pins = (() => {
     const IMG = /\.(png|jpe?g|gif|webp|avif|bmp|svg|ico)$/i, MAX = 24;
     let n = 0, live = 0;
     const isImg = f => f && (/^image\//.test(f.type) || IMG.test(f.name || ''));
-    function open(file, cx, cy) {
+    async function open(file, cx, cy) {
       if (live >= MAX) { say('That\'s ' + MAX + ' pictures. Close some. My screen is only so big.'); return; }
-      const id = 'pic-' + (++n), url = URL.createObjectURL(file), name = file.name || 'pasted image.png';
+      // big photos are shown from a copy about screen-sized (memory saver); "Actual size" still knows the real size
+      const maxSide = Math.min(2560, Math.round(Math.max(screen.width || 1920, screen.height || 1080) * Math.min(2, devicePixelRatio || 1)));
+      let small = null; try { small = await shrinkPic(file, maxSide); } catch (e) {}
+      const id = 'pic-' + (++n), url = URL.createObjectURL(small && small.blob || file), name = file.name || 'pasted image.png';
+      const realW = small ? small.w : 0, realH = small ? small.h : 0;
       const img = h('img', { src: url, alt: name, draggable: 'false' });
       const grip = h('div', { class: 'pin-grip', title: 'Drag to resize', 'aria-hidden': 'true' });
       const w = h('section', { class: 'win raised app pin', id: 'w-' + id, 'data-app': id, 'data-title': name, 'data-icon': 'img/icons/app-image-viewer-16.png', 'data-w': 320, 'data-h': 260, 'data-temp': '1', 'data-url': url, hidden: true },
@@ -1857,7 +1881,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       w.dataset.placed = '1';
       openApp(id);
       const fit = (fx = cx, fy = cy) => { // size the window to the picture, at most about half the screen
-        const iw = img.naturalWidth || 320, ih = img.naturalHeight || 240;
+        const iw = realW || img.naturalWidth || 320, ih = realH || img.naturalHeight || 240;
         const k = Math.min(1, (SW() * .42) / iw, ((SH() - tbH()) * .5) / ih);
         const bw = Math.max(140, Math.round(iw * k)), bh = Math.max(80, Math.round(ih * k));
         w.style.width = (bw + 10) + 'px'; w.style.height = (bh + 34) + 'px';
@@ -1873,7 +1897,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       w.querySelector('.tbar').addEventListener('contextmenu', e => {
         e.preventDefault(); e.stopPropagation();
         showMenu(e.clientX, e.clientY, [
-          { label: 'Actual size', run: () => { w.classList.remove('max'); w.style.width = Math.min(SW() - 16, img.naturalWidth + 10) + 'px'; w.style.height = Math.min(SH() - tbH() - 16, img.naturalHeight + 34) + 'px'; } },
+          { label: 'Actual size', run: () => { w.classList.remove('max'); w.style.width = Math.min(SW() - 16, (realW || img.naturalWidth) + 10) + 'px'; w.style.height = Math.min(SH() - tbH() - 16, (realH || img.naturalHeight) + 34) + 'px'; } },
           { label: 'Fit to picture', run: () => { w.classList.remove('max'); const r = w.getBoundingClientRect(); fit(r.left + r.width / 2, r.top + r.height / 2); } },
           '-', { label: 'Close', run: () => closeApp(id) }]);
       });
@@ -2873,11 +2897,12 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadReadworm() {
     if (readwormLoading) return readwormLoading;
     readwormLoading = Promise.all([loadScript('apps/vendor/marked.min.js?v=12.0.2'), loadScript('apps/vendor/purify.min.js?v=3.4.17')])
-      .then(() => loadScript('apps/readworm.js?v=10'))
+      .then(() => loadScript('apps/readworm.js?v=11'))
       .then(() => window.Readworm.mount($('#rwRoot'), {
         menu: (x, y, items) => showMenu(x, y, items),
         pinImage: (file, x, y) => pins.open(file, x, y), // pictures in the library open like dropped ones
         popNote: o => pins.note(o),
+        shrink: (file, max) => shrinkPic(file, max),
         focusMain: () => openApp('readworm'),
       }))
       .catch(() => { $('#rwRoot').textContent = "Couldn't load Readworm. Check your connection and open it again."; readwormLoading = null; });

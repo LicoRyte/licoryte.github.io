@@ -21,7 +21,7 @@
     const DOMPurify = window.DOMPurify;
 
     /* Obsidian-style extras: ==highlight==, [[wikilink|alias]], ![[embed.png]] */
-    let images = new Map(); // file name (lowercase) -> object URL, for images picked together with the .md
+    let images = new Map(); // file name (lowercase) -> picture in the library, for ![[embeds]] in notes
     marked.use({
       gfm: true, breaks: false,
       extensions: [
@@ -116,10 +116,11 @@
       // pictures only keep a link to the file on your disk (no copy); the browser loads them when they're shown
       for (const f of imgs) {
         const path = pathOf(f), old = pics.find(x => x.path === path), url = URL.createObjectURL(f);
-        if (old) { if (images.get(old.name.toLowerCase()) === old.url) images.delete(old.name.toLowerCase()); URL.revokeObjectURL(old.url); Object.assign(old, { file: f, url }); }
-        else if (pics.length < MAX_FILES) pics.push({ id: 'p' + (++seq), name: f.name, path, file: f, url });
+        let pc = old;
+        if (old) { freeUrls(old); Object.assign(old, { file: f, url, small: undefined, job: null }); }
+        else if (pics.length < MAX_FILES) pics.push(pc = { id: 'p' + (++seq), name: f.name, path, file: f, url });
         else { URL.revokeObjectURL(url); continue; }
-        images.set(f.name.toLowerCase(), url);
+        images.set(f.name.toLowerCase(), pc);
       }
       const mds = list.filter(f => MD_RE.test(f.name) || (/^text\//.test(f.type) && !IMG_RE.test(f.name)));
       if (!mds.length) {
@@ -196,7 +197,18 @@
       if (hooks.pinImage) hooks.pinImage(pc.file, e && e.clientX, e && e.clientY);
       else window.open(pc.url, '_blank', 'noopener');
     }
-    function dropPic(pc) { if (images.get(pc.name.toLowerCase()) === pc.url) images.delete(pc.name.toLowerCase()); URL.revokeObjectURL(pc.url); }
+    function freeUrls(pc) { URL.revokeObjectURL(pc.url); if (pc.small) URL.revokeObjectURL(pc.small); }
+    function dropPic(pc) { if (images.get(pc.name.toLowerCase()) === pc) images.delete(pc.name.toLowerCase()); freeUrls(pc); }
+    // Memory saver: a big photo shown in a note is swapped for a copy no bigger than the reading column needs
+    // (a 12-megapixel photo is ~48 MB once the browser unpacks it; the small copy is a few MB). Made once, then reused.
+    const EMBED_MAX = 1600;
+    function embedUrl(pc) {
+      if (pc.small !== undefined) return Promise.resolve(pc.small || pc.url);
+      if (!pc.job) pc.job = (hooks.shrink ? hooks.shrink(pc.file, EMBED_MAX) : Promise.resolve(null))
+        .then(r => { if (!pics.includes(pc)) return pc.url; pc.small = r && r.blob ? URL.createObjectURL(r.blob) : null; return pc.small || pc.url; })
+        .catch(() => { pc.small = null; return pc.url; });
+      return pc.job;
+    }
     function removePic(id) {
       const pc = pics.find(x => x.id === id); if (!pc) return;
       pics = pics.filter(x => x !== pc); dropPic(pc);
@@ -268,8 +280,8 @@
       status.textContent = 'Removed ' + gone.name + '.';
     }
     function removeAll() {
+      pics.forEach(freeUrls);
       files = []; pics = []; current = null; closed.clear(); find.value = ''; query = ''; back = []; fwd = []; navBtns();
-      for (const u of images.values()) URL.revokeObjectURL(u);
       images = new Map();
       renderFileList(); showEmpty();
       status.textContent = 'Library emptied.';
@@ -544,8 +556,12 @@
         img.removeAttribute('data-rw-src');
         if (/^(https?:|data:image\/)/i.test(raw)) { img.src = raw; img.loading = 'lazy'; return; }
         const base = decodeURIComponent(raw.split(/[?#]/)[0].split('/').pop() || '').toLowerCase();
-        const url = images.get(base);
-        if (url) { img.src = url; return; }
+        const pc = images.get(base);
+        if (pc) {
+          img.decoding = 'async'; img.loading = 'lazy'; img.classList.add('rw-pending');
+          embedUrl(pc).then(u => { img.src = u; img.classList.remove('rw-pending'); });
+          return;
+        }
         img.replaceWith(el('span', { class: 'rw-missing', title: 'Open this note together with its images to see them.' }, '🖼 ' + (img.alt || base || 'image')));
       });
     }
