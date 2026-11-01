@@ -1734,6 +1734,12 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   }
   function focusApp(id) {
     const w = APPS[id]; if (!w || w.hidden) return;
+    // Windows stay in their own layer band (10-40) so they never climb above the taskbar, menus or the picture viewer.
+    // When the band fills up, renumber the windows in their current order.
+    if (zTop >= 40) {
+      zTop = 10;
+      Object.values(APPS).filter(x => x.style.zIndex).sort((p, q) => (+p.style.zIndex) - (+q.style.zIndex)).forEach(x => { x.style.zIndex = ++zTop; });
+    }
     w.style.zIndex = ++zTop; activeApp = id;
     Object.values(APPS).forEach(x => x.classList.toggle('active', x === w));
     renderTasks();
