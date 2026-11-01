@@ -167,6 +167,13 @@ a.btn, a.btn:visited { color: var(--text); }
 .statusbar { display: flex; gap: 3px; margin-top: 3px; font: 11px var(--f-ui); flex-shrink: 0; }
 .statusbar span { flex: 1; padding: 1px 5px; border: 1px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .statusbar span:last-child { flex: 0 0 auto; }
+/* pinned pictures (dropped or pasted images) */
+.app.pin { min-width: 140px; min-height: 90px; }
+.pin-body { flex: 1; min-height: 0; position: relative; overflow: hidden; background: #2B2B2B; }
+.pin-body img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; user-select: none; -webkit-user-select: none; }
+.pin-grip { position: absolute; right: 2px; bottom: 2px; width: 14px; height: 14px; cursor: nwse-resize; touch-action: none;
+  background: linear-gradient(135deg, transparent 0 45%, var(--hi) 45% 52%, var(--shade) 52% 60%, transparent 60% 70%, var(--hi) 70% 77%, var(--shade) 77% 85%, transparent 85%); }
+.app.max .pin-grip { display: none; }
 
 /* About */
 .welcome { padding: 12px 14px; }
@@ -1806,6 +1813,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     minimized.delete(id);
     if (id === 'dude') dude.unload();
     const i = openOrder.indexOf(id); if (i >= 0) openOrder.splice(i, 1);
+    if (w.dataset.temp) { pins.forget(id, w); } // picture windows are thrown away when closed
     activeApp = topVisible(); if (activeApp) focusApp(activeApp); else renderTasks();
   }
   function toggleMax(id) { const w = APPS[id]; if (!w || isPhone()) return; w.classList.toggle('max'); focusApp(id); }
@@ -1833,6 +1841,69 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   }
   Object.entries(APPS).forEach(([id, w]) => setupApp(id, w));
   function registerApp(w) { APPS[w.dataset.app] = w; setupApp(w.dataset.app, w); }
+
+  /* ---------- Pinned pictures: drop (or paste) an image anywhere on the desktop and it gets its own window.
+     Handy as references next to notes and PDFs. Nothing is saved: closing the window (or the tab) forgets it. ---------- */
+  const pins = (() => {
+    const IMG = /\.(png|jpe?g|gif|webp|avif|bmp|svg|ico)$/i, MAX = 24;
+    let n = 0, live = 0;
+    const isImg = f => f && (/^image\//.test(f.type) || IMG.test(f.name || ''));
+    function open(file, cx, cy) {
+      if (live >= MAX) { say('That\'s ' + MAX + ' pictures. Close some. My screen is only so big.'); return; }
+      const id = 'pic-' + (++n), url = URL.createObjectURL(file), name = file.name || 'pasted image.png';
+      const img = h('img', { src: url, alt: name, draggable: 'false' });
+      const grip = h('div', { class: 'pin-grip', title: 'Drag to resize', 'aria-hidden': 'true' });
+      const w = h('section', { class: 'win raised app pin', id: 'w-' + id, 'data-app': id, 'data-title': name, 'data-icon': 'img/icons/app-image-viewer-16.png', 'data-w': 320, 'data-h': 260, 'data-temp': '1', 'data-url': url, hidden: true },
+        h('div', { class: 'tbar' }, h('span', { class: 'name' })), h('div', { class: 'pin-body sunken' }, img), grip);
+      document.body.insertBefore(w, $('#ctx'));
+      registerApp(w); live++;
+      w.dataset.placed = '1';
+      openApp(id);
+      const fit = (fx = cx, fy = cy) => { // size the window to the picture, at most about half the screen
+        const iw = img.naturalWidth || 320, ih = img.naturalHeight || 240;
+        const k = Math.min(1, (SW() * .42) / iw, ((SH() - tbH()) * .5) / ih);
+        const bw = Math.max(140, Math.round(iw * k)), bh = Math.max(80, Math.round(ih * k));
+        w.style.width = (bw + 10) + 'px'; w.style.height = (bh + 34) + 'px';
+        const [ox, oy] = OFF(), ww = w.offsetWidth, wh = w.offsetHeight;
+        // centred on where you dropped it, and kept fully on screen so the resize corner is reachable
+        const x = (fx == null ? SW() / 2 : fx - ox) - ww / 2, y = (fy == null ? (SH() - tbH()) / 2 : fy - oy) - wh / 2;
+        place(w, Math.max(4, Math.min(SW() - ww - 4, x)), Math.max(4, Math.min(SH() - tbH() - wh - 4, y)));
+      };
+      fit(); img.addEventListener('load', () => fit(), { once: true });
+      img.addEventListener('error', () => { closeApp(id); say('That picture won\'t open. Might not be a picture.'); }, { once: true });
+      img.addEventListener('dblclick', () => toggleMax(id));
+      // corner grip: drag to resize
+      let st = null;
+      grip.addEventListener('pointerdown', e => { if (e.button !== 0 || w.classList.contains('max')) return; e.preventDefault(); st = { x: e.clientX, y: e.clientY, w: w.offsetWidth, h: w.offsetHeight }; grip.setPointerCapture(e.pointerId); });
+      grip.addEventListener('pointermove', e => { if (!st) return; w.style.width = Math.max(140, st.w + e.clientX - st.x) + 'px'; w.style.height = Math.max(90, st.h + e.clientY - st.y) + 'px'; });
+      const end = () => { st = null; }; grip.addEventListener('pointerup', end); grip.addEventListener('pointercancel', end);
+      w.querySelector('.tbar').addEventListener('contextmenu', e => {
+        e.preventDefault(); e.stopPropagation();
+        showMenu(e.clientX, e.clientY, [
+          { label: 'Actual size', run: () => { w.classList.remove('max'); w.style.width = Math.min(SW() - 16, img.naturalWidth + 10) + 'px'; w.style.height = Math.min(SH() - tbH() - 16, img.naturalHeight + 34) + 'px'; } },
+          { label: 'Fit to picture', run: () => { w.classList.remove('max'); const r = w.getBoundingClientRect(); fit(r.left + r.width / 2, r.top + r.height / 2); } },
+          '-', { label: 'Close', run: () => closeApp(id) }]);
+      });
+    }
+    function forget(id, w) { live = Math.max(0, live - 1); URL.revokeObjectURL(w.dataset.url); delete APPS[id]; w.remove(); }
+    // drops: apps with their own drop zones (Documents, Readworm, Papercut) handle theirs first
+    const hasFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+    addEventListener('dragover', e => { if (hasFiles(e) && !e.defaultPrevented) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
+    addEventListener('drop', e => {
+      if (!hasFiles(e) || e.defaultPrevented) return;
+      e.preventDefault(); // never let the browser leave the site to show a dropped file
+      const imgs = [...e.dataTransfer.files].filter(isImg);
+      if (!imgs.length) { say('I only pin pictures to the desktop. Notes go in Readworm, PDFs in Papercut.'); return; }
+      imgs.slice(0, 8).forEach((f, i) => open(f, e.clientX + i * 24, e.clientY + i * 24));
+    });
+    // Ctrl+V with a copied picture also pins it (not while typing somewhere)
+    addEventListener('paste', e => {
+      const t = e.target; if (t && (t.closest('input, textarea, [contenteditable=""], [contenteditable="true"]'))) return;
+      const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(isImg); if (!f) return;
+      e.preventDefault(); open(f);
+    });
+    return { open, forget };
+  })();
   addEventListener('resize', () => Object.values(APPS).forEach(w => {
     if (w.hidden) return;
     if (isPhone()) w.classList.add('max');
