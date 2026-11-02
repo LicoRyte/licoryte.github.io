@@ -104,7 +104,7 @@ Colors and fonts are at the top of `index.html` in the `:root` block. `--navy` a
 
 ## Sparkles
 
-- Memory: sparkles are drawn at half resolution, and their canvas is freed as soon as the last sparkle fades. The sound engine shuts down a few seconds after the last sound, and Your Dude's background thread only runs while its window is open. Big apps (Network Man, Readworm, Papercut, Saturn Archive) only load when opened. Big photos are shown from a smaller copy (up to 1600 px in Readworm notes, about screen size in picture windows), because a 12-megapixel photo takes ~48 MB of memory once the browser unpacks it; GIFs and SVGs are left alone.
+- Memory: sparkles are drawn at half resolution, and their canvas is freed as soon as the last sparkle fades. The sound engine stays on for the whole visit with its short sounds ready (about 1.5 MB), so sounds never lag after a quiet spell; only the startup sound is let go after it plays. Big apps (Network Man, Readworm, Papercut, Saturn Archive) only load when opened. Big photos are shown from a smaller copy (up to 1600 px in Readworm notes, about screen size in picture windows), because a 12-megapixel photo takes ~48 MB of memory once the browser unpacks it; GIFs and SVGs are left alone.
 
 - Sparkles & cursor trail: visitors can turn them off with the checkbox in the "stats" box. They start off for people who set "reduce motion" on their device.
 

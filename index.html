@@ -2470,7 +2470,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
         x.fillStyle = COLS[ci % COLS.length]; x.fillText(txt, px | 0, py | 0);
       };
     }
-    return { start };
+    return { start, bump };
   })();
 
   /* ---------- Ctrl+S / Cmd+S: no "Save page" dialog. In Paint it saves the drawing instead. ---------- */
@@ -2971,7 +2971,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('archivist'),
       // the countdown shows on the title bar and taskbar button while it runs
-      title: t => { const w = APPS.archivist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
+      title: t => { if (t !== 'Archivist') { resetIdle(); saver.bump(); } /* no screensaver (or idle chatter) over a running timer */ const w = APPS.archivist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
     })).catch(() => { $('#arRoot').textContent = "Couldn't load Archivist. Check your connection and open it again."; archivistLoading = null; });
     return archivistLoading;
   }
@@ -3170,7 +3170,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   for (const [k, url] of Object.entries(SFX)) sfxRaw[k] = fetch(url).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
   function audio() {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
+    if (actx.state !== 'running') actx.resume().catch(() => {}); // the browser may pause it while the tab is hidden
     return actx;
   }
   function loadSfx(k) {
@@ -3188,17 +3188,15 @@ summary.rw-co-h { cursor: var(--cur-hand); }
       return true;
     }).catch(() => false);
   }
-  function primeSounds() { if (userActed && sndOn) { try { loadSfx('startup'); if (clickOn) { loadSfx('click'); loadSfx('ui'); } napLater(); } catch (e) {} } }
-  // Memory saver: after a few quiet seconds the sound engine is closed and decoded sounds are dropped.
-  // The small compressed files stay, so the next sound just wakes it up again.
+  // The sound engine stays on for the whole visit and every short sound stays decoded (about 1.5 MB), so a sound
+  // never has to wait for the audio device to start or for a file to be unpacked. (Shutting it down when quiet
+  // saved a little memory but made the first sound after a pause hitch.)
+  function primeSounds() { if (userActed && sndOn) { try { audio(); loadSfx('startup'); ['click', 'ui', 'notify', 'granted'].forEach(loadSfx); } catch (e) {} } }
+  // the only exception: the startup sound plays once per visit, so its decoded copy (~2 MB) is let go afterwards
   let napT = 0;
   function napLater(ms = 9000) {
     clearTimeout(napT);
-    napT = setTimeout(() => {
-      if (actx) { try { actx.close(); } catch (e) {} actx = null; }
-      for (const k in sfxBuf) delete sfxBuf[k];
-      reverbIR = null;
-    }, ms);
+    napT = setTimeout(() => { delete sfxBuf.startup; }, ms);
   }
   function startupSound() {
     if (!sndOn || !userActed) return;
