@@ -2966,7 +2966,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let archivistLoading = null;
   function loadArchivist() {
     if (archivistLoading) return archivistLoading;
-    archivistLoading = loadScript('apps/archivist-facts.js?v=1').then(() => loadScript('apps/archivist.js?v=2')).then(() => window.Archivist.mount($('#arRoot'), {
+    archivistLoading = loadScript('apps/archivist-facts.js?v=2').then(() => loadScript('apps/archivist.js?v=2')).then(() => window.Archivist.mount($('#arRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('archivist'),
