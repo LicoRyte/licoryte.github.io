@@ -11,3 +11,4 @@ By NightMargin:
 Interface sounds:
   twm_mouse_click.wav   mouse click
   twm_notif.wav         tabs and options inside app windows
+  tada.mp3              Archivist timer-finished sound (Lico's earlier notify sound)

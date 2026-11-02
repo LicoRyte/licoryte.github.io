@@ -697,6 +697,46 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-files mark { background: #FFFF66; color: #000000; }
 .rw-files li.cur .rw-where, .rw-files li.cur .rw-snip { color: #FFFFFF; }
 .rw-tools .rw-nav { padding: 2px 6px; min-width: 24px; }
+/* Archivist */
+#arRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; font: 12px var(--f-ui); }
+.ar-tabs { display: flex; gap: 2px; padding: 2px 2px 0; flex-shrink: 0; }
+.ar-tabs button { padding: 3px 12px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) transparent var(--hi); border-bottom: 0; cursor: var(--cur-hand); position: relative; top: 2px; }
+.ar-tabs button[aria-selected="true"] { top: 0; padding-bottom: 5px; font-weight: bold; z-index: 1; }
+.ar-body { flex: 1; min-height: 0; overflow: auto; background: var(--silver); }
+.ar-pane { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.ar-modes { display: flex; gap: 4px; justify-content: center; }
+.ar-mode { padding: 3px 10px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand); }
+.ar-mode.on { border-color: var(--dark) var(--hi) var(--hi) var(--dark); background: #DCDCDC; font-weight: bold; }
+.ar-mode:disabled { color: #8A8A8A; }
+.ar-clock { text-align: center; font: bold 64px/1 "Consolas", "Lucida Console", "Courier New", monospace; letter-spacing: 2px; color: #00FF66; background: #0A140C; padding: 14px 0 12px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); text-shadow: 0 0 8px rgba(0, 255, 102, .5); }
+#arRoot[data-mode="short"] .ar-clock, #arRoot[data-mode="long"] .ar-clock { color: #66CCFF; background: #08101A; text-shadow: 0 0 8px rgba(102, 204, 255, .5); }
+.ar-bar { height: 22px; background: #FFFFFF; padding: 2px; }
+.ar-bar.thin { height: 12px; margin: 4px 0; }
+.ar-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 10px, transparent 10px 12px); transition: width .25s linear; }
+#arRoot[data-mode="short"] .ar-pane:first-child .ar-fill, #arRoot[data-mode="long"] .ar-pane:first-child .ar-fill { background: repeating-linear-gradient(90deg, #2E8B22 0 10px, transparent 10px 12px); }
+.ar-btns { display: flex; gap: 6px; justify-content: center; }
+.ar-btns .btn { min-width: 78px; padding: 4px 10px; }
+.ar-btns .ar-go { font-weight: bold; }
+.ar-hint { text-align: center; color: #333333; min-height: 1.3em; }
+.ar-card, .ar-entry { background: #FFFDF2; border: 1px solid #A0A0A0; border-left: 4px solid #C9A400; padding: 8px 10px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .15); }
+.ar-card[hidden] { display: none; }
+.ar-card.new { animation: ar-pop .5s ease-out; border-left-color: var(--blue); background: #FFFFF0; }
+@keyframes ar-pop { 0% { transform: scale(.9); opacity: 0; } 70% { transform: scale(1.03); opacity: 1; } 100% { transform: none; } }
+.ar-card-h { display: flex; justify-content: space-between; gap: 8px; font: bold 11px var(--f-ui); color: var(--navy); margin-bottom: 4px; }
+.ar-cat { font-weight: normal; color: #555555; white-space: nowrap; }
+.ar-card p, .ar-entry p { margin: 0; font: 13px/1.5 var(--f-body); color: #1A1A1A; }
+.ar-set summary { cursor: var(--cur-hand); color: #333333; }
+.ar-set-row { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 2px 0; }
+.ar-set select { font: 12px var(--f-ui); }
+.ar-ahead { display: flex; flex-direction: column; gap: 2px; }
+.ar-muted { color: #555555; font-size: 11px; }
+.ar-tools { display: flex; gap: 6px; }
+.ar-tools select { font: 12px var(--f-ui); }
+.ar-find { flex: 1; min-width: 0; font: 12px var(--f-ui); padding: 2px 4px; }
+.ar-list { display: flex; flex-direction: column; gap: 8px; }
+.ar-entry { box-shadow: none; }
+.ar-empty { text-align: center; color: #555555; padding: 10px 0; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .ar-card.new { animation: none; } .ar-fill { transition: none; } }
 .rw-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 var(--hi); }
 .rw-outline .rw-files .rw-pic > .rw-fn { color: #3A3A3A; }
 .rw-scroll.rw-wide .rw-doc { max-width: none; }
@@ -894,6 +934,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
   <button type="button" class="dicon" data-open="papercut"><img src="img/icons/papercut.png" alt=""><span>Papercut</span></button>
+  <button type="button" class="dicon" data-open="archivist"><img src="img/icons/archivist.png" alt=""><span>Archivist</span></button>
   <button type="button" class="dicon" data-open="pancake"><img src="img/icons/pancake.png" alt=""><span>Pancake</span></button>
   <button type="button" class="dicon" data-open="saturn"><img src="img/icons/saturn.png" alt=""><span>Saturn Archive</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
@@ -1014,6 +1055,10 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 <section class="win raised app" id="w-papercut" data-app="papercut" data-title="Papercut" data-icon="img/icons/papercut-16.png" data-w="760" data-h="620" hidden aria-labelledby="t-papercut">
   <div class="tbar"><span class="name" id="t-papercut"></span></div>
   <div id="pcRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Papercut...</p></div>
+</section>
+<section class="win raised app" id="w-archivist" data-app="archivist" data-title="Archivist" data-icon="img/icons/archivist-16.png" data-w="440" data-h="540" hidden aria-labelledby="t-archivist">
+  <div class="tbar"><span class="name" id="t-archivist"></span></div>
+  <div id="arRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Archivist...</p></div>
 </section>
 
 <section class="win raised app" id="w-saturn" data-app="saturn" data-title="Saturn Archive" data-icon="img/icons/saturn-16.png" data-w="900" data-h="600" hidden aria-labelledby="t-saturn">
@@ -1163,6 +1208,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="papercut"><img src="img/icons/papercut.png" alt="">Papercut</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="archivist"><img src="img/icons/archivist.png" alt="">Archivist</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="pancake"><img src="img/icons/pancake.png" alt="">Pancake</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="saturn"><img src="img/icons/saturn.png" alt="">Saturn Archive</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
@@ -1779,6 +1825,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'netman') loadNetMan();
     if (id === 'readworm') loadReadworm();
     if (id === 'saturn') loadSaturn();
+    if (id === 'archivist') loadArchivist();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
@@ -2001,7 +2048,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: library, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: library, archivist, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -2010,6 +2057,9 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
+    archivist: () => { openApp('archivist'); return 'Opened Archivist. 25 minutes. You can do 25 minutes.'; },
+    pomodoro: () => { openApp('archivist'); return 'Opened Archivist.'; },
+    timer: () => { openApp('archivist'); return 'Opened Archivist.'; },
     library: () => { openApp('readworm'); return 'Opened Readworm, the library. Shh.'; },
     saturn: () => { openApp('saturn'); return 'Opened Saturn Archive. It would float in a bathtub, you know.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
@@ -2910,6 +2960,22 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   }
 
   /* ---------- Saturn Archive (apps/saturn.js, loaded the first time the window opens) ---------- */
+  /* ---------- Archivist (apps/archivist.js + apps/archivist-facts.js): Pomodoro timer that unlocks fun facts ---------- */
+  let archivistLoading = null;
+  function loadArchivist() {
+    if (archivistLoading) return archivistLoading;
+    archivistLoading = loadScript('apps/archivist-facts.js?v=1').then(() => loadScript('apps/archivist.js?v=1')).then(() => window.Archivist.mount($('#arRoot'), {
+      tada: () => { if (sndOn) playSfx('tada').then(ok => { if (!ok) synthChime(); }); },
+      ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
+      show: () => openApp('archivist'),
+      // the countdown shows on the title bar and taskbar button while it runs
+      title: t => { const w = APPS.archivist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
+    })).catch(() => { $('#arRoot').textContent = "Couldn't load Archivist. Check your connection and open it again."; archivistLoading = null; });
+    return archivistLoading;
+  }
+  // a timer that was running when the page closed keeps going in the background (the window stays closed until it ends)
+  try { const a = JSON.parse(localStorage.getItem('lico-archivist') || 'null'); if (a && a.run && a.run.running) setTimeout(loadArchivist, 1500); } catch (e) {}
+
   let saturnLoading = null;
   function loadSaturn() {
     if (saturnLoading) return saturnLoading;
@@ -3096,8 +3162,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   try { clickOn = localStorage.getItem('lico-clicks') !== 'off'; } catch (e) {}
   // startup.ogg is the main file; browsers that can't play Ogg (older Safari) get the startup.mp3 copy instead
   const canOgg = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="vorbis"'); } catch (e) { return false; } })();
-  const SFX = { notify: 'sfx/messagebox.wav', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3', click: 'sfx/twm_mouse_click.wav', ui: 'sfx/twm_notif.wav' };
-  const SFX_VOL = { notify: 0.4, startup: 0.6, click: 0.55, ui: 0.5 };
+  const SFX = { tada: 'sfx/tada.mp3', notify: 'sfx/messagebox.wav', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3', click: 'sfx/twm_mouse_click.wav', ui: 'sfx/twm_notif.wav' };
+  const SFX_VOL = { tada: 0.55, notify: 0.4, startup: 0.6, click: 0.55, ui: 0.5 };
   const sfxRaw = {}, sfxBuf = {};
   for (const [k, url] of Object.entries(SFX)) sfxRaw[k] = fetch(url).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
   function audio() {
