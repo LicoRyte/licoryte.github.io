@@ -7,8 +7,8 @@ All rights to each sound belong to its creator.
 By NightMargin:
   startup.ogg        startup sound (startup.mp3 is the same sound, converted for older Safari)
   messagebox.wav     window-open sound
+  granted.wav        Archivist timer-finished sound
 
 Interface sounds:
   twm_mouse_click.wav   mouse click
   twm_notif.wav         tabs and options inside app windows
-  tada.mp3              Archivist timer-finished sound (Lico's earlier notify sound)

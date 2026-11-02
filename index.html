@@ -2965,7 +2965,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadArchivist() {
     if (archivistLoading) return archivistLoading;
     archivistLoading = loadScript('apps/archivist-facts.js?v=1').then(() => loadScript('apps/archivist.js?v=1')).then(() => window.Archivist.mount($('#arRoot'), {
-      tada: () => { if (sndOn) playSfx('tada').then(ok => { if (!ok) synthChime(); }); },
+      tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('archivist'),
       // the countdown shows on the title bar and taskbar button while it runs
@@ -3162,8 +3162,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   try { clickOn = localStorage.getItem('lico-clicks') !== 'off'; } catch (e) {}
   // startup.ogg is the main file; browsers that can't play Ogg (older Safari) get the startup.mp3 copy instead
   const canOgg = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="vorbis"'); } catch (e) { return false; } })();
-  const SFX = { tada: 'sfx/tada.mp3', notify: 'sfx/messagebox.wav', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3', click: 'sfx/twm_mouse_click.wav', ui: 'sfx/twm_notif.wav' };
-  const SFX_VOL = { tada: 0.55, notify: 0.4, startup: 0.6, click: 0.55, ui: 0.5 };
+  const SFX = { granted: 'sfx/granted.wav', notify: 'sfx/messagebox.wav', startup: canOgg ? 'sfx/startup.ogg' : 'sfx/startup.mp3', click: 'sfx/twm_mouse_click.wav', ui: 'sfx/twm_notif.wav' };
+  const SFX_VOL = { granted: 0.5, notify: 0.4, startup: 0.6, click: 0.55, ui: 0.5 };
   const sfxRaw = {}, sfxBuf = {};
   for (const [k, url] of Object.entries(SFX)) sfxRaw[k] = fetch(url).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
   function audio() {
