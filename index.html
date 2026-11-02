@@ -708,8 +708,11 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .ar-mode { padding: 3px 10px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand); }
 .ar-mode.on { border-color: var(--dark) var(--hi) var(--hi) var(--dark); background: #DCDCDC; font-weight: bold; }
 .ar-mode:disabled { color: #8A8A8A; }
-.ar-clock { text-align: center; font: bold 64px/1 "Consolas", "Lucida Console", "Courier New", monospace; letter-spacing: 2px; color: #00FF66; background: #0A140C; padding: 14px 0 12px; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); text-shadow: 0 0 8px rgba(0, 255, 102, .5); }
-#arRoot[data-mode="short"] .ar-clock, #arRoot[data-mode="long"] .ar-clock { color: #66CCFF; background: #08101A; text-shadow: 0 0 8px rgba(102, 204, 255, .5); }
+.ar-screen { background: #FFFFFF; padding: 18px 10px 14px; text-align: center; }
+.ar-big { font: bold 22px/1.25 var(--f-head); color: var(--navy); min-height: 1.25em; }
+#arRoot[data-mode="short"] .ar-big, #arRoot[data-mode="long"] .ar-big { color: #1F6417; }
+.ar-dots i { font-style: normal; } .ar-dots i.off { visibility: hidden; }
+.ar-time { margin-top: 6px; font: 15px var(--f-ui); color: #444444; font-variant-numeric: tabular-nums; }
 .ar-bar { height: 22px; background: #FFFFFF; padding: 2px; }
 .ar-bar.thin { height: 12px; margin: 4px 0; }
 .ar-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 10px, transparent 10px 12px); transition: width .25s linear; }
@@ -2964,7 +2967,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let archivistLoading = null;
   function loadArchivist() {
     if (archivistLoading) return archivistLoading;
-    archivistLoading = loadScript('apps/archivist-facts.js?v=1').then(() => loadScript('apps/archivist.js?v=1')).then(() => window.Archivist.mount($('#arRoot'), {
+    archivistLoading = loadScript('apps/archivist-facts.js?v=1').then(() => loadScript('apps/archivist.js?v=2')).then(() => window.Archivist.mount($('#arRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('archivist'),

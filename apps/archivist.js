@@ -35,14 +35,26 @@
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '⏱ Timer');
     const tabArch = el('button', { type: 'button', role: 'tab', 'aria-selected': 'false', onclick: () => tab('archive') }, '🗃 Archive');
     const modeBtns = Object.keys(MODES).map(m => el('button', { type: 'button', class: 'ar-mode', 'data-m': m, onclick: () => { if (!running) setMode(m); } }, MODES[m]));
-    const clock = el('div', { class: 'ar-clock', 'aria-live': 'off' }, '25:00');
+    // the screen: a big status line ("Gathering Knowledge...") with the time underneath in plain text
+    const bigText = el('span', {}), dots = el('span', { class: 'ar-dots', 'aria-hidden': 'true' });
+    const timeText = el('div', { class: 'ar-time' }, '25:00');
+    const clock = el('div', { class: 'ar-screen sunken', 'aria-live': 'off' }, el('div', { class: 'ar-big' }, bigText, dots), timeText);
+    let dotN = 0, dotT = 0;
+    function headline() {
+      if (!running) return left > 0 && left < length(mode) ? 'Paused' : mode === 'focus' ? 'Ready when you are' : 'Break time';
+      return mode === 'focus' ? 'Gathering Knowledge' : 'Recharging Data Archivist';
+    }
+    function drawDots() { // ".", "..", "..." while running; the unused dots stay invisible so the text doesn't wobble
+      const n = running ? dotN % 4 : 0;
+      dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.')));
+    }
     const barFill = el('div', { class: 'ar-fill' });
     const bar = el('div', { class: 'ar-bar sunken', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100 }, barFill);
     const startB = el('button', { type: 'button', class: 'btn ar-go', onclick: () => running ? pause() : start() }, 'Start');
     const resetB = el('button', { type: 'button', class: 'btn', title: 'Start this session over (a focus session stopped early unlocks nothing)', onclick: () => reset() }, 'Reset');
     const skipB = el('button', { type: 'button', class: 'btn', title: 'Skip to the next part', onclick: () => skip() }, 'Skip');
     const hint = el('div', { class: 'ar-hint' });
-    const card = el('div', { class: 'ar-card' });
+    const card = el('div', { class: 'ar-card', hidden: true });
     const sel = (k, opts) => { const s = el('select', { 'aria-label': k }, opts.map(v => el('option', { value: v, selected: S.set[k] === v || null }, String(v)))); s.addEventListener('change', () => { S.set[k] = +s.value; save(); if (!running && mode === k) { left = length(mode); persistRun(); } draw(); }); return s; };
     const settings = el('details', { class: 'ar-set' }, el('summary', {}, 'Settings'),
       el('div', { class: 'ar-set-row' },
@@ -133,7 +145,11 @@
 
     function drawClock() {
       const r = remaining(), total = length(mode), pct = Math.min(100, Math.max(0, 100 - (r / total) * 100));
-      clock.textContent = fmt(r);
+      timeText.textContent = fmt(r) + (running ? ' left' : '');
+      const hl = headline(); if (bigText.textContent !== hl) bigText.textContent = hl;
+      if (running && !dotT) dotT = setInterval(() => { dotN++; drawDots(); }, 450);
+      if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
+      drawDots();
       barFill.style.width = pct + '%';
       bar.setAttribute('aria-valuenow', Math.round(pct));
       if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? 'Focus' : 'Break') : 'Archivist');
@@ -181,7 +197,7 @@
       if (S.run.endAt > Date.now()) { running = true; endAt = S.run.endAt; loop(); }
       else { const was = S.run.mode; mode = was; finish(true); hint.textContent = was === 'focus' ? 'A focus session finished while you were away. Entry unlocked.' : 'Your break finished while you were away.'; }
     }
-    if (S.got.length && card.hidden !== false) showCard(S.got[S.got.length - 1].id, false);
+    if (S.got.length && card.hidden) showCard(S.got[S.got.length - 1].id, false);
     draw();
     // keep the clock honest when the tab comes back from the background
     document.addEventListener('visibilitychange', () => { if (!document.hidden && running && remaining() <= 0) finish(); });
