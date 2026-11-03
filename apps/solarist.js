@@ -27,17 +27,17 @@
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
     Rocky: { w: 14, t: [-80, 60], pal: ['#d2ad85', '#a8825f', '#7f6045', '#58412e'], bio: ['Rocky plains', 'Canyon mazes', 'Cratered highlands', 'Dust basins', 'Stone arches', 'Boulder fields'], atm: ['Thin nitrogen', 'Carbon dioxide', 'Almost none', 'Argon haze'], life: .15 },
-    Ocean: { w: 10, t: [2, 34], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#77b864', '#c8b47a'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
-    Jungle: { w: 8, t: [18, 48], pal: ['#8fdc6a', '#4caf50', '#2e7d32', '#1b4f20'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
-    Desert: { w: 11, t: [25, 95], pal: ['#f6dc9c', '#e0b268', '#c08844', '#8e5f2c'], bio: ['Dune seas', 'Salt flats', 'Glass deserts', 'Mesa country', 'Dry riverbeds', 'Rust plains'], atm: ['Dry carbon dioxide', 'Thin nitrogen', 'Dusty nitrogen'], life: .25 },
+    Ocean: { w: 12, t: [2, 34], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#77b864', '#c8b47a'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
+    Jungle: { w: 10, t: [18, 48], pal: ['#8fdc6a', '#4caf50', '#2e7d32', '#1b4f20'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
+    Desert: { w: 10, t: [25, 95], pal: ['#f6dc9c', '#e0b268', '#c08844', '#8e5f2c'], bio: ['Dune seas', 'Salt flats', 'Glass deserts', 'Mesa country', 'Dry riverbeds', 'Rust plains'], atm: ['Dry carbon dioxide', 'Thin nitrogen', 'Dusty nitrogen'], life: .25 },
     Ice: { w: 11, t: [-220, -25], pal: ['#ffffff', '#d8eef8', '#a8d0e8', '#76a8c8'], bio: ['Glacier fields', 'Frozen oceans', 'Ice caves', 'Snow plains', 'Cryovolcano fields', 'Blue ice cliffs'], atm: ['Thin nitrogen', 'Methane traces', 'Almost none'], life: .12 },
-    Lava: { w: 8, t: [350, 1500], pal: ['#ffd04a', '#ff7a1a', '#4a2a22', '#241414'], bio: ['Lava seas', 'Volcanic chains', 'Obsidian plains', 'Ash fields', 'Magma rivers', 'Basalt towers'], atm: ['Sulfur dioxide', 'Volcanic ash and CO₂', 'Almost none'], life: .02 },
+    Lava: { w: 7, t: [350, 1500], pal: ['#ffd04a', '#ff7a1a', '#4a2a22', '#241414'], bio: ['Lava seas', 'Volcanic chains', 'Obsidian plains', 'Ash fields', 'Magma rivers', 'Basalt towers'], atm: ['Sulfur dioxide', 'Volcanic ash and CO₂', 'Almost none'], life: .02 },
     'Gas giant': { w: 10, t: [-170, 900], pal: ['#f2e2c0', '#dbb486', '#b77a50', '#86503a'], bio: ['Banded cloud belts', 'Endless storms', 'Ammonia skies', 'Hydrogen depths'], atm: ['Hydrogen and helium'], life: .04, noGround: true },
     'Ice giant': { w: 6, t: [-225, -170], pal: ['#c4f2fa', '#8adaec', '#55b4d4', '#2f84aa'], bio: ['Methane haze', 'Diamond rain layers', 'Deep water-ice mantle', 'Supersonic winds'], atm: ['Hydrogen, helium and methane'], life: .01, noGround: true },
-    Toxic: { w: 6, t: [60, 480], pal: ['#e4ec7a', '#bcc84a', '#8e9a32', '#5e6a20'], bio: ['Acid lakes', 'Sulfur fields', 'Yellow haze plains', 'Corroded canyons', 'Bubbling mud pits'], atm: ['Sulfuric acid clouds', 'Chlorine haze', 'Thick carbon dioxide'], life: .06 },
+    Toxic: { w: 5, t: [60, 480], pal: ['#e4ec7a', '#bcc84a', '#8e9a32', '#5e6a20'], bio: ['Acid lakes', 'Sulfur fields', 'Yellow haze plains', 'Corroded canyons', 'Bubbling mud pits'], atm: ['Sulfuric acid clouds', 'Chlorine haze', 'Thick carbon dioxide'], life: .06 },
     Crystal: { w: 3, t: [-120, 40], pal: ['#f4dcff', '#d2a2f2', '#a46ed6', '#6e3ea8'], bio: ['Crystal spires', 'Mirror plains', 'Prism caves', 'Singing quartz forests', 'Geode valleys'], atm: ['Thin neon', 'Almost none', 'Argon and nitrogen'], life: .1 },
     'Tidally locked': { w: 5, t: [-140, 260], pal: ['#ffd9a0', '#e0a060', '#3a4a7a', '#1a2244'], bio: ['Twilight band', 'Scorched dayside', 'Frozen nightside', 'Eternal sunset strip'], atm: ['Nitrogen', 'Thin carbon dioxide', 'Wind-whipped nitrogen'], life: .3, locked: true },
-    Garden: { w: 3, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
+    Garden: { w: 6, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
     Rogue: { w: 2, t: [-235, -205], pal: ['#4a4f6e', '#353950', '#25283a', '#16182a'], bio: ['Eternal night', 'Frozen crust', 'Geothermal hot spots', 'Black ice plains'], atm: ['Frozen solid', 'Almost none'], life: .05, rogue: true },
   };
   const LIFE = [['No signs of life', 0], ['Microbial traces', 1], ['Moss-like mats', 2], ['Plant-like life', 3], ['Swimming creatures', 4], ['Large animal herds', 5], ['Signs of intelligence', 6]];
@@ -56,30 +56,53 @@
     'The navigation computer flagged {n} as uncharted. Not anymore.',
     'A faint signal led the ship straight to {n}.',
     '{n} appeared out of the dark, right where the charts showed nothing.',
+    'The autopilot slowed down on its own when {n} came into range.',
+    'A course correction brought the ship around, and there was {n}.',
+    'The star charts had a smudge here. The smudge turned out to be {n}.',
+    'The night shift woke everyone up: {n} was on the scanners.',
+    'Gravity readings tugged the ship toward {n} before anyone saw it.',
+    'Exiting the jump, the first thing in the window was {n}.',
   ];
   const GROUND = [
     'Most of the surface is {b1}, broken up by {b2}.',
     'Survey drones mapped {b1} stretching to the horizon, with patches of {b2}.',
     'From orbit it looks like {b1}; up close, there are {b2} too.',
     'The landing team reported {b1} and, further out, {b2}.',
+    'Low passes over the surface showed {b1} giving way to {b2}.',
+    'The map is mostly {b1}, stitched together by {b2}.',
+    'Sensors picked out {b1} in the north and {b2} toward the equator.',
+    'Every photo from the surface shows {b1}. A few show {b2}.',
+    'Half of it is {b1}. The other half is {b2}, which nobody expected.',
+    'The rover got stuck twice in the {b1}, then found {b2}.',
   ];
   const SKY = [
     'The weather: {w}.',
     'Expect {w} on any visit.',
     'Atmospheric readings show {w}.',
     'The crew logged {w} during the flyby.',
+    'Local forecast: {w}.',
+    'The sensors kept reporting {w}.',
+    'It\'s a world of {w}.',
+    'The drones came back reporting {w}.',
   ];
   const GAS = [
     'There is no solid ground, just {b1} sinking into {b2}.',
     'Probes dropped into {b1} and were lost somewhere in the {b2}.',
+    'Below the {b1}, the pressure climbs until the probes go quiet in the {b2}.',
+    'You could fall forever here: {b1} above, {b2} below, and no floor.',
+    'From orbit you can watch {b1} curl into {b2}.',
   ];
   const NOTE = {
-    Common: ['A quiet world. Worth a pin on the map.', 'Nothing unusual, which is its own kind of nice.', 'Logged and catalogued. On to the next one.', 'A good place to stretch your legs.'],
-    Uncommon: ['Scientists back home will want a closer look.', 'The readings here are a little strange. In a good way.', 'One of the crew has already asked to come back.', 'Worth a second visit.'],
-    Rare: ['The ship\'s instruments have never recorded anything like it.', 'Mission control asked for the data three times to be sure.', 'A world like this turns up maybe once in a hundred jumps.'],
-    Legendary: ['Old star maps mention a world like this, but nobody believed them.', 'The crew went completely silent at the viewport.', 'This one goes on the front page of every science journal back home.'],
+    Common: ['A quiet world. Worth a pin on the map.', 'Nothing unusual, which is its own kind of nice.', 'Logged and catalogued. On to the next one.', 'A good place to stretch your legs.', 'Ordinary, in the most relaxing way.', 'One more dot on the map. A nice dot.', 'The crew took a group photo and moved on.'],
+    Uncommon: ['Scientists back home will want a closer look.', 'The readings here are a little strange. In a good way.', 'One of the crew has already asked to come back.', 'Worth a second visit.', 'There is more going on here than it first looks like.', 'The sample drawers are full of interesting rocks.'],
+    Rare: ['The ship\'s instruments have never recorded anything like it.', 'Mission control asked for the data three times to be sure.', 'A world like this turns up maybe once in a hundred jumps.', 'Three different sensors had to agree before anyone believed it.', 'The science team is arguing about it already.'],
+    Legendary: ['Old star maps mention a world like this, but nobody believed them.', 'The crew went completely silent at the viewport.', 'This one goes on the front page of every science journal back home.', 'Once in a lifetime. Maybe once in several.', 'Nobody on board will forget this one.'],
   };
-  const ODD = ['a perfectly round lake', 'ruins of an ancient structure', 'a second, tiny star in its sky', 'rings that glow at night', 'a mountain taller than Olympus Mons', 'a canyon that circles the whole planet', 'a moon that orbits backwards', 'a magnetic field strong enough to scramble the compass', 'a repeating radio pulse from the surface', 'giant crystal arches', 'a crater shaped like a heart', 'a storm that has not moved in centuries'];
+  const ODD = ['a perfectly round lake', 'ruins of an ancient structure', 'a second, tiny star in its sky', 'rings that glow at night', 'a mountain taller than Olympus Mons', 'a canyon that circles the whole planet', 'a moon that orbits backwards', 'a magnetic field strong enough to scramble the compass', 'a repeating radio pulse from the surface', 'giant crystal arches', 'a crater shaped like a heart', 'a storm that has not moved in centuries', 'a lake that glows at night', 'floating rock islands', 'a geyser taller than any mountain', 'a perfectly straight canyon', 'spiral-shaped dunes', 'mirror-smooth salt plains that reflect the stars', 'trees of pure crystal', 'a waterfall that falls upward in the wind'];
+  // extra lines for variety: the star's light, how livable it feels, and what the bio-scanner says
+  const STAR_LINE = { 'red dwarf': 'Its red dwarf sun turns every shadow a deep crimson.', 'orange dwarf': 'Amber light from its star makes every afternoon look like sunset.', 'yellow dwarf': 'Its yellow sun feels almost familiar.', 'white dwarf': 'A tiny, fierce white star gives it a cold, clinical light.', 'blue giant': 'A huge blue sun fills the sky and bleaches every color.', 'red giant': 'A swollen red giant takes up a third of the sky.', 'binary pair': 'Two suns cast double shadows on everything.', 'pulsar': 'The pulsar ticks overhead like a cosmic clock.' };
+  const HAB_LINE = ['You could almost walk around without a suit.', 'Someone should bring a tent.', 'It looks a lot like home, if home were a bit stranger.', 'The air readings came back almost breathable.', 'The crew is already arguing about who gets to live here.'];
+  const LIFE_LINE = [null, ['The bio-scanner found microbes clinging to the rocks.', 'Something tiny is alive down there.'], ['Patches of moss-like life cover the sheltered valleys.', 'The ground is furred with something green-ish.'], ['Whole forests of strange plants sway below.', 'Things are growing everywhere you look.'], ['Shapes move under the water. Big ones.', 'The seas are full of swimmers.'], ['Herds of large animals crossed the plains below.', 'The bio-scanner would not stop beeping.'], ['Something down there is watching us back.', 'There are lights on the night side. Regular, patterned lights.']];
 
   function weighted(r, list) { const total = list.reduce((a, x) => a + x[1], 0); let x = r() * total; for (const it of list) { if ((x -= it[1]) < 0) return it[0]; } return list[0][0]; }
   const pick = (r, a) => a[Math.floor(r() * a.length)];
@@ -104,17 +127,20 @@
     const suf = r(); if (suf < .45) name += ' ' + pick(r, ROMAN); else if (suf < .65) name += '-' + (1 + Math.floor(r() * 99)); else if (suf < .8) name += ' ' + 'bcdef'[Math.floor(r() * 5)];
     const code = pick(r, CATALOG) + '-' + (100 + Math.floor(r() * 9900)) + ' ' + 'bcdefg'[Math.floor(r() * 6)];
     const star = T.rogue ? 'none (drifting alone)' : weighted(r, STARS);
-    const temp = Math.round(between(r, T.t[0], T.t[1]));
+    // stats lean toward friendly, Earth-like numbers (but anything can still happen)
+    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < .55 && l < h ? between(r, l, h) : between(r, lo, hi); };
+    const temp = Math.round(lean(T.t[0], T.t[1], -10, 32));
     const tempNight = T.locked ? Math.round(between(r, -200, -60)) : null;
-    const gravity = T.noGround ? +(between(r, 0.9, 3.4)).toFixed(2) : +(between(r, 0.15, 2.4)).toFixed(2);
-    const day = T.locked ? null : +(T.noGround ? between(r, 8, 18) : between(r, 6, 90)).toFixed(1);
+    const gravity = T.noGround ? +(between(r, 0.9, 3.4)).toFixed(2) : +(lean(0.15, 2.4, 0.75, 1.35)).toFixed(2);
+    const day = T.locked ? null : +(T.noGround ? between(r, 8, 18) : lean(6, 90, 18, 32)).toFixed(1);
     const year = Math.round(T.rogue ? 0 : (star === 'red dwarf' ? between(r, 3, 60) : between(r, 40, 4000)));
     const moons = T.noGround ? Math.floor(between(r, 2, 90)) : Math.floor(r() * r() * 8);
     const rings = r() < (T.noGround ? .55 : .1) || (rarity === 'Legendary' && r() < .5);
     const dist = Math.round(Math.pow(10, between(r, 0.8, 4.4))); // 6 to 25,000 light-years
     const b = T.bio.slice().sort(() => r() - .5);
     const atm = pick(r, T.atm);
-    let lifeLvl = r() < T.life ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
+    const mild = !T.noGround && temp > -15 && temp < 45 && type !== 'Toxic' && type !== 'Lava';
+    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .15 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
     if (type === 'Garden' && lifeLvl < 3) lifeLvl = 3;
     const life = LIFE[Math.min(6, lifeLvl)][0];
     const pool = T.noGround ? WEATHER.gas : WEATHER.any.concat( temp > 80 ? WEATHER.hot : temp < -20 ? WEATHER.cold : (type === 'Ocean' || type === 'Jungle' || type === 'Garden') ? WEATHER.wet : []);
@@ -123,19 +149,72 @@
     const odd = rarity === 'Rare' || rarity === 'Legendary' ? pick(r, ODD) : (r() < .12 ? pick(r, ODD) : null);
     // the written log, built from pieces
     const fill = s => s.replace('{n}', name).replace('{star}', star.replace(' (drifting alone)', '') === 'none' ? 'nothing' : star).replace('{b1}', b[0].toLowerCase()).replace('{b2}', (b[1] || b[0]).toLowerCase()).replace('{w}', weather);
-    const lines = [fill(T.rogue ? '{n} drifts through deep space with no star at all. The ship nearly flew past it.' : pick(r, OPEN)), fill(T.noGround ? pick(r, GAS) : pick(r, GROUND)), fill(pick(r, SKY))];
-    if (odd) lines.push('Most striking: ' + odd + '.');
-    if (lifeLvl >= 3) lines.push(lifeLvl >= 6 ? 'Something down there is watching us back.' : 'The bio-scanner would not stop beeping.');
+    const lines = [fill(T.rogue ? '{n} drifts through deep space with no star at all. The ship nearly flew past it.' : pick(r, OPEN)), fill(T.noGround ? pick(r, GAS) : pick(r, GROUND))];
+    if (STAR_LINE[star] && r() < .45) lines.push(STAR_LINE[star]);
+    lines.push(fill(pick(r, SKY)));
+    if (mild && gravity > .6 && gravity < 1.6 && (type === 'Garden' || type === 'Jungle' || type === 'Ocean') && r() < .7) lines.push(pick(r, HAB_LINE));
+    if (odd) lines.push(pick(r, ['Most striking: ', 'The highlight: ', 'Strangest of all: ', 'Nobody expected ']) + odd + '.');
+    if (lifeLvl && r() < (lifeLvl >= 3 ? .9 : .5)) lines.push(pick(r, LIFE_LINE[Math.min(6, lifeLvl)]));
     lines.push(pick(r, NOTE[rarity]));
     // look: palette with a little random variation
     const hue = between(r, -18, 18), lit = between(r, -.05, .05);
     const pal = T.pal.map(c => shiftHex(c, hue, lit));
     const land = T.land ? T.land.map(c => shiftHex(c, hue / 2, lit)) : null;
-    return {
+    const planet = {
       v: 1, seed, num, type, rarity, name, code, star, temp, tempNight, gravity, day, year, moons, rings, dist, atm, life, lifeLvl, weather,
       biomes: b.slice(0, 2), res, odd, log: lines.join(' '),
       look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: shiftHex(pick(r, ['#d8c8a0', '#a8b8d0', '#c0a0d8', '#e0d0b0']), hue, 0), noise: Math.floor(r() * 1e9) },
     };
+    planet.x = makeExtra(planet);
+    return planet;
+  }
+
+  /* ---------- the extended survey (orbit, size, climate numbers, biodiversity, habitability). Worked out from the
+     planet's own seed and stats, so worlds found before this existed get the same numbers every time. ---------- */
+  const HZ = { 'red dwarf': [0.1, 0.25], 'orange dwarf': [0.45, 0.85], 'yellow dwarf': [0.95, 1.67], 'white dwarf': [0.008, 0.02], 'blue giant': [20, 50], 'red giant': [10, 25], 'binary pair': [1.1, 2.2], pulsar: [0.3, 0.6] };
+  const LEVEL = ['None', 'Weak', 'Moderate', 'Strong', 'Extreme'];
+  function makeExtra(p) {
+    const r = rng((p.seed ^ 0xA11CE5) >>> 0), T = TYPES[p.type] || {}, gas = !!T.noGround, x = {};
+    // orbit: the hotter the planet, the closer to its star; is it inside the habitable zone?
+    if (p.star.startsWith('none')) { x.au = null; x.zone = 'no star'; }
+    else {
+      const hz = HZ[p.star] || [0.9, 1.6], mid = Math.sqrt(hz[0] * hz[1]);
+      const k = Math.max(25, (p.tempNight != null ? (p.temp + p.tempNight) / 2 : p.temp) + 273);
+      const au = mid * Math.pow(288 / k, 2) * between(r, .85, 1.15);
+      x.au = +au.toPrecision(3); x.zone = au < hz[0] ? 'too close' : au > hz[1] ? 'too far' : 'habitable';
+    }
+    // size and mass (mass follows from gravity and radius, so the numbers agree with each other)
+    x.radius = +(gas ? (p.type === 'Ice giant' ? between(r, 3.2, 4.6) : between(r, 6, 13)) : r() < .55 ? between(r, .75, 1.4) : between(r, .25, 2.3)).toFixed(2);
+    x.mass = +(p.gravity * x.radius * x.radius).toFixed(2);
+    x.escape = +(11.19 * Math.sqrt(x.mass / x.radius)).toFixed(1);
+    x.tilt = Math.round(r() < .7 ? between(r, 3, 35) : between(r, 0, 98));
+    x.age = +between(r, .4, 12.8).toFixed(1);
+    const a = p.atm.toLowerCase();
+    x.pressure = gas ? null : (a.includes('almost none') || a.includes('frozen')) ? +between(r, 0, .01).toFixed(3) : a.includes('thin') ? +between(r, .05, .6).toFixed(2) : (a.includes('thick') || a.includes('sulfuric') || a.includes('chlorine')) ? +between(r, 4, 92).toFixed(1) : +(r() < .6 ? between(r, .8, 1.3) : between(r, .5, 3)).toFixed(2);
+    const W = { Ocean: [85, 99], Garden: [55, 80], Jungle: [20, 50], Desert: [0, 3], Rocky: [0, 12], Toxic: [0, 8], 'Tidally locked': [2, 25], Crystal: [0, 6] };
+    x.water = gas || !W[p.type] ? 0 : Math.round(between(r, W[p.type][0], W[p.type][1]));
+    const O = { Garden: [18, 24], Jungle: [22, 33], Ocean: [10, 24], 'Tidally locked': [0, 12] };
+    x.oxygen = +(O[p.type] ? between(r, O[p.type][0], O[p.type][1]) : between(r, 0, 1.5)).toFixed(1);
+    x.clouds = Math.round(gas ? between(r, 90, 100) : p.type === 'Toxic' ? between(r, 70, 100) : between(r, 0, 80));
+    x.peak = gas ? null : +between(r, .5, 2 + 22 / Math.max(.3, p.gravity)).toFixed(1);
+    x.depth = x.water > 0 ? +between(r, .2, 12).toFixed(1) : null;
+    x.magnet = gas ? LEVEL[3 + Math.floor(r() * 2)] : LEVEL[Math.floor(r() * 5)];
+    let rad = (p.star === 'blue giant' || p.star === 'pulsar') ? 2 : p.star === 'red dwarf' ? 1 : 0;
+    if (x.magnet === 'None' || x.magnet === 'Weak') rad++; if (x.pressure != null && x.pressure > 1.5) rad--;
+    x.radiation = ['Low', 'Moderate', 'High', 'Lethal'][Math.max(0, Math.min(3, rad))];
+    x.albedo = +(p.type === 'Ice' || p.type === 'Ice giant' ? between(r, .6, .9) : p.type === 'Lava' || p.type === 'Rogue' ? between(r, .03, .15) : between(r, .1, .5)).toFixed(2);
+    // biodiversity: a 0-100 index and a rough species count, from how complex its life is
+    const lv = Math.min(6, p.lifeLvl || 0), BIO = [[0, 0], [100, 900], [1000, 12000], [10000, 250000], [50000, 1200000], [200000, 5000000], [1000000, 20000000]];
+    x.species = lv ? Math.round(Math.exp(between(r, Math.log(BIO[lv][0]), Math.log(BIO[lv][1])))) : 0;
+    x.bio = lv ? Math.min(100, Math.round(lv * 14 + between(r, 0, 14))) : 0;
+    // habitability: how close it is to somewhere people could live
+    const near = (v, ideal, span) => Math.max(0, 1 - Math.abs(v - ideal) / span);
+    let h = gas ? .02 : near(p.temp, 15, 60) * .3 + near(p.gravity, 1, 1.5) * .15 + (x.pressure == null ? 0 : near(Math.log10(Math.max(x.pressure, .001)), 0, 2)) * .15
+      + Math.min(1, x.oxygen / 21) * .15 + Math.min(1, x.water / 70) * .1 + (x.zone === 'habitable' ? .1 : 0) + (x.radiation === 'Low' ? .05 : x.radiation === 'Moderate' ? .025 : 0);
+    if (p.type === 'Lava' || p.type === 'Toxic') h *= .3;
+    if (p.tempNight != null) h *= .7;
+    x.hab = Math.round(Math.min(1, h) * 100);
+    return x;
   }
 
   /* ---------- Listening Posts: build one on a world, tune the ship's satellite to it, and it reports back.
@@ -296,6 +375,7 @@
       delete p.deep; delete p.probed; delete p.boosted;
     });
     if (S.probe) { if (!S.tuned) S.tuned = S.probe.num; delete S.probe; }
+    S.found.forEach(({ p }) => { if (!p.x) p.x = makeExtra(p); }); // worlds found before the extended survey existed
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
     save();
     const rollDay = () => { if (S.day !== today()) { S.day = today(); S.todayN = 0; } };
@@ -365,17 +445,34 @@
     const fmtTemp = p => p.tempNight != null ? p.temp + ' °C day side / ' + p.tempNight + ' °C night side' : p.temp + ' °C';
     const pad = n => '#' + String(n).padStart(4, '0');
     const logText = p => p.custom ? p.log.split(p.name).join(p.custom) : p.log;
+    // survey data, split into tabs so the list stays short
+    const num = n => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const habLabel = h => h >= 80 ? 'Earth-like: you could live here' : h >= 60 ? 'Livable, with a little help' : h >= 35 ? 'Survivable in a sealed base' : h >= 15 ? 'Hostile' : 'Deadly';
+    const zoneLabel = { habitable: 'inside the habitable zone ✓', 'too close': 'too close: scorched', 'too far': 'too far: frozen', 'no star': '' };
+    const meter = (v, cls) => el('span', { class: 'sl-meter' + (cls ? ' ' + cls : '') }, el('i', { style: 'width:' + v + '%' }));
+    let surveyTab = 'Overview';
     function facts(p) {
-      const rows = [['Class', p.type + (p.rings ? ', ringed' : '')], ['Star', p.star], ['Distance', p.dist.toLocaleString() + ' light-years from Earth'], ['Temperature', fmtTemp(p)], ['Gravity', p.gravity + ' g'],
-        ['Day', p.day == null ? 'never ends on one side' : p.day + ' hours'], ['Year', p.year ? p.year.toLocaleString() + ' days' : 'no orbit'], ['Moons', String(p.moons)], ['Atmosphere', p.atm], [p.type === 'Gas giant' || p.type === 'Ice giant' ? 'Layers' : 'Biomes', p.biomes.join(', ')],
-        ['Weather', p.weather], ['Life', p.life], ['Resources', p.res.join(', ')]];
-      const post = p.post;
-      if (p.odd) rows.push(['Anomaly', p.odd + (post && post.oddX ? ': ' + post.oddX : '')]);
-      if (post && post.core) rows.push(['Core', post.core]);
-      if (post && post.species) rows.push(['Native species', post.species]);
-      if (post) rows.push(['Listening Post', 'built ' + new Date(post.built).toLocaleDateString() + ', ' + post.reports.length + ' transmission' + (post.reports.length === 1 ? '' : 's')]);
-      if (p.custom) rows.push(['Charted as', p.name]);
-      return el('dl', { class: 'sl-facts' }, rows.flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, v)]));
+      if (!p.x) p.x = makeExtra(p);
+      const x = p.x, post = p.post, gas = p.type === 'Gas giant' || p.type === 'Ice giant';
+      const T = {
+        Overview: [['Class', p.type + (p.rings ? ', ringed' : '')], ['Habitability', [meter(x.hab, x.hab >= 60 ? 'ok' : x.hab >= 35 ? 'mid' : 'bad'), ' ' + x.hab + '% · ' + habLabel(x.hab)]], ['Star', p.star],
+          ['Distance from star', x.au == null ? 'none, it drifts alone' : num(x.au) + ' AU · ' + zoneLabel[x.zone]], ['Distance from Earth', p.dist.toLocaleString() + ' light-years'],
+          ['Year', p.year ? p.year.toLocaleString() + ' days' : 'no orbit'], ['Day', p.day == null ? 'never ends on one side' : p.day + ' hours'], ['Age', x.age + ' billion years']],
+        Physical: [['Radius', x.radius + '× Earth (' + Math.round(x.radius * 6371).toLocaleString() + ' km)'], ['Mass', num(x.mass) + '× Earth'], ['Gravity', p.gravity + ' g'], ['Escape velocity', x.escape + ' km/s'],
+          ['Axial tilt', x.tilt + '°' + (x.tilt < 4 ? ' (no seasons)' : x.tilt < 15 ? ' (mild seasons)' : x.tilt < 35 ? ' (clear seasons)' : x.tilt < 60 ? ' (strong seasons)' : ' (wild seasons)')], ['Moons', String(p.moons)], ['Rings', p.rings ? 'Yes' : 'No'],
+          ['Highest peak', x.peak == null ? 'no solid surface' : x.peak + ' km'], ['Magnetic field', x.magnet], ['Albedo', x.albedo + ' (how much light it reflects)']],
+        Climate: [['Temperature', fmtTemp(p)], ['Surface pressure', x.pressure == null ? 'no surface' : x.pressure + ' atm'], ['Atmosphere', p.atm], ['Oxygen', x.oxygen + '%'], ['Surface water', x.water + '%'],
+          ['Deepest ocean', x.depth == null ? 'none' : x.depth + ' km'], ['Cloud cover', x.clouds + '%'], ['Weather', p.weather], [gas ? 'Layers' : 'Biomes', p.biomes.join(', ')], ['Radiation', x.radiation]],
+        Life: [['Life', p.life], ['Biodiversity', x.bio ? [meter(x.bio, 'bio'), ' ' + x.bio + ' / 100'] : 'none detected'], ['Known species', x.species ? 'about ' + Number(x.species.toPrecision(2)).toLocaleString() : '0'],
+          ['Native species', post && post.species ? post.species : p.lifeLvl ? (post ? 'still being studied' : 'needs a Listening Post to identify') : 'none']],
+        Resources: [['Resources', p.res.join(', ')], ['Core', post && post.core ? post.core : post ? 'scan in progress' : 'needs a Listening Post to scan'], ['Anomaly', p.odd ? p.odd + (post && post.oddX ? ': ' + post.oddX : '') : 'none'],
+          ['Listening Post', post ? 'built ' + new Date(post.built).toLocaleDateString() + ', ' + post.reports.length + ' transmission' + (post.reports.length === 1 ? '' : 's') : 'none'], ['Catalog code', p.code]].concat(p.custom ? [['Charted as', p.name]] : []),
+      };
+      const panel = el('dl', { class: 'sl-facts' });
+      const tabs = Object.keys(T).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === surveyTab), onclick: () => show(k) }, k));
+      function show(k) { surveyTab = k; tabs.forEach(b => b.setAttribute('aria-selected', String(b.textContent === k))); panel.replaceChildren(...T[k].flatMap(([a, b]) => [el('dt', {}, a), el('dd', {}, b)])); }
+      show(surveyTab);
+      return el('div', { class: 'sl-survey' }, el('div', { class: 'sl-stabs', role: 'tablist' }, tabs), panel);
     }
     function postLog(p) {
       const reps = p.post.reports.slice().reverse();
@@ -393,7 +490,7 @@
         el('div', { class: 'sl-card-h' }, el('span', {}, (HEAD[kind] || '') + pad(p.num)), el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity)),
         el('div', { class: 'sl-pl' }, pic,
           el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, '🗼 Post') : null),
-            el('div', { class: 'sl-code' }, p.code + ' · ' + p.type), el('p', {}, logText(p)))),
+            el('div', { class: 'sl-code' }, p.code + ' · ' + p.type + ' · ' + (p.x || (p.x = makeExtra(p))).hab + '% habitable'), el('p', {}, logText(p)))),
         el('details', { class: 'sl-more' }, el('summary', {}, 'Survey data'), facts(p)),
         p.post ? postLog(p) : null,
       ].filter(Boolean);
@@ -539,5 +636,5 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden && running && remaining() <= 0) finish(); });
     return { running: () => running };
   }
-  window.Solarist = { mount, makePlanet, paint };
+  window.Solarist = { mount, makePlanet, makeExtra, paint };
 })();
