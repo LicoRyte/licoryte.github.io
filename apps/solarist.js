@@ -269,12 +269,18 @@
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
     const byNum = n => S.found.find(f => f.p.num === n);
+    // Probe battery: settling charges it for BATTERY boosted travel trips; then it goes dormant until resettled
+    const BATTERY = 4;
+    if (S.probe && S.probe.charge == null) S.probe.charge = BATTERY;
+    const charged = () => !!(S.probe && S.probe.charge > 0);
+    const isHere = n => !!(S.probe && S.probe.num === n);
+    const batt = () => '⚡' + '▮'.repeat(S.probe.charge) + '▯'.repeat(BATTERY - S.probe.charge);
     const nm = p => p.custom || p.name;
     const settling = () => { const f = S.mission && byNum(S.mission); return f ? f.p : null; };
     function headline() {
       const t = settling();
       if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (t ? 'Ready to deploy the probe' : 'Ready for launch') : 'Docked. Ready to recharge';
-      return mode === 'focus' ? (t ? 'Deploying probe to ' + nm(t) : 'Traveling to an uncharted world') : 'Recharging ship cores';
+      return mode === 'focus' ? (t ? (isHere(t.num) ? 'Recharging probe on ' : 'Deploying probe to ') + nm(t) : 'Traveling to an uncharted world') : 'Recharging ship cores';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -326,13 +332,13 @@
     }
     const HEAD = { new: '★ New world discovered · ', probe: '📡 Probe settled · ', last: 'Last discovery · ', log: '' };
     function planetCard(p, kind) {
-      const here = S.probe && S.probe.num === p.num;
+      const here = isHere(p.num);
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
-        here ? el('span', { class: 'sl-orbit', title: 'Your probe is orbiting this world' }, el('img', { src: probeSprite(), alt: 'Probe' })) : null);
+        here ? el('span', { class: 'sl-orbit' + (charged() ? '' : ' dormant'), title: charged() ? 'Your probe is orbiting this world' : 'Your probe is orbiting this world (battery empty)' }, el('img', { src: probeSprite(), alt: 'Probe' })) : null);
       return [
         el('div', { class: 'sl-card-h' }, el('span', {}, (HEAD[kind] || '') + pad(p.num)), el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity)),
         el('div', { class: 'sl-pl' }, pic,
-          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), here ? el('span', { class: 'sl-tag' }, '📡 Probe active') : null), el('div', { class: 'sl-code' }, p.code + ' · ' + p.type), el('p', {}, p.custom ? p.log.split(p.name).join(p.custom) : p.log),
+          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), here ? el('span', { class: 'sl-tag' + (charged() ? '' : ' off'), title: charged() ? 'Signal boost for the next ' + S.probe.charge + ' travel trip' + (S.probe.charge === 1 ? '' : 's') : 'Battery empty. Resettle the probe to recharge it.' }, charged() ? '📡 ' + batt() : '📡 Dormant') : null), el('div', { class: 'sl-code' }, p.code + ' · ' + p.type), el('p', {}, p.custom ? p.log.split(p.name).join(p.custom) : p.log),
             p.deep ? el('p', { class: 'sl-deep' }, el('b', {}, 'Probe report: '), p.deep.secret) : null)),
         el('details', { class: 'sl-more' }, el('summary', {}, p.deep ? 'Survey data (deep scan)' : 'Survey data'), facts(p)),
       ];
@@ -367,22 +373,26 @@
         S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus;
         const target = settling();
         if (target) { // settle the probe: it leaves its old world, lands here and runs a deep scan
-          S.probe = { num: target.num, since: Date.now() };
+          const again = isHere(target.num);
+          S.probe = { num: target.num, since: again ? S.probe.since : Date.now(), charge: BATTERY };
           if (!target.deep) target.deep = deepScan(target);
           target.probed = true; S.mission = 0;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(target, 'probe');
           toBreak();
-          hint.textContent = 'Probe settled on ' + nm(target) + '. Deep scan done, and you can rename it in the Logbook. Now a ' + MODES[mode].toLowerCase() + '.';
+          hint.textContent = (again ? 'Probe recharged on ' + nm(target) + '. ' : 'Probe settled on ' + nm(target) + '. Deep scan done, and you can rename it in the Logbook. ') + 'Signal boost for the next ' + BATTERY + ' trips. Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
-          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, !!S.probe);
+          const boost = charged();
+          if (boost) S.probe.charge--;
+          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, boost);
+          if (boost) p.boosted = true;
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(p, 'new');
           toBreak();
-          hint.textContent = 'Arrived! Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = 'Arrived! ' + (boost ? (S.probe.charge ? 'Signal boost used (' + S.probe.charge + ' left). ' : 'That was the last boosted trip; the probe is dormant now. ') : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
       } else {
         if (!quiet && hooks.ding) hooks.ding();
@@ -413,12 +423,13 @@
       mission.hidden = !S.found.length;
       missionSel.disabled = running && mode === 'focus';
       missionSel.replaceChildren(el('option', { value: 0 }, '🚀 Travel to a new world'),
-        ...S.found.slice().reverse().slice(0, 300).map(f => el('option', { value: f.p.num, disabled: S.probe && S.probe.num === f.p.num || null }, '📡 Settle probe on ' + nm(f.p) + ' (' + pad(f.p.num) + ')' + (S.probe && S.probe.num === f.p.num ? ': already there' : ''))));
+        ...S.found.slice().reverse().slice(0, 300).map(f => { const here = isHere(f.p.num);
+          return el('option', { value: f.p.num, disabled: here && charged() || null }, here ? (charged() ? '📡 Probe on ' + nm(f.p) + ' (still charged)' : '🔋 Recharge probe on ' + nm(f.p) + ' (' + pad(f.p.num) + ')') : '📡 Settle probe on ' + nm(f.p) + ' (' + pad(f.p.num) + ')'); }));
       missionSel.value = String(S.mission || 0);
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
       const pr = S.probe && byNum(S.probe.num);
-      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (pr ? ' · 📡 ' + nm(pr.p) : '');
+      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (pr ? ' · 📡 ' + nm(pr.p) + ' ' + (charged() ? batt() : '(dormant)') : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
     }
 
@@ -431,7 +442,7 @@
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
         el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
-        (() => { const pr = S.probe && byNum(S.probe.num); return el('div', { class: 'sl-muted' }, pr ? '📡 Probe on ' + nm(pr.p) + ' since ' + new Date(S.probe.since).toLocaleDateString() + '. Signal boost: better odds of Rare and Legendary worlds.' : '📡 No probe settled yet. Open a world below and choose "Settle probe here".'); })());
+        (() => { const pr = S.probe && byNum(S.probe.num); return el('div', { class: 'sl-muted' }, pr ? (charged() ? '📡 Probe on ' + nm(pr.p) + ', battery ' + batt() + ': the next ' + S.probe.charge + ' travel trip' + (S.probe.charge === 1 ? ' has' : 's have') + ' better odds of Rare and Legendary worlds.' : '📡 Probe on ' + nm(pr.p) + ' is dormant (battery empty). Spend a session resettling it, here or on another world, for ' + BATTERY + ' more boosted trips.') : '📡 No probe settled yet. Open a world below and choose "Settle probe here". It boosts your next ' + BATTERY + ' trips.'); })());
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
       const q = find.value.trim().toLowerCase(), ty = typeSel.value, ra = rarSel.value;
       const list = S.found.slice().reverse().filter(f => (!ty || f.p.type === ty) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
@@ -440,11 +451,11 @@
         const p = f.p, open = openNum === p.num;
         const row = el('button', { type: 'button', class: 'sl-row', 'aria-expanded': String(open), onclick: () => { openNum = open ? null : p.num; drawLog(); } },
           el('img', { src: paint(p, 32), alt: '', width: 48, height: 48 }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), S.probe && S.probe.num === p.num ? ' 📡' : p.probed ? el('small', { class: 'sl-was' }, ' (probe was here)') : null), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
+          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), isHere(p.num) ? (charged() ? ' 📡' : ' 📡💤') : p.probed ? el('small', { class: 'sl-was' }, ' (probe was here)') : null), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
           el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity));
-        const here = S.probe && S.probe.num === p.num;
+        const here = isHere(p.num);
         const acts = open ? el('div', { class: 'sl-acts' },
-          here ? el('span', { class: 'sl-muted' }, '📡 Your probe is here.') : el('button', { type: 'button', class: 'btn', title: 'Your next study session will fly the probe here', disabled: running && mode === 'focus' || null, onclick: () => { S.mission = p.num; save(); hint.textContent = ''; tab('timer'); draw(); } }, S.mission === p.num ? '📡 Probe heading here next' : '📡 Settle probe here'),
+          here && charged() ? el('span', { class: 'sl-muted' }, '📡 Your probe is here. Battery ' + batt() + '.') : el('button', { type: 'button', class: 'btn', title: here ? 'Your next study session recharges the probe here' : 'Your next study session will fly the probe here', disabled: running && mode === 'focus' || null, onclick: () => { S.mission = p.num; save(); hint.textContent = ''; tab('timer'); draw(); } }, S.mission === p.num ? (here ? '🔋 Recharging here next' : '📡 Probe heading here next') : here ? '🔋 Recharge probe here' : '📡 Settle probe here'),
           p.deep ? el('button', { type: 'button', class: 'btn', title: 'Worlds your probe has settled on can be renamed', onclick: () => rename(p) }, 'Rename...') : null) : null;
         return el('div', { class: 'sl-entry' + (open ? ' open' : '') }, row, open ? el('div', { class: 'sl-detail' }, acts, ...planetCard(p, 'log').slice(1)) : null);
       }));
