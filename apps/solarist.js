@@ -39,6 +39,16 @@
     Crystal: { w: 3, t: [-120, 40], pal: ['#f4dcff', '#d2a2f2', '#a46ed6', '#6e3ea8'], bio: ['Crystal spires', 'Mirror plains', 'Prism caves', 'Singing quartz forests', 'Geode valleys'], atm: ['Thin neon', 'Almost none', 'Argon and nitrogen'], life: .1 },
     'Tidally locked': { w: 5, t: [-140, 260], pal: ['#ffd9a0', '#e0a060', '#3a4a7a', '#1a2244'], bio: ['Twilight band', 'Scorched dayside', 'Frozen nightside', 'Eternal sunset strip'], atm: ['Nitrogen', 'Thin carbon dioxide', 'Wind-whipped nitrogen'], life: .3, locked: true },
     Garden: { w: 6, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
+    Savanna: { w: 6, t: [15, 42], pal: ['#f2dc86', '#d6b652', '#a98d3a', '#6c8a3c'], bio: ['Golden grasslands', 'Lone giant trees', 'Termite-mound fields', 'Seasonal watering holes', 'Red-rock outcrops', 'Dry riverbeds'], atm: ['Nitrogen and oxygen, dry', 'Warm nitrogen and oxygen'], life: .85 },
+    Tundra: { w: 5, t: [-40, 8], pal: ['#eef3f4', '#bcc8b4', '#8c9c82', '#5e6e5a'], bio: ['Frozen moss plains', 'Permafrost bogs', 'Rocky taiga', 'Snowy foothills', 'Frost-cracked flats', 'Ice-edged lakes'], atm: ['Cold nitrogen and oxygen', 'Thin, crisp nitrogen'], life: .45 },
+    Swamp: { w: 5, t: [12, 38], pal: ['#6c8c5c', '#4c6c42', '#36522f', '#22361e'], land: ['#7c6c3c', '#5c7c36'], bio: ['Mangrove-like mazes', 'Steaming bogs', 'Reed marshes', 'Floating plant mats', 'Muddy deltas', 'Fog-filled hollows'], atm: ['Humid, methane-scented air', 'Thick, wet nitrogen and oxygen'], life: .85 },
+    Fungal: { w: 3, t: [5, 30], pal: ['#f6b6e2', '#d27cc2', '#9c4c9c', '#5e2a6a'], bio: ['Giant mushroom forests', 'Spore meadows', 'Glowing mycelium caves', 'Puffball plains', 'Shelf-fungus cliffs'], atm: ['Spore-heavy nitrogen', 'Damp carbon dioxide and oxygen'], life: .95 },
+    Hycean: { w: 4, t: [-10, 60], pal: ['#a2f2e2', '#4ccac2', '#2a8c9c', '#1a5a72'], clouds: true, bio: ['Warm global ocean', 'Hydrogen sky', 'Deep thermal vents', 'Glowing plankton seas'], atm: ['Thick hydrogen over a warm ocean'], life: .6 },
+    Iron: { w: 3, t: [-50, 300], pal: ['#e2e6ec', '#b2b8c2', '#7e8692', '#4e545e'], bio: ['Metal plains', 'Rust canyons', 'Magnetite dunes', 'Mirror-bright craters', 'Iron spire fields'], atm: ['Almost none', 'Thin argon'], life: .05 },
+    Carbon: { w: 2, t: [-80, 600], pal: ['#4c4c56', '#36363e', '#24242a', '#141418'], sparkle: true, bio: ['Graphite plains', 'Diamond-studded cliffs', 'Tar lakes', 'Soot deserts', 'Carbide mountains'], atm: ['Carbon monoxide haze', 'Thick methane'], life: .05 },
+    Shattered: { w: 2, t: [100, 900], pal: ['#ff5c3a', '#c42c1a', '#3c2c32', '#1a1418'], bio: ['Broken crust plates', 'Glowing fault lines', 'Floating rock shards', 'Magma rifts'], atm: ['Almost none', 'Volcanic ash and CO₂'], life: .01 },
+    Dwarf: { w: 5, t: [-230, -60], pal: ['#d2cac2', '#aaa29a', '#827a72', '#5a524a'], bio: ['Cratered plains', 'Frozen nitrogen fields', 'Dusty highlands', 'Tiny ice volcanoes'], atm: ['Almost none', 'Frozen solid'], life: .03 },
+    'Glass storm': { w: 2, t: [700, 1100], pal: ['#d2f2ff', '#7cbaf2', '#3c7ad2', '#1a3c8c'], bio: ['Silicate cloud bands', 'Sideways glass rain', 'Supersonic winds', 'Molten silicate depths'], atm: ['Hydrogen with silicate clouds'], life: 0, noGround: true },
     Rogue: { w: 2, t: [-235, -205], pal: ['#4a4f6e', '#353950', '#25283a', '#16182a'], bio: ['Eternal night', 'Frozen crust', 'Geothermal hot spots', 'Black ice plains'], atm: ['Frozen solid', 'Almost none'], life: .05, rogue: true },
   };
   const LIFE = [['No signs of life', 0], ['Microbial traces', 1], ['Moss-like mats', 2], ['Plant-like life', 3], ['Swimming creatures', 4], ['Large animal herds', 5], ['Signs of intelligence', 6]];
@@ -120,7 +130,7 @@
 
   function makePlanet(seed, num, lucky) {
     const r = rng(seed);
-    const LUCK = { Garden: 4, Ocean: 2, Jungle: 2.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
+    const LUCK = { Garden: 4, Ocean: 2, Jungle: 2.5, Savanna: 2.5, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
     const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w * (lucky ? LUCK[k] || 1 : 1)])), T = TYPES[type];
     const rarity = weighted(r, lucky ? RARITY_LUCKY : RARITY); // a charged Interplanetary Coordinator steers toward better worlds
     // name: 2-3 made-up syllables + a numeral or letter; plus a survey catalog code
@@ -165,7 +175,7 @@
     const planet = {
       v: 1, seed, num, lucky: !!lucky || undefined, type, rarity, name, code, star, temp, tempNight, gravity, day, year, moons, rings, dist, atm, life, lifeLvl, weather,
       biomes: b.slice(0, 2), res, odd, log: lines.join(' '),
-      look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: shiftHex(pick(r, ['#d8c8a0', '#a8b8d0', '#c0a0d8', '#e0d0b0']), hue, 0), noise: Math.floor(r() * 1e9) },
+      look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava' || type === 'Shattered', sparkle: !!T.sparkle || type === 'Crystal', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: shiftHex(pick(r, ['#d8c8a0', '#a8b8d0', '#c0a0d8', '#e0d0b0']), hue, 0), noise: Math.floor(r() * 1e9) },
     };
     planet.x = makeExtra(planet);
     return planet;
@@ -193,9 +203,9 @@
     x.age = +between(r, .4, 12.8).toFixed(1);
     const a = p.atm.toLowerCase();
     x.pressure = gas ? null : (a.includes('almost none') || a.includes('frozen')) ? +between(r, 0, .01).toFixed(3) : a.includes('thin') ? +between(r, .05, .6).toFixed(2) : (a.includes('thick') || a.includes('sulfuric') || a.includes('chlorine')) ? +between(r, 4, 92).toFixed(1) : +(r() < .6 ? between(r, .8, 1.3) : between(r, .5, 3)).toFixed(2);
-    const W = { Ocean: [85, 99], Garden: [55, 80], Jungle: [20, 50], Desert: [0, 3], Rocky: [0, 12], Toxic: [0, 8], 'Tidally locked': [2, 25], Crystal: [0, 6] };
+    const W = { Ocean: [85, 99], Garden: [55, 80], Jungle: [20, 50], Desert: [0, 3], Rocky: [0, 12], Toxic: [0, 8], 'Tidally locked': [2, 25], Savanna: [5, 25], Tundra: [10, 40], Swamp: [40, 70], Fungal: [15, 40], Hycean: [96, 100], Iron: [0, 2], Carbon: [0, 5], Crystal: [0, 6] };
     x.water = gas || !W[p.type] ? 0 : Math.round(between(r, W[p.type][0], W[p.type][1]));
-    const O = { Garden: [18, 24], Jungle: [22, 33], Ocean: [10, 24], 'Tidally locked': [0, 12] };
+    const O = { Garden: [18, 24], Jungle: [22, 33], Ocean: [10, 24], 'Tidally locked': [0, 12], Savanna: [16, 23], Tundra: [12, 21], Swamp: [14, 22], Fungal: [8, 18], Hycean: [0, 4] };
     x.oxygen = +(O[p.type] ? between(r, O[p.type][0], O[p.type][1]) : between(r, 0, 1.5)).toFixed(1);
     x.clouds = Math.round(gas ? between(r, 90, 100) : p.type === 'Toxic' ? between(r, 70, 100) : between(r, 0, 80));
     x.peak = gas ? null : +between(r, .5, 2 + 22 / Math.max(.3, p.gravity)).toFixed(1);
@@ -204,7 +214,7 @@
     let rad = (p.star === 'blue giant' || p.star === 'pulsar') ? 2 : p.star === 'red dwarf' ? 1 : 0;
     if (x.magnet === 'None' || x.magnet === 'Weak') rad++; if (x.pressure != null && x.pressure > 1.5) rad--;
     x.radiation = ['Low', 'Moderate', 'High', 'Lethal'][Math.max(0, Math.min(3, rad))];
-    x.albedo = +(p.type === 'Ice' || p.type === 'Ice giant' ? between(r, .6, .9) : p.type === 'Lava' || p.type === 'Rogue' ? between(r, .03, .15) : between(r, .1, .5)).toFixed(2);
+    x.albedo = +(p.type === 'Ice' || p.type === 'Ice giant' || p.type === 'Tundra' || p.type === 'Glass storm' ? between(r, .5, .9) : p.type === 'Lava' || p.type === 'Rogue' || p.type === 'Carbon' || p.type === 'Shattered' ? between(r, .02, .12) : between(r, .1, .5)).toFixed(2);
     // biodiversity: a 0-100 index and a rough species count, from how complex its life is
     const lv = Math.min(6, p.lifeLvl || 0), BIO = [[0, 0], [100, 900], [1000, 12000], [10000, 250000], [50000, 1200000], [200000, 5000000], [1000000, 20000000]];
     x.species = lv ? Math.round(Math.exp(between(r, Math.log(BIO[lv][0]), Math.log(BIO[lv][1])))) : 0;
@@ -213,7 +223,7 @@
     const near = (v, ideal, span) => Math.max(0, 1 - Math.abs(v - ideal) / span);
     let h = gas ? .02 : near(p.temp, 15, 60) * .3 + near(p.gravity, 1, 1.5) * .15 + (x.pressure == null ? 0 : near(Math.log10(Math.max(x.pressure, .001)), 0, 2)) * .15
       + Math.min(1, x.oxygen / 21) * .15 + Math.min(1, x.water / 70) * .1 + (x.zone === 'habitable' ? .1 : 0) + (x.radiation === 'Low' ? .05 : x.radiation === 'Moderate' ? .025 : 0);
-    if (p.type === 'Lava' || p.type === 'Toxic') h *= .3;
+    if (p.type === 'Lava' || p.type === 'Toxic' || p.type === 'Shattered') h *= .3;
     if (p.tempNight != null) h *= .7;
     x.hab = Math.round(Math.min(1, h) * 100);
     return x;
@@ -248,7 +258,7 @@
   }
   function daily(p, post, r) {
     const sp = post.species, pk = a => a[Math.floor(r() * a.length)];
-    const pool = DAILY.any.concat(sp ? DAILY.life : [], p.type === 'Gas giant' || p.type === 'Ice giant' ? DAILY.gas : [], p.star.startsWith('none') ? [] : DAILY.star);
+    const pool = DAILY.any.concat(sp ? DAILY.life : [], (p.type === 'Gas giant' || p.type === 'Ice giant' || p.type === 'Glass storm') ? DAILY.gas : [], p.star.startsWith('none') ? [] : DAILY.star);
     return pk(pool).replace('{w}', p.weather).replace('{m}', String(p.moons)).replace('{d}', p.day == null ? 'endless' : p.day + ' hours').replace('{t}', p.temp + ' °C')
       .replace('{b}', p.biomes[0].toLowerCase()).replace('{r}', pk(p.res)).replace('{n}', p.custom || p.name).replace('{s}', sp || 'locals').replace('{star}', p.star);
   }
@@ -336,7 +346,7 @@
   function paint(p, size) {
     const key = p.seed + ':' + size; if (cache.has(key)) return cache.get(key);
     const S = size, cv = document.createElement('canvas'); cv.width = cv.height = S;
-    const x = cv.getContext('2d'), img = x.createImageData(S, S), L = p.look, r = rng(L.noise);
+    const x = cv.getContext('2d'), img = x.createImageData(S, S), L = p.look, r = rng(L.noise); const sr = rng((L.noise ^ 0x51A4) >>> 0);
     // value noise
     const G = 16, grid = Array.from({ length: (G + 1) * (G + 1) }, () => r());
     const vn = (u, v) => { u = ((u % G) + G) % G; v = Math.max(0, Math.min(G - .001, v)); const i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j, su = fu * fu * (3 - 2 * fu), sv = fv * fv * (3 - 2 * fv); const g = (a, b) => grid[(b % (G + 1)) * (G + 1) + (a % G)]; const a = g(i, j), b2 = g(i + 1, j), c = g(i, j + 1), d = g(i + 1, j + 1); return a + (b2 - a) * su + (c - a) * sv + (a - b2 - c + d) * su * sv; };
@@ -380,6 +390,7 @@
       let shade = lightDot + ((px + py) % 2 ? .04 : -.04);
       shade = shade > .75 ? 1.12 : shade > .45 ? 1 : shade > .2 ? .72 : .45;
       if (L.lava && c === pal[0]) shade = Math.max(shade, 1);
+      if (L.sparkle && sr() < .035) { c = [255, 255, 255]; shade = Math.max(shade, .9); } // glints of diamond and crystal
       put(i, c.map(v => Math.min(255, v * shade)));
       const front = ringAt(px + .5, py + .5, true); if (front) put(i, ringCol.map(v => v * front));
     }
@@ -569,7 +580,7 @@
     let surveyTab = 'Overview';
     function facts(p) {
       if (!p.x) p.x = makeExtra(p);
-      const x = p.x, post = p.post, gas = p.type === 'Gas giant' || p.type === 'Ice giant';
+      const x = p.x, post = p.post, gas = (p.type === 'Gas giant' || p.type === 'Ice giant' || p.type === 'Glass storm');
       const T = {
         Overview: [['Class', p.type + (p.rings ? ', ringed' : '')], ['Habitability', [meter(x.hab, x.hab >= 60 ? 'ok' : x.hab >= 35 ? 'mid' : 'bad'), ' ' + x.hab + '% · ' + habLabel(x.hab)]], ['Star', p.star],
           ['Distance from star', x.au == null ? 'none, it drifts alone' : num(x.au) + ' AU · ' + zoneLabel[x.zone]], ['Distance from Earth', p.dist.toLocaleString() + ' light-years'],
