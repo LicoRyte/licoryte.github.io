@@ -1,6 +1,7 @@
 /* Solarist: a Pomodoro timer for space explorers. Every finished study session is a jump through deep space that ends
    at a brand-new, randomly generated planet (name, class, climate, biomes, life, a pixel-art portrait...).
-   Breaks recharge the ship. Every world you find goes in your Logbook.
+   Breaks recharge the ship. Every world you find goes in your Logbook. Build a Listening Post on a world and tune the
+   ship's satellite to it, and it sends back a transmission every study session (purely for fun: no effect on finds).
    Saved in this browser: the logbook, today's count, settings and a running timer.
    Loaded by index.html the first time the window opens. */
 (() => {
@@ -22,7 +23,6 @@
   const CATALOG = ['KS', 'HX', 'TRA', 'VND', 'OGL', 'SLR', 'GX', 'PMR', 'NEB', 'K2', 'TOI', 'QZ'];
   const ROMAN = ['II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const RARITY = [['Common', 60], ['Uncommon', 26], ['Rare', 11], ['Legendary', 3]];
-  const RARITY_BOOST = [['Common', 51], ['Uncommon', 29], ['Rare', 15], ['Legendary', 5]];
   const STARS = [['red dwarf', 34], ['orange dwarf', 22], ['yellow dwarf', 18], ['white dwarf', 6], ['blue giant', 5], ['red giant', 6], ['binary pair', 7], ['pulsar', 2]];
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
@@ -94,10 +94,10 @@
     return '#' + [r1, g1, b1].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
   }
 
-  function makePlanet(seed, num, boost) {
+  function makePlanet(seed, num) {
     const r = rng(seed);
     const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w])), T = TYPES[type];
-    const rarity = weighted(r, boost ? RARITY_BOOST : RARITY); // a settled probe boosts the long-range scanners
+    const rarity = weighted(r, RARITY);
     // name: 2-3 made-up syllables + a numeral or letter; plus a survey catalog code
     let name = ''; const ns = r() < .6 ? 2 : 3; for (let i = 0; i < ns; i++) name += pick(r, SYL);
     name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -138,7 +138,9 @@
     };
   }
 
-  /* ---------- Probe deep scan: extra survey data revealed when the probe settles on a world ---------- */
+  /* ---------- Listening Posts: build one on a world, tune the ship's satellite to it, and it reports back.
+     Each study session while tuned brings one transmission: first the deep-scan findings (core, native species,
+     what the anomaly really is, hidden secrets), then an endless trickle of daily logs. ---------- */
   const CORES = ['Molten iron core', 'Solid iron-nickel core', 'Diamond-rich core', 'Frozen rock core', 'Liquid metallic hydrogen', 'Radioactive core, warm to the touch', 'Strangely hollow-sounding mantle', 'Crystal lattice core', 'Ocean of liquid water under the crust', 'Slowly cooling magma core'];
   const SPECIES = [null,
     ['mat colonies', 'spore clouds', 'slime films', 'micro-blooms'],
@@ -148,21 +150,53 @@
     ['striders', 'longnecks', 'burrowers', 'six-legged grazers', 'shell-backs'],
     ['builders', 'watchers', 'singers', 'tool-makers', 'stargazers']];
   const ODD_X = ['completely natural, though nobody can explain how it formed', 'almost certainly natural. Almost', 'artificial. Someone was here long before us', 'a trick of the light from the local star', 'older than the planet\'s own crust', 'still changing, very slowly', 'linked to something deep underground'];
-  const SECRETS = ['The probe recorded a low hum coming from underground.', 'At night, the ground glows faintly where the probe landed.', 'Something left tracks around the probe overnight.', 'A huge cave system runs under most of the surface.', 'The probe found a meteorite that came from another star system.', 'Wind here whistles through the rocks, almost like music.', 'The probe\'s compass points at the same mountain no matter where it moves.', 'Ice and rock layers show the climate flips every few thousand years.', 'There is liquid water deep underground, kept warm by the core.', 'The probe picked up a faint signal that repeats every 42 minutes.', 'The soil is full of tiny, perfect glass spheres.', 'Sunsets here last almost an hour.', 'The probe\'s camera caught a shooting star every few minutes.', 'Gravity readings dip slightly over one region, as if something huge is buried there.'];
-  function deepScan(p) {
-    const r = rng((p.seed ^ 0x5EEDBEEF) >>> 0);
-    let sp = null;
-    if (p.lifeLvl > 0) { let n = ''; for (let i = 0; i < 2; i++) n += pick(r, SYL); sp = n.charAt(0).toUpperCase() + n.slice(1) + ' ' + pick(r, SPECIES[Math.min(6, p.lifeLvl)]); }
-    return { core: pick(r, CORES), species: sp, oddX: p.odd ? pick(r, ODD_X) : null, secret: pick(r, SECRETS), at: Date.now() };
+  const SECRETS = ['The post recorded a low hum coming from underground.', 'At night, the ground glows faintly around the post.', 'Something left tracks around the post overnight.', 'A huge cave system runs under most of the surface.', 'Found a meteorite that came from another star system.', 'Wind here whistles through the rocks, almost like music.', 'The compass points at the same mountain no matter where you stand.', 'Rock layers show the climate flips every few thousand years.', 'There is liquid water deep underground, kept warm by the core.', 'Picked up a faint signal that repeats every 42 minutes.', 'The soil is full of tiny, perfect glass spheres.', 'Sunsets here last almost an hour.', 'A shooting star crosses the sky every few minutes.', 'Gravity dips slightly over one region, as if something huge is buried there.'];
+  const DAILY = {
+    any: ['All systems green. Nothing to report, which is nice.', 'Antenna realigned after a small quake.', 'Recorded {w} again today.', 'Counted {m} moons rising tonight.', 'Dust cleaned off the solar panels. Again.', 'Measured the day: {d}. The post\'s clock agrees.', 'Temperature holding at {t}.', 'Took a panorama of the {b}. It\'s beautiful out here.', 'Drilled a core sample: mostly {r}.', 'Quiet night. The stars look different from here.', 'A small rockslide near the post. No damage.', 'Signal strength perfect. Hello from {n}.'],
+    life: ['The {s} came closer to the post today.', 'Recorded the {s} making a new sound.', 'A group of {s} seems to be nesting nearby.', 'The {s} avoid the post at night. Curious.'],
+    gas: ['The post\'s balloon drifted through another storm band.', 'Lightning flashes lit up the cloud deck for an hour.', 'Wind speed hit a new record today.'],
+    star: ['The {star} flared briefly. Shields held.', 'Watched the {star} set behind the {b}.'],
+  };
+  function scanQueue(p) { // the first transmissions from a new post: the deep-scan findings, in order
+    const r = rng((p.seed ^ 0x5EEDBEEF) >>> 0), q = [];
+    q.push({ k: 'core', v: pick(r, CORES) });
+    if (p.lifeLvl > 0) { let n = ''; for (let i = 0; i < 2; i++) n += pick(r, SYL); q.push({ k: 'species', v: n.charAt(0).toUpperCase() + n.slice(1) + ' ' + pick(r, SPECIES[Math.min(6, p.lifeLvl)]) }); }
+    if (p.odd) q.push({ k: 'odd', v: pick(r, ODD_X) });
+    SECRETS.slice().sort(() => r() - .5).slice(0, 3).forEach(v => q.push({ k: 'secret', v }));
+    return q;
   }
-  // the probe: a tiny pixel sprite (made once)
-  let probeUrl = null;
-  function probeSprite() {
-    if (probeUrl) return probeUrl;
+  function daily(p, post, r) {
+    const sp = post.species, pk = a => a[Math.floor(r() * a.length)];
+    const pool = DAILY.any.concat(sp ? DAILY.life : [], p.type === 'Gas giant' || p.type === 'Ice giant' ? DAILY.gas : [], p.star.startsWith('none') ? [] : DAILY.star);
+    return pk(pool).replace('{w}', p.weather).replace('{m}', String(p.moons)).replace('{d}', p.day == null ? 'endless' : p.day + ' hours').replace('{t}', p.temp + ' °C')
+      .replace('{b}', p.biomes[0].toLowerCase()).replace('{r}', pk(p.res)).replace('{n}', p.custom || p.name).replace('{s}', sp || 'locals').replace('{star}', p.star);
+  }
+  // the next transmission from a post (adds it to the post's log and returns it)
+  function transmit(p) {
+    const post = p.post, q = scanQueue(p), i = post.reports.filter(x => x.k !== 'log').length;
+    let rep;
+    if (i < q.length) {
+      const it = q[i];
+      if (it.k === 'core') { post.core = it.v; rep = { k: 'core', t: 'Core scan complete: ' + it.v.charAt(0).toLowerCase() + it.v.slice(1) + '.' }; }
+      else if (it.k === 'species') { post.species = it.v; rep = { k: 'species', t: 'Native species identified and named: the ' + it.v + '.' }; }
+      else if (it.k === 'odd') { post.oddX = it.v; rep = { k: 'odd', t: 'Anomaly studied. The ' + p.odd + ' is ' + it.v + '.' }; }
+      else rep = { k: 'secret', t: it.v };
+    } else {
+      const r = rng((p.seed + post.reports.length * 7919) >>> 0);
+      rep = { k: 'log', t: daily(p, post, r) };
+    }
+    rep.at = Date.now(); rep.day = Math.max(1, Math.round((Date.now() - post.built) / 86400000) + 1);
+    post.reports.push(rep);
+    return rep;
+  }
+  // the ship's satellite: a tiny pixel sprite (made once)
+  let satUrl = null;
+  function satSprite() {
+    if (satUrl) return satUrl;
     const rows = ['....r....', '....g....', 'bb.ggg.bb', 'bbbgwgbbb', 'bb.ggg.bb', '...g.g...'], col = { b: '#3a6ad8', g: '#c8c8c8', w: '#ffffff', r: '#ff3030' };
     const cv = document.createElement('canvas'); cv.width = 9; cv.height = 6; const x = cv.getContext('2d');
     rows.forEach((row, y) => [...row].forEach((c, i) => { if (col[c]) { x.fillStyle = col[c]; x.fillRect(i, y, 1, 1); } }));
-    probeUrl = cv.toDataURL(); return probeUrl;
+    satUrl = cv.toDataURL(); return satUrl;
   }
 
   /* ---------- pixel-art planet painter (deterministic, so the same planet always looks the same) ---------- */
@@ -231,6 +265,7 @@
     return url;
   }
 
+
   /* ===================================================================== the app ===================================================================== */
   function mount(root, hooks) {
     hooks = hooks || {};
@@ -243,13 +278,24 @@
     const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
     /* ---------- saved state (settings, stats and a running timer carry over from Archivist) ---------- */
-    let S = { found: [], probe: null, mission: 0, total: 0, minutes: 0, day: today(), todayN: 0, cycle: 0, set: { focus: 25, short: 5, long: 15, every: 4 }, run: null };
+    let S = { found: [], tuned: 0, mission: 0, total: 0, minutes: 0, day: today(), todayN: 0, cycle: 0, set: { focus: 25, short: 5, long: 15, every: 4 }, run: null };
     try {
       let s = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (!s) { const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null'); if (old) { s = { total: old.total, minutes: old.minutes, day: old.day, todayN: old.todayN, cycle: old.cycle, set: old.set, run: old.run, found: [] }; } }
       if (s) S = Object.assign(S, s, { set: Object.assign(S.set, s.set || {}), found: Array.isArray(s.found) ? s.found : [] });
       localStorage.removeItem(OLD_KEY);
     } catch (e) {}
+    // a world the old probe settled on becomes a Listening Post that has already sent its deep-scan findings
+    S.found.forEach(({ p }) => {
+      if (p.deep && !p.post) {
+        const d = p.deep, at = d.at || Date.now(), reports = [{ k: 'core', t: 'Core scan complete: ' + d.core.charAt(0).toLowerCase() + d.core.slice(1) + '.', at, day: 1 }];
+        if (d.species) reports.push({ k: 'species', t: 'Native species identified and named: the ' + d.species + '.', at, day: 1 });
+        if (d.oddX) reports.push({ k: 'odd', t: 'Anomaly studied. The ' + p.odd + ' is ' + d.oddX + '.', at, day: 1 });
+        p.post = { built: at, reports, core: d.core, species: d.species, oddX: d.oddX };
+      }
+      delete p.deep; delete p.probed; delete p.boosted;
+    });
+    if (S.probe) { if (!S.tuned) S.tuned = S.probe.num; delete S.probe; }
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
     save();
     const rollDay = () => { if (S.day !== today()) { S.day = today(); S.todayN = 0; } };
@@ -259,6 +305,11 @@
     let running = false, endAt = 0, left = 0, tickT = 0;
     const length = m => S.set[m] * 60000;
     left = (S.run && S.run.left) || length(mode);
+    const byNum = n => S.found.find(f => f.p.num === n);
+    const nm = p => p.custom || p.name;
+    const tunedP = () => { const f = S.tuned && byNum(S.tuned); return f && f.p.post ? f.p : null; };
+    const building = () => { const f = S.mission && byNum(S.mission); return f && !f.p.post ? f.p : null; };
+    const posts = () => S.found.filter(f => f.p.post);
 
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
@@ -268,19 +319,10 @@
     const timeText = el('div', { class: 'sl-time' }, '25:00');
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
-    const byNum = n => S.found.find(f => f.p.num === n);
-    // Probe battery: settling charges it for BATTERY boosted travel trips; then it goes dormant until resettled
-    const BATTERY = 4;
-    if (S.probe && S.probe.charge == null) S.probe.charge = BATTERY;
-    const charged = () => !!(S.probe && S.probe.charge > 0);
-    const isHere = n => !!(S.probe && S.probe.num === n);
-    const batt = () => '⚡' + '▮'.repeat(S.probe.charge) + '▯'.repeat(BATTERY - S.probe.charge);
-    const nm = p => p.custom || p.name;
-    const settling = () => { const f = S.mission && byNum(S.mission); return f ? f.p : null; };
     function headline() {
-      const t = settling();
-      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (t ? 'Ready to deploy the probe' : 'Ready for launch') : 'Docked. Ready to recharge';
-      return mode === 'focus' ? (t ? (isHere(t.num) ? 'Recharging probe on ' : 'Deploying probe to ') + nm(t) : 'Traveling to an uncharted world') : 'Recharging ship cores';
+      const b = building();
+      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? 'Ready to build' : 'Ready for launch') : 'Docked. Ready to recharge';
+      return mode === 'focus' ? (b ? 'Building a Listening Post on ' + nm(b) : 'Traveling to an uncharted world') : 'Recharging ship cores';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -289,6 +331,7 @@
     const resetB = el('button', { type: 'button', class: 'btn', title: 'Start this leg over (a trip stopped early finds nothing)', onclick: () => reset() }, 'Reset');
     const skipB = el('button', { type: 'button', class: 'btn', title: 'Skip to the next part', onclick: () => skip() }, 'Skip');
     const hint = el('div', { class: 'sl-hint' });
+    const trans = el('div', { class: 'sl-trans', hidden: true });
     const card = el('div', { class: 'sl-card', hidden: true });
     const sel = (k, opts) => { const s = el('select', { 'aria-label': k }, opts.map(v => el('option', { value: v, selected: S.set[k] === v || null }, String(v)))); s.addEventListener('change', () => { S.set[k] = +s.value; save(); if (!running && mode === k) { left = length(mode); persistRun(); } draw(); }); return s; };
     const settings = el('details', { class: 'sl-set' }, el('summary', {}, 'Settings'),
@@ -297,14 +340,14 @@
         el('label', {}, 'Short recharge ', sel('short', [3, 5, 10]), ' min'),
         el('label', {}, 'Long recharge ', sel('long', [10, 15, 20, 30]), ' min'),
         el('label', {}, 'Long recharge every ', sel('every', [2, 3, 4, 5, 6]), ' trips')));
-    // what the next study session is for: travel to a new world, or settle the probe on one you've found
+    // what the next study session is for: travel to a new world, or build a Listening Post on one you've found
     const missionSel = el('select', { class: 'sl-mission-sel', 'aria-label': 'Next trip' });
     missionSel.addEventListener('change', () => { S.mission = +missionSel.value; save(); hint.textContent = ''; draw(); });
     const mission = el('label', { class: 'sl-mission' }, 'Next trip: ', missionSel);
-    const timerPane = el('div', { class: 'sl-pane' }, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, card, settings);
+    const timerPane = el('div', { class: 'sl-pane' }, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
 
     const find = el('input', { type: 'search', class: 'sl-find', placeholder: 'Search worlds...', 'aria-label': 'Search your logbook' });
-    const typeSel = el('select', { 'aria-label': 'Planet class' }, el('option', { value: '' }, 'All classes'), ...Object.keys(TYPES).map(t => el('option', { value: t }, t)));
+    const typeSel = el('select', { 'aria-label': 'Planet class' }, el('option', { value: '' }, 'All classes'), el('option', { value: '@post' }, '🗼 With a Listening Post'), ...Object.keys(TYPES).map(t => el('option', { value: t }, t)));
     const rarSel = el('select', { 'aria-label': 'Rarity' }, el('option', { value: '' }, 'Any rarity'), ...RARITY.map(([k]) => el('option', { value: k }, k)));
     const logHead = el('div', { class: 'sl-ahead' });
     const logList = el('div', { class: 'sl-list' });
@@ -321,33 +364,49 @@
     /* ---------- planet card / details ---------- */
     const fmtTemp = p => p.tempNight != null ? p.temp + ' °C day side / ' + p.tempNight + ' °C night side' : p.temp + ' °C';
     const pad = n => '#' + String(n).padStart(4, '0');
+    const logText = p => p.custom ? p.log.split(p.name).join(p.custom) : p.log;
     function facts(p) {
       const rows = [['Class', p.type + (p.rings ? ', ringed' : '')], ['Star', p.star], ['Distance', p.dist.toLocaleString() + ' light-years from Earth'], ['Temperature', fmtTemp(p)], ['Gravity', p.gravity + ' g'],
         ['Day', p.day == null ? 'never ends on one side' : p.day + ' hours'], ['Year', p.year ? p.year.toLocaleString() + ' days' : 'no orbit'], ['Moons', String(p.moons)], ['Atmosphere', p.atm], [p.type === 'Gas giant' || p.type === 'Ice giant' ? 'Layers' : 'Biomes', p.biomes.join(', ')],
         ['Weather', p.weather], ['Life', p.life], ['Resources', p.res.join(', ')]];
-      if (p.odd) rows.push(['Anomaly', p.odd + (p.deep && p.deep.oddX ? ': ' + p.deep.oddX : '')]);
-      if (p.deep) { rows.push(['Core', p.deep.core]); if (p.deep.species) rows.push(['Native species', p.deep.species]); }
+      const post = p.post;
+      if (p.odd) rows.push(['Anomaly', p.odd + (post && post.oddX ? ': ' + post.oddX : '')]);
+      if (post && post.core) rows.push(['Core', post.core]);
+      if (post && post.species) rows.push(['Native species', post.species]);
+      if (post) rows.push(['Listening Post', 'built ' + new Date(post.built).toLocaleDateString() + ', ' + post.reports.length + ' transmission' + (post.reports.length === 1 ? '' : 's')]);
       if (p.custom) rows.push(['Charted as', p.name]);
       return el('dl', { class: 'sl-facts' }, rows.flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, v)]));
     }
-    const HEAD = { new: '★ New world discovered · ', probe: '📡 Probe settled · ', last: 'Last discovery · ', log: '' };
+    function postLog(p) {
+      const reps = p.post.reports.slice().reverse();
+      return el('details', { class: 'sl-more sl-postlog' }, el('summary', {}, '🗼 Listening Post log (' + reps.length + ')'),
+        reps.length ? el('ol', { class: 'sl-reports', reversed: true }, reps.map(r => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, 'Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), ' ', r.t)))
+          : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.'));
+    }
+    const HEAD = { new: '★ New world discovered · ', built: '🗼 Listening Post built · ', last: 'Last discovery · ', log: '' };
     function planetCard(p, kind) {
-      const here = isHere(p.num);
+      const tuned = S.tuned === p.num && !!p.post;
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
-        here ? el('span', { class: 'sl-orbit' + (charged() ? '' : ' dormant'), title: charged() ? 'Your probe is orbiting this world' : 'Your probe is orbiting this world (battery empty)' }, el('img', { src: probeSprite(), alt: 'Probe' })) : null);
+        p.post ? el('span', { class: 'sl-tower', title: 'Listening Post' }, '🗼') : null,
+        tuned ? el('span', { class: 'sl-orbit', title: 'The ship\'s satellite is tuned to this world' }, el('img', { src: satSprite(), alt: 'Satellite' })) : null);
       return [
         el('div', { class: 'sl-card-h' }, el('span', {}, (HEAD[kind] || '') + pad(p.num)), el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity)),
         el('div', { class: 'sl-pl' }, pic,
-          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), here ? el('span', { class: 'sl-tag' + (charged() ? '' : ' off'), title: charged() ? 'Signal boost for the next ' + S.probe.charge + ' travel trip' + (S.probe.charge === 1 ? '' : 's') : 'Battery empty. Resettle the probe to recharge it.' }, charged() ? '📡 ' + batt() : '📡 Dormant') : null), el('div', { class: 'sl-code' }, p.code + ' · ' + p.type), el('p', {}, p.custom ? p.log.split(p.name).join(p.custom) : p.log),
-            p.deep ? el('p', { class: 'sl-deep' }, el('b', {}, 'Probe report: '), p.deep.secret) : null)),
-        el('details', { class: 'sl-more' }, el('summary', {}, p.deep ? 'Survey data (deep scan)' : 'Survey data'), facts(p)),
-      ];
+          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, '🗼 Post') : null),
+            el('div', { class: 'sl-code' }, p.code + ' · ' + p.type), el('p', {}, logText(p)))),
+        el('details', { class: 'sl-more' }, el('summary', {}, 'Survey data'), facts(p)),
+        p.post ? postLog(p) : null,
+      ].filter(Boolean);
     }
     function showCard(p, kind) {
       if (!p) { card.hidden = true; card.replaceChildren(); return; }
-      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'probe' ? ' new' : '');
+      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' ? ' new' : '');
       card.replaceChildren(...planetCard(p, kind));
-      if (kind === 'probe') card.querySelector('details').open = true;
+    }
+    function showTrans(p, rep) {
+      if (!p || !rep) { trans.hidden = true; trans.replaceChildren(); return; }
+      trans.hidden = false;
+      trans.replaceChildren(el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), ' Transmission from ' + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t));
     }
 
     /* ---------- timer ---------- */
@@ -360,8 +419,9 @@
     function reset() { running = false; clearInterval(tickT); left = length(mode); persistRun(); draw(); }
     function skip() {
       running = false; clearInterval(tickT);
+      const wasBuilding = mode === 'focus' && building();
       if (mode === 'focus') toBreak(); else setMode('focus');
-      hint.textContent = mode === 'focus' ? 'Recharge skipped. Next jump is ready.' : settling() ? 'Turned back early. The probe stays where it was.' : 'Turned back early. No new world this time.';
+      hint.textContent = mode === 'focus' ? 'Recharge skipped. Next jump is ready.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : 'Turned back early. No new world this time.';
       persistRun();
     }
     function toBreak() { setMode(S.cycle > 0 && S.cycle % S.set.every === 0 ? 'long' : 'short'); }
@@ -371,28 +431,26 @@
       if (mode === 'focus') {
         rollDay();
         S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus;
-        const target = settling();
-        if (target) { // settle the probe: it leaves its old world, lands here and runs a deep scan
-          const again = isHere(target.num);
-          S.probe = { num: target.num, since: again ? S.probe.since : Date.now(), charge: BATTERY };
-          if (!target.deep) target.deep = deepScan(target);
-          target.probed = true; S.mission = 0;
+        const target = building();
+        // the tuned post reports in every study session (also while building somewhere else)
+        const tp = tunedP(); const rep = tp ? transmit(tp) : null;
+        if (target) {
+          target.post = { built: Date.now(), reports: [] };
+          S.mission = 0;
+          const autoTune = !tp; if (autoTune) S.tuned = target.num;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(target, 'probe');
+          showCard(target, 'built'); showTrans(tp, rep);
           toBreak();
-          hint.textContent = (again ? 'Probe recharged on ' + nm(target) + '. ' : 'Probe settled on ' + nm(target) + '. Deep scan done, and you can rename it in the Logbook. ') + 'Signal boost for the next ' + BATTERY + ' trips. Now a ' + MODES[mode].toLowerCase() + '.';
+          hint.textContent = 'Listening Post built on ' + nm(target) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it in the Logbook to hear from it.') + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
-          const boost = charged();
-          if (boost) S.probe.charge--;
-          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, boost);
-          if (boost) p.boosted = true;
+          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1);
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(p, 'new');
+          showCard(p, 'new'); showTrans(tp, rep);
           toBreak();
-          hint.textContent = 'Arrived! ' + (boost ? (S.probe.charge ? 'Signal boost used (' + S.probe.charge + ' left). ' : 'That was the last boosted trip; the probe is dormant now. ') : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = 'Arrived! Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
       } else {
         if (!quiet && hooks.ding) hooks.ding();
@@ -410,26 +468,24 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (settling() ? 'Deploying probe' : 'Traveling') : 'Recharging') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? 'Building' : 'Traveling') : 'Recharging') : 'Solarist');
     }
     function draw() {
       drawClock();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? 'Launch' : 'Recharge');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (settling() ? 'Finish this session to settle the probe on ' + nm(settling()) + '.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
-      // the "Next trip" picker
-      if (S.mission && !byNum(S.mission)) S.mission = 0;
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? 'Build' : 'Launch') : 'Recharge');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session to build a Listening Post on ' + nm(building()) + '.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
+      if (S.mission && !building()) S.mission = 0;
       mission.hidden = !S.found.length;
       missionSel.disabled = running && mode === 'focus';
       missionSel.replaceChildren(el('option', { value: 0 }, '🚀 Travel to a new world'),
-        ...S.found.slice().reverse().slice(0, 300).map(f => { const here = isHere(f.p.num);
-          return el('option', { value: f.p.num, disabled: here && charged() || null }, here ? (charged() ? '📡 Probe on ' + nm(f.p) + ' (still charged)' : '🔋 Recharge probe on ' + nm(f.p) + ' (' + pad(f.p.num) + ')') : '📡 Settle probe on ' + nm(f.p) + ' (' + pad(f.p.num) + ')'); }));
+        ...S.found.slice().reverse().filter(f => !f.p.post).slice(0, 300).map(f => el('option', { value: f.p.num }, '🗼 Build a Listening Post on ' + nm(f.p) + ' (' + pad(f.p.num) + ')')));
       missionSel.value = String(S.mission || 0);
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
-      const pr = S.probe && byNum(S.probe.num);
-      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (pr ? ' · 📡 ' + nm(pr.p) + ' ' + (charged() ? batt() : '(dormant)') : '');
+      const tp = tunedP();
+      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
     }
 
@@ -438,25 +494,28 @@
     function drawLog() {
       const ly = S.found.reduce((a, f) => a + f.p.dist, 0);
       const counts = {}; S.found.forEach(f => { counts[f.p.rarity] = (counts[f.p.rarity] || 0) + 1; });
+      const tp = tunedP(), pc = posts().length;
       logHead.replaceChildren(
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
         el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
-        (() => { const pr = S.probe && byNum(S.probe.num); return el('div', { class: 'sl-muted' }, pr ? (charged() ? '📡 Probe on ' + nm(pr.p) + ', battery ' + batt() + ': the next ' + S.probe.charge + ' travel trip' + (S.probe.charge === 1 ? ' has' : 's have') + ' better odds of Rare and Legendary worlds.' : '📡 Probe on ' + nm(pr.p) + ' is dormant (battery empty). Spend a session resettling it, here or on another world, for ' + BATTERY + ' more boosted trips.') : '📡 No probe settled yet. Open a world below and choose "Settle probe here". It boosts your next ' + BATTERY + ' trips.'); })());
+        el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' Listening Post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) + ' (' + tp.post.reports.length + ' transmissions)' : ' · 📡 Satellite not tuned') : '🗼 No Listening Posts yet. Open a world below and choose "Build a Listening Post here".'));
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
       const q = find.value.trim().toLowerCase(), ty = typeSel.value, ra = rarSel.value;
-      const list = S.found.slice().reverse().filter(f => (!ty || f.p.type === ty) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
+      const list = S.found.slice().reverse().filter(f => (!ty || (ty === '@post' ? !!f.p.post : f.p.type === ty)) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
       if (!list.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds match.')); return; }
       logList.replaceChildren(...list.slice(0, 300).map(f => {
-        const p = f.p, open = openNum === p.num;
+        const p = f.p, open = openNum === p.num, tuned = S.tuned === p.num && !!p.post;
         const row = el('button', { type: 'button', class: 'sl-row', 'aria-expanded': String(open), onclick: () => { openNum = open ? null : p.num; drawLog(); } },
           el('img', { src: paint(p, 32), alt: '', width: 48, height: 48 }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), isHere(p.num) ? (charged() ? ' 📡' : ' 📡💤') : p.probed ? el('small', { class: 'sl-was' }, ' (probe was here)') : null), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
+          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.post ? ' 🗼' : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
           el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity));
-        const here = isHere(p.num);
+        const busy = running && mode === 'focus';
         const acts = open ? el('div', { class: 'sl-acts' },
-          here && charged() ? el('span', { class: 'sl-muted' }, '📡 Your probe is here. Battery ' + batt() + '.') : el('button', { type: 'button', class: 'btn', title: here ? 'Your next study session recharges the probe here' : 'Your next study session will fly the probe here', disabled: running && mode === 'focus' || null, onclick: () => { S.mission = p.num; save(); hint.textContent = ''; tab('timer'); draw(); } }, S.mission === p.num ? (here ? '🔋 Recharging here next' : '📡 Probe heading here next') : here ? '🔋 Recharge probe here' : '📡 Settle probe here'),
-          p.deep ? el('button', { type: 'button', class: 'btn', title: 'Worlds your probe has settled on can be renamed', onclick: () => rename(p) }, 'Rename...') : null) : null;
+          !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { S.mission = p.num; save(); hint.textContent = ''; tab('timer'); draw(); } }, S.mission === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
+            : tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune satellite')
+              : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite here'),
+          p.post ? el('button', { type: 'button', class: 'btn', title: 'Worlds with a Listening Post can be renamed', onclick: () => rename(p) }, 'Rename...') : null) : null;
         return el('div', { class: 'sl-entry' + (open ? ' open' : '') }, row, open ? el('div', { class: 'sl-detail' }, acts, ...planetCard(p, 'log').slice(1)) : null);
       }));
       const det = logList.querySelector('.sl-detail details'); if (det) det.open = true;
@@ -467,14 +526,13 @@
       const t = v.trim().slice(0, 32);
       if (t && t !== p.name) p.custom = t; else delete p.custom;
       save(); drawLog(); draw();
-      if (!card.hidden && S.found.length) { const shown = card.querySelector('.sl-card-h span'); if (shown && shown.textContent.endsWith(pad(p.num))) showCard(p, 'last'); }
     }
     find.addEventListener('input', drawLog); typeSel.addEventListener('change', drawLog); rarSel.addEventListener('change', drawLog);
 
     /* ---------- resume a timer that was running when the page closed ---------- */
     if (S.run && S.run.running) {
       if (S.run.endAt > Date.now()) { running = true; endAt = S.run.endAt; loop(); }
-      else { const was = S.run.mode; mode = was; finish(true); hint.textContent = was === 'focus' ? 'You arrived somewhere new while you were away.' : 'The cores finished recharging while you were away.'; }
+      else { const was = S.run.mode; mode = was; finish(true); hint.textContent = was === 'focus' ? 'Your session finished while you were away.' : 'The cores finished recharging while you were away.'; }
     }
     if (S.found.length && card.hidden) showCard(S.found[S.found.length - 1].p, 'last');
     draw();

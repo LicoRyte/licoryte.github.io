@@ -775,15 +775,20 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 @keyframes sl-blink { 50% { opacity: 0; } }
 .sl-tag { display: inline-block; margin-left: 6px; padding: 0 5px; font: bold 10px var(--f-ui); color: #1F6417; background: #E4F6E0; border: 1px solid #2E8B4A; vertical-align: 2px; }
 .sl-tag.off { color: #555555; background: #EEEEEE; border-color: #999999; }
-.sl-orbit.dormant { animation-duration: 16s; filter: grayscale(.8) brightness(.8); }
-.sl-orbit.dormant::after { animation: none; background: #666666; }
-.sl-deep { margin-top: 6px !important; padding-top: 6px; border-top: 1px dashed #BBBBBB; }
+.sl-tower { position: absolute; right: 4px; bottom: 2px; z-index: 3; font-size: 14px; line-height: 1; filter: drop-shadow(1px 1px 0 #000000); }
+.sl-trans { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 6px 8px; }
+.sl-trans[hidden] { display: none; }
+.sl-trans-h { display: flex; align-items: center; gap: 6px; font: bold 11px var(--f-ui); color: var(--navy); margin-bottom: 3px; }
+.sl-trans-h img { width: 18px; height: 12px; image-rendering: pixelated; }
+.sl-trans p { margin: 0; font: italic 12px/1.5 var(--f-ui); color: var(--text); }
+.sl-card > .sl-postlog { margin: 0 6px 6px; }
+.sl-reports { margin: 4px 0 0; padding: 4px 8px 4px 30px; max-height: 180px; overflow: auto; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); font: 12px/1.45 var(--f-ui); }
+.sl-reports li { margin: 2px 0; } .sl-reports small { color: #666666; }
+.sl-reports .sl-rep-core, .sl-reports .sl-rep-species, .sl-reports .sl-rep-odd { color: var(--navy); font-weight: bold; } .sl-reports .sl-rep-secret { font-style: italic; }
 .sl-mission { display: flex; align-items: center; justify-content: center; gap: 6px; font: 12px var(--f-ui); }
 .sl-mission[hidden] { display: none; }
 .sl-mission-sel { font: 12px var(--f-ui); max-width: 300px; }
 .sl-acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-.sl-was { color: #777777; font-weight: normal; }
-.sl-entry.open > .sl-row .sl-was { color: #DDDDDD; }
 @media (prefers-reduced-motion: reduce) { .sl-orbit { animation: none; transform: translate(40px, 14px); z-index: 2; } .sl-orbit::after { animation: none; } }
 .rw-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 var(--hi); }
 .rw-outline .rw-files .rw-pic > .rw-fn { color: #3A3A3A; }
@@ -3014,7 +3019,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=4').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=5').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
