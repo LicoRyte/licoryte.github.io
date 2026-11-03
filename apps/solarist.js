@@ -498,10 +498,6 @@
       S.events.push(ev); if (S.events.length > 200) S.events.shift();
       return ev;
     }
-    // Codex: every class × rarity combination; a slot fills with the first world that matches
-    const codexKey = p => p.type + '|' + p.rarity;
-    const codexFirst = () => { const m = new Map(); S.found.forEach(f => { const k = codexKey(f.p); if (!m.has(k)) m.set(k, f.p); }); return m; };
-    const CODEX_TOTAL = Object.keys(TYPES).length * RARITY.length;
 
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
@@ -708,13 +704,12 @@
         } else {
           const lucky = !!S.coord && !(ev && ev.got); if (lucky) S.coord = false;
           const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
-          const newCodex = !codexFirst().has(codexKey(p));
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(p, lucky ? 'lucky' : 'new'); showTrans(reps);
           toBreak();
-          hint.textContent = 'Arrived! ' + (newCodex ? '📖 New Codex entry: ' + p.rarity + ' ' + p.type + '! ' : '') + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
       } else {
         if (!quiet && hooks.ding) hooks.ding();
@@ -813,7 +808,6 @@
     function closeWorld() { openNum = null; drawLog(); body().scrollTop = gridScroll; }
     function drawLog() {
       const tools = logPane.querySelector('.sl-tools');
-      if (openNum === 'codex') { logHead.hidden = tools.hidden = true; drawCodex(); return; }
       const f0 = openNum != null && byNum(openNum);
       logHead.hidden = tools.hidden = !!f0;
       if (f0) { drawWorld(f0); return; }
@@ -824,8 +818,7 @@
       logHead.replaceChildren(
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
-        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0))),
-          el('button', { type: 'button', class: 'btn sl-codex-b', title: 'Every class × rarity combination you\'ve found', onclick: () => openWorld('codex') }, '📖 Codex ' + codexFirst().size + ' / ' + CODEX_TOTAL)),
+        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
         el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) : ' · 📡 Satellite not tuned') : '🗼 No posts yet. Open a world and choose "Build a Listening Post here".'));
       logList.className = 'sl-list';
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
@@ -833,25 +826,15 @@
       shownList = S.found.slice().reverse().filter(f => (!ty || (ty === '@post' ? !!f.p.post : f.p.type === ty)) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
       if (!shownList.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds match.')); return; }
       logList.className = 'sl-grid';
+      const plain = !q && !ty && !ra, ROW = 12, blanks = plain ? Math.max(ROW, Math.ceil((shownList.length + 1) / ROW) * ROW) - shownList.length : 0;
+      const unknown = () => el('span', { class: 'sl-tile sl-unknown', title: 'Still out there. Finish a study session to find it.' }, el('span', { class: 'sl-tile-pic' }, '???'), el('b', {}, '???'), el('small', {}, 'uncharted'));
       logList.replaceChildren(...shownList.slice(0, 400).map(f => {
         const p = f.p, tuned = S.tuned === p.num && !!p.post;
         const marks = (p.lucky ? '🧭' : '') + (p.post ? (p.post.tp ? '🏘' : '🗼') : '') + (tuned ? '📡' : '');
         return el('button', { type: 'button', class: 'sl-tile sl-t-' + p.rarity.toLowerCase(), title: nm(p) + ' · ' + p.type + ' · ' + p.rarity, onclick: () => openWorld(p.num) },
           el('span', { class: 'sl-tile-pic' }, el('img', { src: paint(p, 32), alt: '' }), marks ? el('span', { class: 'sl-tile-m' }, marks) : null),
           el('b', {}, nm(p)), el('small', {}, pad(p.num) + ' · ' + p.type));
-      }));
-    }
-    function drawCodex() {
-      const have = codexFirst();
-      const nav = el('div', { class: 'sl-wnav' }, el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'), el('b', {}, '📖 Codex: ' + have.size + ' / ' + CODEX_TOTAL), el('span', { class: 'sl-muted' }, Math.round(have.size / CODEX_TOTAL * 100) + '%'));
-      const head = el('div', { class: 'sl-cx-row sl-cx-head' }, el('span', {}), RARITY.map(([r]) => el('span', { class: 'sl-rar sl-r-' + r.toLowerCase() }, r)));
-      const rows = Object.keys(TYPES).map(t => el('div', { class: 'sl-cx-row' }, el('span', { class: 'sl-cx-t' }, t), RARITY.map(([r]) => {
-        const p = have.get(t + '|' + r);
-        return p ? el('button', { type: 'button', class: 'sl-cx-c', title: r + ' ' + t + ': first found ' + nm(p), onclick: () => openWorld(p.num) }, el('img', { src: paint(p, 32), alt: nm(p) }))
-          : el('span', { class: 'sl-cx-c none', title: r + ' ' + t + ': not found yet' }, '???');
-      })));
-      logList.className = 'sl-wpage';
-      logList.replaceChildren(nav, el('p', { class: 'sl-muted' }, 'Every planet is one of a kind, but each one has a class and a rarity. Find one of each combination to fill the Codex. Click a filled slot to open the first world you found.'), el('div', { class: 'sl-codex' }, head, rows));
+      }), ...Array.from({ length: blanks }, unknown));
     }
     function drawWorld(f) {
       const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';
