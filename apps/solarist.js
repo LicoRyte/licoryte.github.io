@@ -270,6 +270,36 @@
     post.reports.push(rep);
     return rep;
   }
+  /* ---------- Travelers' Posts: an upgraded Listening Post that ships and travelers stop at. You can add facilities
+     (one of each), and when it's tuned they send logs of what's going on there. Purely for fun. ---------- */
+  const FAC = {
+    diner: ['🍜', 'Diner', ['The Diner served {num} bowls of {food} today.', '{who} ordered the "{n} Special" and asked for seconds.', 'A freighter crew from {from} ate everything on the menu.', 'The cook tried a new recipe with local {res}. Results: mixed.', '{who} left a very big tip at the Diner.']],
+    depot: ['📦', 'Depot', ['The Depot shipped {num} crates of {res} toward {from}.', 'A cargo hauler unloaded spare parts for the whole post.', '{who} spent all morning counting boxes. Two are missing. Again.', 'The Depot is almost full. Someone ordered {num} cans of {food}.', 'A mystery crate arrived. Nobody wants to open it.']],
+    hangar: ['🛩', 'Hangar', ['{num} ships docked at the Hangar today.', '{who} fixed a scout ship with tape and hope.', 'A racer from {from} set a new docking speed record.', 'The Hangar doors got stuck open during {w}.', 'An old transport limped in and the mechanics cheered when it landed.']],
+    greenhouse: ['🌱', 'Greenhouse', ['The Greenhouse grew its first {plant}.', '{who} swears the {plant} hum when it\'s quiet.', 'Harvest day: {num} kilos of fresh {plant}.', 'A seed swap with travelers from {from} brought something new.', 'The tomatoes are winning. Nobody is sure what they are winning.']],
+    observatory: ['🔭', 'Observatory', ['The Observatory spotted a comet heading past {from}.', '{who} stayed up all night watching the {star}.', 'Counted {num} shooting stars tonight.', 'A new nebula photo is pinned on the noticeboard.', 'Someone thinks they saw the ship from here. It was a smudge on the lens.']],
+    clinic: ['🩹', 'Clinic', ['The Clinic patched up {num} travelers. Mostly sunburn.', '{who} came in with a bump from low gravity and a funny story.', 'Quiet day at the Clinic. The doctor reorganized the bandages twice.', 'A crew from {from} got their checkups before the next jump.']],
+    lounge: ['🛋', 'Lounge', ['Music night at the Lounge. {who} played until sunrise.', 'Travelers from {from} told stories about {from}.', 'Someone started a chess tournament. {num} players so far.', 'The Lounge window has the best view of the {b}.', 'Movie night got cancelled when {w} knocked out the projector.']],
+    radio: ['📻', 'Radio Shack', ['The Radio Shack picked up a signal from {from}: "say hi to {n}".', '{who} hosts a call-in show now. {num} callers today.', 'Static all day because of {w}.', 'Played the same song {num} times by request.']],
+    workshop: ['🔧', 'Workshop', ['The Workshop built a new rover from spare parts.', '{who} invented a gadget nobody understands yet.', 'Repaired {num} broken scanners for passing ships.', 'Somebody made a statue out of {res} scraps.']],
+    library: ['📚', 'Library', ['The Library got {num} new books from travelers.', '{who} fell asleep in the reading corner again.', 'A traveler from {from} donated a map of the old routes.', 'Story hour was full today.']],
+    market: ['🛒', 'Market', ['Market day: traders swapped {res} for {food}.', '{who} sold souvenir snow globes of {n}.', 'Prices went up after a trader from {from} bought everything.', '{num} stalls opened this morning.']],
+    bathhouse: ['♨', 'Hot Spring Bath', ['The Hot Spring Bath was packed after the long jump from {from}.', '{who} stayed in the bath for {num} minutes and came out very calm.', 'Someone left a rubber duck in the bath. It stays.', 'Steam from the bath froze into tiny crystals outside.']],
+    arcade: ['🕹', 'Arcade', ['{who} beat the high score on the Arcade cabinet.', 'Arcade tournament: travelers from {from} took first place.', 'The claw machine finally gave out a prize.', '{num} coins jammed the old pinball table.']],
+    inn: ['🛏', 'Inn', ['The Inn had {num} guests tonight.', '{who} checked in for one night and stayed a week.', 'A traveling crew from {from} took every room.', 'The Inn\'s guestbook is filling up with doodles of {n}.']],
+  };
+  const FOOD = ['noodles', 'dumplings', 'space soup', 'fried rice', 'pancakes', 'curry', 'moon pie', 'tea', 'hot cocoa', 'grilled fish', 'mystery stew', 'sticky rice'];
+  const PLANT = ['glow-beans', 'blue melons', 'star lettuce', 'spiral carrots', 'purple chilies', 'moss tea leaves', 'crystal berries'];
+  const TITLE = ['Captain', 'Pilot', 'Trader', 'Engineer', 'Doctor', 'Old', 'Navigator', 'Cook', 'Miner'];
+  function facLog(p, k, r, worlds) {
+    const pk = a => a[Math.floor(r() * a.length)];
+    const nameBit = () => { let n = ''; for (let i = 0; i < 2; i++) n += pk(SYL); return n.charAt(0).toUpperCase() + n.slice(1); };
+    const from = worlds.length > 1 && r() < .7 ? pk(worlds) : nameBit();
+    return pk(FAC[k][2]).replace(/\{who\}/g, () => pk(TITLE) + ' ' + nameBit()).replace(/\{from\}/g, from).replace(/\{num\}/g, () => String(2 + Math.floor(r() * 40)))
+      .replace(/\{food\}/g, () => pk(FOOD)).replace(/\{plant\}/g, () => pk(PLANT)).replace(/\{res\}/g, () => pk(p.res)).replace(/\{n\}/g, p.custom || p.name)
+      .replace(/\{w\}/g, p.weather).replace(/\{b\}/g, p.biomes[0].toLowerCase()).replace(/\{star\}/g, p.star.startsWith('none') ? 'darkness' : p.star);
+  }
+
   // the ship's satellite: a tiny pixel sprite (made once)
   let satUrl = null;
   function satSprite() {
@@ -390,7 +420,34 @@
     const byNum = n => S.found.find(f => f.p.num === n);
     const nm = p => p.custom || p.name;
     const tunedP = () => { const f = S.tuned && byNum(S.tuned); return f && f.p.post ? f.p : null; };
-    const building = () => { const f = S.mission > 0 && byNum(S.mission); return f && !f.p.post ? f.p : null; };
+    // the Build mission is a "job": a new Listening Post, an upgrade to a Travelers' Post, or a facility at one
+    if (S.mission > 0 && !S.job) S.job = { k: 'post', num: S.mission };
+    const hasFac = (p, k) => !!(p.post && p.post.tp && p.post.tp.fac.some(x => x.k === k));
+    function building() {
+      if (!(S.mission > 0) || !S.job) return null;
+      const j = S.job, f = byNum(j.num); if (!f) return null; const p = f.p;
+      if (j.k === 'post' && !p.post) return { k: 'post', p };
+      if (j.k === 'upgrade' && p.post && !p.post.tp) return { k: 'upgrade', p };
+      if (j.k === 'add' && p.post && p.post.tp && FAC[j.fac] && !hasFac(p, j.fac)) return { k: 'add', p, fac: j.fac };
+      return null;
+    }
+    const jobText = j => j.k === 'post' ? 'Building a Listening Post on ' + nm(j.p) : j.k === 'upgrade' ? 'Upgrading ' + nm(j.p) + ' to a Travelers\' Post' : 'Building a ' + FAC[j.fac][1] + ' at ' + nm(j.p);
+    const jobKey = j => j.k + ':' + (j.p ? j.p.num : j.num) + ':' + (j.fac || '');
+    function buildOptions() { // every job you could do next, grouped
+      const out = { Facilities: [], Upgrades: [], 'New Listening Posts': [] };
+      S.found.slice().reverse().forEach(({ p }) => {
+        if (!p.post) out['New Listening Posts'].push({ k: 'post', num: p.num, label: '🗼 Listening Post on ' + nm(p) + ' (' + pad(p.num) + ')' });
+        else if (!p.post.tp) out.Upgrades.push({ k: 'upgrade', num: p.num, label: '🏘 Upgrade ' + nm(p) + ' to a Travelers\' Post' });
+        else Object.keys(FAC).filter(k => !hasFac(p, k)).forEach(k => out.Facilities.push({ k: 'add', num: p.num, fac: k, label: FAC[k][0] + ' ' + FAC[k][1] + ' at ' + nm(p) }));
+      });
+      return out;
+    }
+    const anyBuild = () => { const o = buildOptions(); return Object.values(o).some(a => a.length); };
+    function fillBuildSel(selEl) {
+      const o = buildOptions();
+      selEl.replaceChildren(...Object.entries(o).filter(([, a]) => a.length).map(([g, a]) => el('optgroup', { label: g }, a.slice(0, 300).map(j => el('option', { value: j.k + ':' + j.num + ':' + (j.fac || '') }, j.label)))));
+    }
+    function setJob(key) { const [k, n, fac] = key.split(':'); S.mission = 1; S.job = { k, num: +n, fac: fac || undefined }; save(); hint.textContent = ''; draw(); }
     // Interplanetary Coordinator: spend one study session charging it, and your next trip is a lucky one (one charge, no stacking)
     const charging = () => S.mission === -1 && !S.coord;
     const posts = () => S.found.filter(f => f.p.post);
@@ -406,8 +463,8 @@
     let dotN = 0, dotT = 0;
     function headline() {
       const b = building(), c = charging();
-      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? 'Ready to build' : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Ready to recharge';
-      return mode === 'focus' ? (b ? 'Building a Listening Post on ' + nm(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Recharging ship cores';
+      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Ready to recharge';
+      return mode === 'focus' ? (b ? jobText(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Recharging ship cores';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -427,19 +484,18 @@
         el('label', {}, 'Long break every ', sel('every', [2, 3, 4, 5, 6]), ' study sessions')));
     // what the next study session is for: travel to a new world, or build a Listening Post on one you've found
     // the mission: what this study session is for. Exactly one is pressed.
-    const MISSIONS = [['explore', '🚀', 'Explore', 'Find a new world'], ['build', '🗼', 'Build', 'Build a Listening Post on a world you found'], ['charge', '🧭', 'Charge', 'Charge the Interplanetary Coordinator: your next Explore is a lucky one']];
-    const unposted = () => S.found.slice().reverse().filter(f => !f.p.post);
-    const curMission = () => S.mission > 0 ? 'build' : S.mission === -1 ? 'charge' : 'explore';
+    const MISSIONS = [['explore', '🚀', 'Explore', 'Find a new world'], ['build', '🗼', 'Build', 'Build a Listening Post, upgrade one to a Travelers\' Post, or add a facility'], ['charge', '🧭', 'Charge', 'Charge the Interplanetary Coordinator: your next Explore is a lucky one']];
+        const curMission = () => S.mission > 0 ? 'build' : S.mission === -1 ? 'charge' : 'explore';
     function setMission(m, num) {
       if (running && mode === 'focus') return;
       if (m === 'explore') S.mission = 0;
       else if (m === 'charge') { if (S.coord) return; S.mission = -1; }
-      else { const list = unposted(); if (!list.length) return; S.mission = num || (building() ? S.mission : list[0].p.num); }
+      else { if (building()) { S.mission = 1; } else { const o = buildOptions(), first = (o.Facilities[0] || o.Upgrades[0] || o['New Listening Posts'][0]); if (!first) return; S.mission = 1; S.job = { k: first.k, num: first.num, fac: first.fac }; } }
       save(); hint.textContent = ''; draw();
     }
     const misBtns = MISSIONS.map(([k, ic, label, tip]) => el('button', { type: 'button', class: 'sl-mis', 'data-m': k, role: 'radio', title: tip, onclick: () => setMission(k) }, el('span', { class: 'sl-mis-i', 'aria-hidden': 'true' }, ic), label));
     const buildSel = el('select', { class: 'sl-build-sel', 'aria-label': 'World to build on' });
-    buildSel.addEventListener('change', () => setMission('build', +buildSel.value));
+    buildSel.addEventListener('change', () => setJob(buildSel.value));
     const mission = el('div', { class: 'sl-missions' }, el('span', { class: 'sl-mis-l' }, 'Mission:'), el('div', { class: 'sl-mis-g', role: 'radiogroup', 'aria-label': 'Mission' }, misBtns), buildSel);
     const timerPane = el('div', { class: 'sl-pane' }, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
 
@@ -485,7 +541,7 @@
         Life: [['Life', p.life], ['Biodiversity', x.bio ? [meter(x.bio, 'bio'), ' ' + x.bio + ' / 100'] : 'none detected'], ['Known species', x.species ? 'about ' + Number(x.species.toPrecision(2)).toLocaleString() : '0'],
           ['Native species', post && post.species ? post.species : p.lifeLvl ? (post ? 'still being studied' : 'needs a Listening Post to identify') : 'none']],
         Resources: [['Resources', p.res.join(', ')], ['Core', post && post.core ? post.core : post ? 'scan in progress' : 'needs a Listening Post to scan'], ['Anomaly', p.odd ? p.odd + (post && post.oddX ? ': ' + post.oddX : '') : 'none'],
-          ['Listening Post', post ? 'built ' + new Date(post.built).toLocaleDateString() + ', ' + post.reports.length + ' transmission' + (post.reports.length === 1 ? '' : 's') : 'none'], ['Catalog code', p.code]].concat(p.custom ? [['Charted as', p.name]] : []),
+          [post && post.tp ? 'Travelers\' Post' : 'Listening Post', post ? 'built ' + new Date(post.built).toLocaleDateString() + ', ' + post.reports.length + ' transmission' + (post.reports.length === 1 ? '' : 's') + (post.tp ? ', ' + post.tp.fac.length + ' facilit' + (post.tp.fac.length === 1 ? 'y' : 'ies') : '') : 'none'], ['Catalog code', p.code]].concat(p.custom ? [['Charted as', p.name]] : []),
       };
       const panel = el('dl', { class: 'sl-facts' });
       const tabs = Object.keys(T).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === surveyTab), onclick: () => show(k) }, k));
@@ -499,30 +555,46 @@
         reps.length ? el('ol', { class: 'sl-reports', reversed: true }, reps.map(r => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, 'Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), ' ', r.t)))
           : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.'));
     }
-    const HEAD = { new: '★ New world discovered · ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', last: 'Last discovery · ', log: '' };
+    const HEAD = { new: '★ New world discovered · ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ', log: '' };
     function planetCard(p, kind) {
       const tuned = S.tuned === p.num && !!p.post;
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
-        p.post ? el('span', { class: 'sl-tower', title: 'Listening Post' }, '🗼') : null,
+        p.post ? el('span', { class: 'sl-tower', title: p.post.tp ? 'Travelers\' Post' : 'Listening Post' }, p.post.tp ? '🏘' : '🗼') : null,
         tuned ? el('span', { class: 'sl-orbit', title: 'The ship\'s satellite is tuned to this world' }, el('img', { src: satSprite(), alt: 'Satellite' })) : null);
       return [
         el('div', { class: 'sl-card-h' }, el('span', {}, (HEAD[kind] || '') + pad(p.num)), el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity)),
         el('div', { class: 'sl-pl' }, pic,
-          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, '🗼 Post') : null),
+          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, p.post.tp ? '🏘 Travelers\' Post' : '🗼 Post') : null),
             el('div', { class: 'sl-code' }, p.code + ' · ' + p.type + ' · ' + (p.x || (p.x = makeExtra(p))).hab + '% habitable'), el('p', {}, logText(p)))),
         el('details', { class: 'sl-more' }, el('summary', {}, 'Survey data'), facts(p)),
+        p.post && p.post.tp ? el('div', { class: 'sl-facs', title: 'Facilities at this Travelers\' Post' }, p.post.tp.fac.length ? p.post.tp.fac.map(f => el('span', { class: 'sl-fac' }, FAC[f.k][0] + ' ' + FAC[f.k][1])) : el('span', { class: 'sl-muted' }, '🏘 Travelers\' Post · no facilities yet')) : null,
         p.post ? postLog(p) : null,
       ].filter(Boolean);
     }
     function showCard(p, kind) {
       if (!p) { card.hidden = true; card.replaceChildren(); return; }
-      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' ? ' new' : '');
+      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' || kind === 'upgraded' || kind === 'opened' ? ' new' : '');
       card.replaceChildren(...planetCard(p, kind));
     }
-    function showTrans(p, rep) {
-      if (!p || !rep) { trans.hidden = true; trans.replaceChildren(); return; }
+    function facReport(p) { // a log from one of a Travelers' Post's facilities
+      const fac = p.post.tp.fac; if (!fac.length) return null;
+      const r = rng((p.seed * 31 + p.post.reports.length * 7919 + Date.now() % 100000) >>> 0);
+      const k = fac[Math.floor(r() * fac.length)].k;
+      const rep = { k: 'fac', f: k, t: FAC[k][0] + ' ' + facLog(p, k, r, S.found.map(f => nm(f.p)).filter(x => x !== nm(p))), at: Date.now(), day: Math.max(1, Math.round((Date.now() - p.post.built) / 86400000) + 1) };
+      p.post.reports.push(rep); return rep;
+    }
+    function sessionReports() { // what the satellite hears at the end of a study session
+      const out = [], tp = tunedP();
+      if (tp) { out.push({ p: tp, rep: transmit(tp) }); if (tp.post.tp) { const fr = facReport(tp); if (fr) out.push({ p: tp, rep: fr }); } }
+      const others = posts().map(f => f.p).filter(p => p.post.tp && p !== tp); // Travelers' Posts are busy enough to be heard without tuning
+      if (others.length) { const o = others[Math.floor(Math.random() * others.length)]; const fr = o.post.tp.fac.length && Math.random() < .6 ? facReport(o) : null; out.push({ p: o, rep: fr || transmit(o), passive: true }); }
+      return out;
+    }
+    function showTrans(list) {
+      if (!list || !list.length) { trans.hidden = true; trans.replaceChildren(); return; }
       trans.hidden = false;
-      trans.replaceChildren(el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), ' Transmission from ' + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t));
+      trans.replaceChildren(...list.map(({ p, rep, passive }) => el('div', { class: 'sl-trans-i' },
+        el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), (passive ? ' Overheard from ' : ' Transmission from ') + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t))));
     }
 
     /* ---------- timer ---------- */
@@ -549,30 +621,40 @@
         S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus;
         const target = building();
         // the tuned post reports in every study session (also while building somewhere else)
-        const tp = tunedP(); const rep = tp ? transmit(tp) : null;
+        const tp = tunedP(), reps = sessionReports();
         if (charging()) {
           S.coord = true; S.mission = 0;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showTrans(tp, rep);
+          showTrans(reps);
           toBreak();
           hint.textContent = '🧭 Interplanetary Coordinator charged. Your next trip will head somewhere promising. Now a ' + MODES[mode].toLowerCase() + '.';
         } else if (target) {
-          target.post = { built: Date.now(), reports: [] };
-          S.mission = 0;
-          const autoTune = !tp; if (autoTune) S.tuned = target.num;
+          const tp2 = target.p; let msg;
+          if (target.k === 'post') {
+            tp2.post = { built: Date.now(), reports: [] };
+            const autoTune = !tp; if (autoTune) S.tuned = tp2.num;
+            msg = 'Listening Post built on ' + nm(tp2) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it on the Ship tab to hear from it.');
+          } else if (target.k === 'upgrade') {
+            tp2.post.tp = { at: Date.now(), fac: [] };
+            msg = nm(tp2) + ' is now a Travelers\' Post. It\'ll be heard even when the satellite isn\'t tuned to it, and you can add facilities with the Build mission.';
+          } else {
+            tp2.post.tp.fac.push({ k: target.fac, at: Date.now() });
+            msg = FAC[target.fac][0] + ' ' + FAC[target.fac][1] + ' opened at ' + nm(tp2) + '. When the post is tuned, you\'ll hear what goes on there.';
+          }
+          S.mission = 0; S.job = null;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(target, 'built'); showTrans(tp, rep);
+          showCard(tp2, target.k === 'post' ? 'built' : target.k === 'upgrade' ? 'upgraded' : 'opened'); showTrans(reps);
           toBreak();
-          hint.textContent = 'Listening Post built on ' + nm(target) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it on the Ship tab to hear from it.') + ' Now a ' + MODES[mode].toLowerCase() + '.';
+          hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
           const lucky = !!S.coord; S.coord = false;
           const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(p, lucky ? 'lucky' : 'new'); showTrans(tp, rep);
+          showCard(p, lucky ? 'lucky' : 'new'); showTrans(reps);
           toBreak();
           hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
@@ -592,17 +674,17 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? 'Building' : charging() ? 'Charging' : 'Traveling') : 'Recharging') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : 'Traveling') : 'Recharging') : 'Solarist');
     }
     function draw() {
       drawClock();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? 'Build' : charging() ? 'Charge' : 'Launch') : 'Recharge');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session to build a Listening Post on ' + nm(building()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
-      if (S.mission > 0 && !building()) S.mission = 0;
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : 'Launch') : 'Recharge');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
+      if (S.mission > 0 && !building()) { S.mission = 0; S.job = null; }
       if (S.mission === -1 && S.coord) S.mission = 0;
-      const cm = curMission(), locked = running && mode === 'focus', canBuild = unposted().length > 0;
+      const cm = curMission(), locked = running && mode === 'focus', canBuild = anyBuild();
       mission.classList.toggle('off', mode !== 'focus');
       misBtns.forEach(b => {
         const k = b.dataset.m, on = k === cm;
@@ -610,10 +692,10 @@
         b.disabled = (locked && !on) || (k === 'build' && !canBuild) || (k === 'charge' && !!S.coord && !on);
         if (k === 'explore') b.lastChild.textContent = S.coord ? 'Explore 🧭' : 'Explore';
         if (k === 'charge') b.title = S.coord ? 'Already charged: your next Explore is a lucky one' : MISSIONS[2][3];
-        if (k === 'build') b.title = canBuild ? MISSIONS[1][3] : 'Every world you found already has a Listening Post';
+        if (k === 'build') b.title = canBuild ? MISSIONS[1][3] : 'Nothing left to build';
       });
       buildSel.hidden = cm !== 'build'; buildSel.disabled = locked;
-      if (cm === 'build') { buildSel.replaceChildren(...unposted().slice(0, 300).map(f => el('option', { value: f.p.num }, nm(f.p) + ' (' + pad(f.p.num) + ')'))); buildSel.value = String(S.mission); }
+      if (cm === 'build') { fillBuildSel(buildSel); buildSel.value = jobKey(building()); }
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
       const tp = tunedP();
@@ -626,7 +708,7 @@
     function drawShip() {
       const group = (title, ...kids) => el('fieldset', { class: 'sl-group' }, el('legend', {}, title), ...kids);
       const cm = curMission(), b = building(), locked = running && mode === 'focus';
-      const next = cm === 'build' && b ? '🗼 Build a Listening Post on ' + nm(b) : cm === 'charge' ? '🧭 Charge the Interplanetary Coordinator' : S.coord ? '🚀 Explore (lucky, Coordinator charged)' : '🚀 Explore a new world';
+      const next = cm === 'build' && b ? (b.k === 'upgrade' ? '🏘 ' : b.k === 'add' ? FAC[b.fac][0] + ' ' : '🗼 ') + jobText(b) : cm === 'charge' ? '🧭 Charge the Interplanetary Coordinator' : S.coord ? '🚀 Explore (lucky, Coordinator charged)' : '🚀 Explore a new world';
       const coord = group('🧭 Interplanetary Coordinator',
         el('p', {}, S.coord ? el('b', {}, 'Charged. ') : el('b', {}, 'Empty. '), S.coord ? 'Your next Explore session heads somewhere promising: better odds of Rare and Legendary, livable worlds.' : 'Spend one study session charging it, and your next Explore is a lucky one. It holds one charge.'),
         S.coord ? null : el('button', { type: 'button', class: 'btn', disabled: locked || cm === 'charge' || null, onclick: () => { setMission('charge'); drawShip(); } }, cm === 'charge' ? 'Charging next session' : 'Charge it next session'));
@@ -634,12 +716,11 @@
       const postRows = pl.length ? el('div', { class: 'sl-posts' }, pl.map(f => {
         const p = f.p, tuned = S.tuned === p.num;
         return el('div', { class: 'sl-post' + (tuned ? ' tuned' : '') }, el('img', { src: paint(p, 32), alt: '' }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), tuned ? ' 📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.post.reports.length + ' transmission' + (p.post.reports.length === 1 ? '' : 's'))),
+          el('span', { class: 'sl-row-t' }, el('b', {}, (p.post.tp ? '🏘 ' : '🗼 ') + nm(p), tuned ? ' 📡' : ''), el('small', {}, pad(p.num) + ' · ' + (p.post.tp ? 'Travelers\' Post' + (p.post.tp.fac.length ? ' · ' + p.post.tp.fac.map(f => FAC[f.k][0]).join('') : '') : 'Listening Post') + ' · ' + p.post.reports.length + ' log' + (p.post.reports.length === 1 ? '' : 's'))),
           tuned ? el('button', { type: 'button', class: 'btn', onclick: () => { S.tuned = 0; save(); draw(); } }, 'Untune') : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); draw(); } }, 'Tune'));
       })) : el('p', { class: 'sl-muted' }, 'No posts yet. Choose the 🗼 Build mission on the Voyage tab (or open a world in the Logbook).');
-      const up = unposted();
-      const plan = up.length ? (() => { const s2 = el('select', { 'aria-label': 'World to build on' }, up.slice(0, 300).map(f => el('option', { value: f.p.num }, nm(f.p) + ' (' + pad(f.p.num) + ')'))); if (b) s2.value = String(b.num);
-        return el('div', { class: 'sl-plan' }, 'New post on ', s2, el('button', { type: 'button', class: 'btn', disabled: locked || null, onclick: () => { setMission('build', +s2.value); drawShip(); } }, 'Build next session')); })() : null;
+      const plan = anyBuild() ? (() => { const s2 = el('select', { 'aria-label': 'What to build' }); fillBuildSel(s2); if (b) s2.value = jobKey(b);
+        return el('div', { class: 'sl-plan' }, 'Build: ', s2, el('button', { type: 'button', class: 'btn', disabled: locked || null, onclick: () => { setJob(s2.value); drawShip(); } }, 'Next session')); })() : null;
       const feed = [];
       posts().forEach(f => f.p.post.reports.forEach(r => feed.push({ p: f.p, r })));
       feed.sort((a, c) => c.r.at - a.r.at);
@@ -648,7 +729,7 @@
           : el('p', { class: 'sl-muted' }, 'Nothing yet. A tuned post sends one transmission every study session.'));
       shipPane.replaceChildren(
         el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)),
-        coord, group('🗼 Listening Posts (' + pl.length + ')', postRows, plan), trans);
+        coord, group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, and a tuned one adds news from its facilities.'), postRows, plan), trans);
     }
 
     /* ---------- logbook ---------- */
@@ -670,13 +751,14 @@
         const p = f.p, open = openNum === p.num, tuned = S.tuned === p.num && !!p.post;
         const row = el('button', { type: 'button', class: 'sl-row', 'aria-expanded': String(open), onclick: () => { openNum = open ? null : p.num; drawLog(); } },
           el('img', { src: paint(p, 32), alt: '', width: 48, height: 48 }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.lucky ? ' 🧭' : '', p.post ? ' 🗼' : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
+          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.lucky ? ' 🧭' : '', p.post ? (p.post.tp ? ' 🏘' : ' 🗼') : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
           el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity));
         const busy = running && mode === 'focus';
         const acts = open ? el('div', { class: 'sl-acts' },
-          !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { S.mission = p.num; save(); hint.textContent = ''; tab('timer'); draw(); } }, S.mission === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
-            : tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune satellite')
-              : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite here'),
+          !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { setJob('post:' + p.num + ':'); tab('timer'); } }, S.mission > 0 && S.job && S.job.k === 'post' && S.job.num === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
+            : !p.post.tp ? el('button', { type: 'button', class: 'btn', title: 'Your next study session upgrades this post', disabled: busy || null, onclick: () => { setJob('upgrade:' + p.num + ':'); tab('timer'); } }, '🏘 Upgrade to Travelers\' Post') : null,
+          p.post ? (tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune satellite')
+              : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite here')) : null,
           p.post ? el('button', { type: 'button', class: 'btn', title: 'Worlds with a Listening Post can be renamed', onclick: () => rename(p) }, 'Rename...') : null) : null;
         return el('div', { class: 'sl-entry' + (open ? ' open' : '') }, row, open ? el('div', { class: 'sl-detail' }, acts, ...planetCard(p, 'log').slice(1)) : null);
       }));

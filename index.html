@@ -804,6 +804,11 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-plan { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .sl-plan select { font: 12px var(--f-ui); max-width: 170px; }
 .sl-feed { max-height: 220px; }
+.sl-facs { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 6px 6px; }
+.sl-detail .sl-facs { margin: 6px 0 0; }
+.sl-fac { font: 11px var(--f-ui); padding: 1px 6px; background: #FFFFFF; border: 1px solid var(--shade); }
+.sl-trans-i + .sl-trans-i { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #BBBBBB; }
+.sl-reports .sl-rep-fac { color: #5A3A00; }
 .sl-tower { position: absolute; right: 4px; bottom: 2px; z-index: 3; font-size: 14px; line-height: 1; filter: drop-shadow(1px 1px 0 #000000); }
 .sl-trans { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 6px 8px; }
 .sl-trans[hidden] { display: none; }
@@ -3045,7 +3050,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=8').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=9').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
