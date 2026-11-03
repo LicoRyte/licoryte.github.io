@@ -128,7 +128,7 @@
     return '#' + [r1, g1, b1].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
   }
 
-  function makePlanet(seed, num, lucky) {
+  function makePlanet(seed, num, lucky, oddBoost) {
     const r = rng(seed);
     const LUCK = { Garden: 4, Ocean: 2, Jungle: 2.5, Savanna: 2.5, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
     const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w * (lucky ? LUCK[k] || 1 : 1)])), T = TYPES[type];
@@ -158,7 +158,7 @@
     const pool = T.noGround ? WEATHER.gas : WEATHER.any.concat( temp > 80 ? WEATHER.hot : temp < -20 ? WEATHER.cold : (type === 'Ocean' || type === 'Jungle' || type === 'Garden') ? WEATHER.wet : []);
     const weather = pick(r, pool);
     const res = RES.slice().sort(() => r() - .5).slice(0, 1 + Math.floor(r() * 3));
-    const odd = rarity === 'Rare' || rarity === 'Legendary' ? pick(r, ODD) : (r() < .12 ? pick(r, ODD) : null);
+    const odd = rarity === 'Rare' || rarity === 'Legendary' ? pick(r, ODD) : (r() < .12 + (oddBoost || 0) ? pick(r, ODD) : null);
     // the written log, built from pieces
     const fill = s => s.replace('{n}', name).replace('{star}', star.replace(' (drifting alone)', '') === 'none' ? 'nothing' : star).replace('{b1}', b[0].toLowerCase()).replace('{b2}', (b[1] || b[0]).toLowerCase()).replace('{w}', weather);
     const lines = [fill(T.rogue ? '{n} drifts through deep space with no star at all. The ship nearly flew past it.' : pick(r, OPEN)), fill(T.noGround ? pick(r, GAS) : pick(r, GROUND))];
@@ -485,7 +485,7 @@
     const posts = () => S.found.filter(f => f.p.post);
     if (!S.events) S.events = []; if (!S.fc) S.fc = { n: 0, broken: false };
     function rollEvent(force) {
-      if (!force && Math.random() >= 1 / 15) return null;
+      if (!force && Math.random() >= evChance(lvl('comms'))) return null;
       const pk = a => a[Math.floor(Math.random() * a.length)];
       const nameBit = () => { let n = ''; for (let i = 0; i < 2; i++) n += pk(SYL); return n.charAt(0).toUpperCase() + n.slice(1); };
       const pl = posts(); const pool = EVENTS.filter(e => e[1] !== 'Distress call' || pl.length);
@@ -498,6 +498,99 @@
       S.events.push(ev); if (S.events.length > 200) S.events.shift();
       return ev;
     }
+    /* ---------- Progression: Stardust (earned every study session), ship modules and facility levels to spend it on,
+       growing Travelers' Posts, rotating bounties and personal records. None of it ever runs out. ---------- */
+    if (S.dust == null) S.dust = 0; if (S.dustTotal == null) S.dustTotal = S.dust;
+    if (!S.mods) S.mods = {}; if (!S.bounties) S.bounties = []; if (!S.rec) S.rec = {}; if (!S.bDone) S.bDone = 0;
+    const lvl = k => S.mods[k] || 1;
+    const evChance = l => Math.min(.2, 1 / 15 + (l - 1) * .005);
+    const MODS = {
+      engine: ['🚀', 'Engine', l => '+' + (l - 1) * 3 + '%', 'stardust from every session'],
+      scanner: ['📡', 'Scanner', l => '+' + Math.min(20, l - 1) + '%', 'chance of an anomaly on new worlds'],
+      lab: ['🧪', 'Lab', l => Math.min(50, (l - 1) * 4) + '%', 'chance of a bonus transmission from the tuned post'],
+      comms: ['📻', 'Comms', l => '1 in ' + Math.round(1 / evChance(l)), 'sessions has a deep-space event'],
+      hull: ['🛡', 'Hull', l => '+' + (25 + (l - 1) * 8) + ' ✦', 'for every Full Cycle'],
+    };
+    const modCost = k => Math.round(40 * Math.pow(1.35, lvl(k) - 1));
+    const facCost = lv => Math.round(30 * Math.pow(1.8, lv - 1));
+    const FAC_MAX = 10;
+    function addDust(n) { n = Math.max(0, Math.round(n)); S.dust += n; S.dustTotal += n; return n; }
+    const RAR_BONUS = { Common: 0, Uncommon: 5, Rare: 15, Legendary: 40 }, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
+    // settlements: Travelers' Posts grow a population every study session (faster with more and better facilities)
+    const TIERS = [[0, 'Outpost'], [100, 'Village'], [1000, 'Town'], [10000, 'City'], [100000, 'Metropolis'], [1000000, 'Megacity']];
+    const tierOf = n => TIERS.filter(t => n >= t[0]).pop()[1];
+    function growPosts(notes) {
+      posts().forEach(({ p }) => {
+        const t = p.post.tp; if (!t) return;
+        const before = t.pop || 0, power = t.fac.reduce((a, f) => a + (f.lv || 1), 0);
+        t.pop = before + Math.round((3 + Math.random() * 6) * (1 + power) * (S.tuned === p.num ? 2 : 1) * (1 + before / 2000));
+        if (tierOf(before) !== tierOf(t.pop)) notes.push('🏙 ' + nm(p) + ' grew into a ' + tierOf(t.pop) + '! (' + t.pop.toLocaleString() + ' settlers)');
+      });
+    }
+    // bounties: three small goals at a time; finishing one pays stardust and rolls a new one
+    const CLASSES = Object.keys(TYPES);
+    function newBounty() {
+      const pk = a => a[Math.floor(Math.random() * a.length)];
+      for (let tries = 0; tries < 8; tries++) {
+        const k = pk(['class', 'class', 'rarity', 'hab', 'moons', 'rings', 'life', 'sessions', 'sessions', 'cycle', 'temp']); let b;
+        if (k === 'class') { const c = pk(CLASSES); b = { v: c, t: 'Find ' + (/^[AEIOU]/.test(c) ? 'an ' : 'a ') + c + ' world', reward: 25 + Math.round(70 / TYPES[c].w) }; }
+        else if (k === 'rarity') { const v = pk(['Uncommon', 'Uncommon', 'Rare']); b = { v, t: 'Find ' + (/^[AEIOU]/.test(v) ? 'an ' : 'a ') + v + ' (or rarer) world', reward: v === 'Rare' ? 70 : 35 }; }
+        else if (k === 'hab') { const v = pk([60, 70, 80]); b = { v, t: 'Find a world at least ' + v + '% habitable', reward: v - 25 }; }
+        else if (k === 'moons') { const v = 3 + Math.floor(Math.random() * 6); b = { v, t: 'Find a world with ' + v + ' or more moons', reward: 20 + v * 4 }; }
+        else if (k === 'rings') b = { t: 'Find a ringed world', reward: 35 };
+        else if (k === 'life') { const v = pk([3, 4, 5]); b = { v, t: 'Find a world with ' + LIFE[v][0].toLowerCase() + ' (or more)', reward: 20 + v * 10 }; }
+        else if (k === 'sessions') { const v = 2 + Math.floor(Math.random() * 4); b = { v, t: 'Finish ' + v + ' study sessions', reward: 15 * v, prog: 0 }; }
+        else if (k === 'cycle') b = { t: 'Finish a Full Cycle (nothing skipped)', reward: 60 };
+        else { const v = pk(['hot', 'cold']); b = { v, t: v === 'hot' ? 'Find a world hotter than 500 °C' : 'Find a world colder than −150 °C', reward: 35 }; }
+        b.k = k; b.id = Date.now() + '' + Math.random();
+        if (!S.bounties.some(x => x.t === b.t)) return b;
+      }
+      return { k: 'sessions', v: 3, t: 'Finish 3 study sessions', reward: 45, prog: 0, id: Date.now() + '' + Math.random() };
+    }
+    while (S.bounties.length < 3) S.bounties.push(newBounty());
+    function bountyHit(b, ctx) {
+      const p = ctx.planet;
+      if (b.k === 'sessions') { if (ctx.session) b.prog = (b.prog || 0) + 1; return b.prog >= b.v; }
+      if (b.k === 'cycle') return !!ctx.cycle;
+      if (!p) return false;
+      const coldest = p.tempNight != null ? Math.min(p.temp, p.tempNight) : p.temp;
+      return b.k === 'class' ? p.type === b.v : b.k === 'rarity' ? RANK[p.rarity] >= RANK[b.v] : b.k === 'hab' ? p.x.hab >= b.v : b.k === 'moons' ? p.moons >= b.v
+        : b.k === 'rings' ? p.rings : b.k === 'life' ? (p.lifeLvl || 0) >= b.v : b.k === 'temp' ? (b.v === 'hot' ? p.temp > 500 : coldest < -150) : false;
+    }
+    function checkBounties(ctx, notes) {
+      S.bounties.forEach((b, i) => { if (bountyHit(b, ctx)) { const got = addDust(b.reward); notes.push('🎯 Bounty complete: ' + b.t + ' (+' + got + ' ✦)'); S.bDone++; S.bounties[i] = newBounty(); } });
+    }
+    // personal records: the extremes of everything you've found
+    const REC = [
+      ['hottest', '🔥', 'Hottest world', p => p.temp, v => v + ' °C', 1], ['coldest', '❄', 'Coldest world', p => p.tempNight != null ? Math.min(p.temp, p.tempNight) : p.temp, v => v + ' °C', -1],
+      ['biggest', '🪐', 'Biggest world', p => p.x.radius, v => v + '× Earth', 1], ['smallest', '🪨', 'Smallest world', p => p.x.radius, v => v + '× Earth', -1],
+      ['moons', '🌙', 'Most moons', p => p.moons, v => String(v), 1], ['far', '🔭', 'Farthest from Earth', p => p.dist, v => v.toLocaleString() + ' ly', 1],
+      ['species', '🦎', 'Most species', p => p.x.species || null, v => 'about ' + Number(v.toPrecision(2)).toLocaleString(), 1], ['hab', '🏡', 'Most habitable', p => p.x.hab, v => v + '%', 1],
+      ['gravity', '🏋', 'Strongest gravity', p => p.gravity, v => v + ' g', 1], ['day', '⏳', 'Longest day', p => p.day, v => v + ' hours', 1],
+    ];
+    function checkRecords(p, notes) {
+      REC.forEach(([k, , label, get, f, dir]) => {
+        const v = get(p); if (v == null) return;
+        const cur = S.rec[k];
+        if (!cur || (dir > 0 ? v > cur.v : v < cur.v)) { if (cur && notes) notes.push('🏆 New record! ' + label + ': ' + nm(p) + ' (' + f(v) + ')'); S.rec[k] = { v, num: p.num }; }
+      });
+    }
+    S.found.forEach(({ p }) => checkRecords(p, null)); // fill records from worlds found before this existed
+    save();
+    // everything that happens at the end of a study session, shown together under the timer
+    function sessionEnd(reps, p, ev) {
+      const notes = [];
+      let earned = Math.max(4, Math.round(S.set.focus * .4)) + (p ? RAR_BONUS[p.rarity] : 0) + (ev ? 10 : 0);
+      earned *= 1 + (lvl('engine') - 1) * .03;
+      notes.push('✦ +' + addDust(earned) + ' stardust');
+      if (p) { checkRecords(p, notes); checkBounties({ planet: p }, notes); }
+      checkBounties({ session: true }, notes);
+      growPosts(notes);
+      if (!S.rec.dayN || S.todayN > S.rec.dayN.v) { if (S.rec.dayN && S.todayN > S.rec.dayN.v) notes.push('🏆 New record! Most sessions in a day: ' + S.todayN); S.rec.dayN = { v: S.todayN, date: Date.now() }; }
+      showTrans(reps.concat(notes.length ? [{ notes }] : []));
+    }
+    function upgradeMod(k) { const c = modCost(k); if (S.dust < c) return; S.dust -= c; S.mods[k] = lvl(k) + 1; save(); draw(); }
+    function upgradeFac(p, f) { const lv = f.lv || 1, c = facCost(lv + 1); if (lv >= FAC_MAX || S.dust < c) return; S.dust -= c; f.lv = lv + 1; save(); draw(); }
 
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
@@ -615,7 +708,7 @@
           el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, p.post.tp ? '🏘 Travelers\' Post' : '🗼 Post') : null),
             el('div', { class: 'sl-code' }, p.code + ' · ' + p.type + ' · ' + (p.x || (p.x = makeExtra(p))).hab + '% habitable'), el('p', {}, logText(p)))),
         el('details', { class: 'sl-more' }, el('summary', {}, 'Survey data'), facts(p)),
-        p.post && p.post.tp ? el('div', { class: 'sl-facs', title: 'Facilities at this Travelers\' Post' }, p.post.tp.fac.length ? p.post.tp.fac.map(f => el('span', { class: 'sl-fac' }, FAC[f.k][0] + ' ' + FAC[f.k][1])) : el('span', { class: 'sl-muted' }, '🏘 Travelers\' Post · no facilities yet')) : null,
+        p.post && p.post.tp ? el('div', { class: 'sl-facs', title: 'Facilities at this Travelers\' Post' }, [el('span', { class: 'sl-fac sl-popl' }, '🏙 ' + tierOf(p.post.tp.pop || 0) + ' · ' + (p.post.tp.pop || 0).toLocaleString() + ' settlers'), ...p.post.tp.fac.map(f => el('span', { class: 'sl-fac' }, FAC[f.k][0] + ' ' + FAC[f.k][1] + ((f.lv || 1) > 1 ? ' ' + '★'.repeat(Math.min(5, f.lv - 1)) + (f.lv > 6 ? '+' : '') : '')))]) : null,
         p.post ? postLog(p) : null,
       ].filter(Boolean);
     }
@@ -627,13 +720,16 @@
     function facReport(p) { // a log from one of a Travelers' Post's facilities
       const fac = p.post.tp.fac; if (!fac.length) return null;
       const r = rng((p.seed * 31 + p.post.reports.length * 7919 + Date.now() % 100000) >>> 0);
-      const k = fac[Math.floor(r() * fac.length)].k;
-      const rep = { k: 'fac', f: k, t: FAC[k][0] + ' ' + facLog(p, k, r, S.found.map(f => nm(f.p)).filter(x => x !== nm(p))), at: Date.now(), day: Math.max(1, Math.round((Date.now() - p.post.built) / 86400000) + 1) };
+      const fo = fac[Math.floor(r() * fac.length)], k = fo.k, lv = fo.lv || 1;
+      const FAME = ['The ' + FAC[k][1] + ' is famous across the sector now.', 'Travelers line up outside the ' + FAC[k][1] + ' every evening.', 'The ' + FAC[k][1] + ' hired ' + (lv * 3) + ' new staff this week.', 'A travel guide gave the ' + FAC[k][1] + ' ' + Math.min(5, lv) + ' stars.'];
+      let text = lv >= 3 && r() < .3 ? FAME[Math.floor(r() * FAME.length)] : facLog(p, k, r, S.found.map(f => nm(f.p)).filter(x => x !== nm(p)));
+      if (lv > 1) text = text.replace(/\b(\d+)\b/, (m0, d) => String(+d * lv)); // a bigger facility does more of everything
+      const rep = { k: 'fac', f: k, t: FAC[k][0] + ' ' + text, at: Date.now(), day: Math.max(1, Math.round((Date.now() - p.post.built) / 86400000) + 1) };
       p.post.reports.push(rep); return rep;
     }
     function sessionReports() { // what the satellite hears at the end of a study session
       const out = [], tp = tunedP();
-      if (tp) { out.push({ p: tp, rep: transmit(tp) }); if (tp.post.tp) { const fr = facReport(tp); if (fr) out.push({ p: tp, rep: fr }); } }
+      if (tp) { out.push({ p: tp, rep: transmit(tp) }); if (Math.random() < Math.min(.5, (lvl('lab') - 1) * .04)) out.push({ p: tp, rep: transmit(tp) }); if (tp.post.tp) { const fr = facReport(tp); if (fr) out.push({ p: tp, rep: fr }); } }
       const others = posts().map(f => f.p).filter(p => p.post.tp && p !== tp); // Travelers' Posts are busy enough to be heard without tuning
       if (others.length) { const o = others[Math.floor(Math.random() * others.length)]; const fr = o.post.tp.fac.length && Math.random() < .6 ? facReport(o) : null; out.push({ p: o, rep: fr || transmit(o), passive: true }); }
       return out;
@@ -641,7 +737,7 @@
     function showTrans(list) {
       if (!list || !list.length) { trans.hidden = true; trans.replaceChildren(); return; }
       trans.hidden = false;
-      trans.replaceChildren(...list.map(({ p, rep, passive, ev }) => ev ? el('div', { class: 'sl-trans-i sl-event' },
+      trans.replaceChildren(...list.map(({ p, rep, passive, ev, notes }) => notes ? el('div', { class: 'sl-trans-i sl-notes' }, notes.map(t => el('p', {}, t))) : ev ? el('div', { class: 'sl-trans-i sl-event' },
           el('div', { class: 'sl-trans-h' }, el('span', { class: 'sl-ev-i' }, ev.ic), ' Deep-space event: ' + ev.title), el('p', {}, ev.t), ev.got ? el('p', { class: 'sl-ev-got' }, ev.got) : null)
         : el('div', { class: 'sl-trans-i' },
         el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), (passive ? ' Overheard from ' : ' Transmission from ') + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t))));
@@ -675,11 +771,11 @@
         const tp = tunedP(), reps = sessionReports();
         const forced = !!S.eventNext; S.eventNext = false;
         const ev = rollEvent(forced); if (ev) reps.unshift({ ev });
+        let foundP = null;
         if (charging()) {
           S.coord = true; S.mission = 0;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showTrans(reps);
           toBreak();
           hint.textContent = '🧭 Interplanetary Coordinator charged. Your next trip will head somewhere promising. Now a ' + MODES[mode].toLowerCase() + '.';
         } else if (target) {
@@ -698,19 +794,20 @@
           S.mission = 0; S.job = null;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(tp2, target.k === 'post' ? 'built' : target.k === 'upgrade' ? 'upgraded' : 'opened'); showTrans(reps);
+          showCard(tp2, target.k === 'post' ? 'built' : target.k === 'upgrade' ? 'upgraded' : 'opened');
           toBreak();
           hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
           const lucky = !!S.coord && !(ev && ev.got); if (lucky) S.coord = false;
-          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
+          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky, Math.min(.2, (lvl('scanner') - 1) * .01));
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(p, lucky ? 'lucky' : 'new'); showTrans(reps);
+          showCard(p, lucky ? 'lucky' : 'new'); foundP = p;
           toBreak();
           hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
+        sessionEnd(reps, foundP, ev);
       } else {
         if (!quiet && hooks.ding) hooks.ding();
         if (hooks.show) hooks.show();
@@ -721,7 +818,9 @@
           if (!S.fc.broken && S.fc.n >= S.set.every) {
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
-            showTrans([]);
+            const notes = ['✦ +' + addDust(25 + (lvl('hull') - 1) * 8) + ' stardust (Full Cycle)'];
+            checkBounties({ cycle: true }, notes);
+            showTrans([{ notes }]);
           }
           S.fc = { n: 0, broken: false };
         }
@@ -763,12 +862,13 @@
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every + stars;
       status.title = S.fc.broken ? 'Full Cycle broken this time (something was skipped). It resets after the long break.' : 'Full Cycle: finish every session and break of this cycle without skipping for a bonus after the long break';
       const tp = tunedP();
-      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '') + (S.coord ? ' · 🧭 charged' : '');
+      status2.textContent = '✦ ' + S.dust.toLocaleString() + ' · ' + S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + (tp ? ' · 📡 ' + nm(tp) : '') + (S.coord ? ' · 🧭 charged' : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
       if (!shipPane.hidden) drawShip();
     }
 
     /* ---------- the Ship tab: Coordinator, Listening Posts and all their transmissions in one place ---------- */
+    let shipTab = 'Ship';
     function drawShip() {
       const group = (title, ...kids) => el('fieldset', { class: 'sl-group' }, el('legend', {}, title), ...kids);
       const cm = curMission(), b = building(), locked = running && mode === 'focus';
@@ -781,7 +881,11 @@
         const p = f.p, tuned = S.tuned === p.num;
         return el('div', { class: 'sl-post' + (tuned ? ' tuned' : '') }, el('img', { src: paint(p, 32), alt: '' }),
           el('span', { class: 'sl-row-t' }, el('b', {}, (p.post.tp ? '🏘 ' : '🗼 ') + nm(p), tuned ? ' 📡' : ''), el('small', {}, pad(p.num) + ' · ' + (p.post.tp ? 'Travelers\' Post' + (p.post.tp.fac.length ? ' · ' + p.post.tp.fac.map(f => FAC[f.k][0]).join('') : '') : 'Listening Post') + ' · ' + p.post.reports.length + ' log' + (p.post.reports.length === 1 ? '' : 's'))),
-          tuned ? el('button', { type: 'button', class: 'btn', onclick: () => { S.tuned = 0; save(); draw(); } }, 'Untune') : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); draw(); } }, 'Tune'));
+          tuned ? el('button', { type: 'button', class: 'btn', onclick: () => { S.tuned = 0; save(); draw(); } }, 'Untune') : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); draw(); } }, 'Tune'),
+          p.post.tp ? el('div', { class: 'sl-post-x' }, el('div', { class: 'sl-muted' }, '🏙 ' + tierOf(p.post.tp.pop || 0) + ' · ' + (p.post.tp.pop || 0).toLocaleString() + ' settlers' + (p.post.tp.fac.length ? ' · upgrade a facility:' : ' · add facilities with the 🗼 Build mission')),
+            p.post.tp.fac.length ? el('div', { class: 'sl-facup' }, p.post.tp.fac.map(f => { const lv = f.lv || 1, c = facCost(lv + 1), max = lv >= FAC_MAX;
+              return el('button', { type: 'button', class: 'sl-fac-b', disabled: max || S.dust < c || null, title: max ? 'Max level' : 'Upgrade to level ' + (lv + 1) + ' for ' + c + ' stardust: bigger numbers, more settlers, and fame', onclick: () => upgradeFac(p, f) },
+                FAC[f.k][0] + ' Lv ' + lv, el('small', {}, max ? 'MAX' : '✦ ' + c)); })) : null) : null);
       })) : el('p', { class: 'sl-muted' }, 'No posts yet. Choose the 🗼 Build mission on the Voyage tab (or open a world in the Logbook).');
       const plan = anyBuild() ? (() => { const s2 = el('select', { 'aria-label': 'What to build' }); fillBuildSel(s2); if (b) s2.value = jobKey(b);
         return el('div', { class: 'sl-plan' }, 'Build: ', s2, el('button', { type: 'button', class: 'btn', disabled: locked || null, onclick: () => { setJob(s2.value); drawShip(); } }, 'Next session')); })() : null;
@@ -794,10 +898,20 @@
       const evs = S.events.slice().reverse();
       const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? el('ol', { class: 'sl-reports sl-feed' }, evs.slice(0, 60).map(e => el('li', { class: 'sl-rep-ev' }, el('small', {}, e.ic + ' ' + e.title + ' · ' + new Date(e.at).toLocaleDateString()), el('br', {}), e.t, e.got ? el('b', {}, ' ' + e.got) : null)))
         : el('p', { class: 'sl-muted' }, 'No deep-space events yet. About one study session in 15 runs into something.'));
-      shipPane.replaceChildren(
-        el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)),
-        group('★ Full Cycle', el('p', {}, S.fc.broken ? 'Broken this cycle (something was skipped). A fresh cycle starts after the long break.' : 'Finish all ' + S.set.every + ' study sessions and their breaks without skipping: ' + '★'.repeat(Math.min(S.set.every, S.fc.n)) + '☆'.repeat(Math.max(0, S.set.every - S.fc.n)) + '. The long break then charges the Coordinator for free (or, if it\'s already charged, guarantees a deep-space event).')),
-        coord, group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, and a tuned one adds news from its facilities.'), postRows, plan), trans, evLog);
+      const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session (more for rarer worlds, events, Full Cycles and bounties). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
+        el('div', { class: 'sl-mods' }, Object.entries(MODS).map(([k, [ic, name, eff, what]]) => { const l = lvl(k), c = modCost(k);
+          return el('div', { class: 'sl-mod' }, el('span', { class: 'sl-mod-i' }, ic), el('span', { class: 'sl-row-t' }, el('b', {}, name + ' · Lv ' + l), el('small', {}, eff(l) + ' ' + what + ' (next: ' + eff(l + 1) + ')')),
+            el('button', { type: 'button', class: 'btn', disabled: S.dust < c || null, onclick: () => upgradeMod(k) }, 'Upgrade ✦ ' + c.toLocaleString())); })));
+      const cyc = group('★ Full Cycle', el('p', {}, S.fc.broken ? 'Broken this cycle (something was skipped). A fresh cycle starts after the long break.' : 'Finish all ' + S.set.every + ' study sessions and their breaks without skipping: ' + '★'.repeat(Math.min(S.set.every, S.fc.n)) + '☆'.repeat(Math.max(0, S.set.every - S.fc.n)) + '. The long break then pays stardust and charges the Coordinator (or guarantees a deep-space event).'));
+      const bounties = group('🎯 Bounties', el('p', { class: 'sl-muted' }, 'Finish one and a new one takes its place. ' + S.bDone + ' completed so far.'),
+        el('div', { class: 'sl-posts' }, S.bounties.map(b => el('div', { class: 'sl-post' }, el('span', { class: 'sl-mod-i' }, '🎯'), el('span', { class: 'sl-row-t' }, el('b', {}, b.t), el('small', {}, b.k === 'sessions' ? (b.prog || 0) + ' / ' + b.v + ' done' : b.k === 'cycle' ? 'finish every session and break of a cycle' : 'on any Explore trip')), el('span', { class: 'sl-reward' }, '✦ ' + b.reward)))));
+      const recRows = REC.filter(([k]) => S.rec[k]).map(([k, ic, label, , f]) => { const r = S.rec[k], fw = byNum(r.num); return el('tr', {}, el('td', {}, ic + ' ' + label), el('td', {}, f(r.v)), el('td', {}, fw ? el('button', { type: 'button', class: 'sl-link', onclick: () => { tab('log'); openWorld(r.num); } }, nm(fw.p)) : '')); });
+      if (S.rec.dayN) recRows.unshift(el('tr', {}, el('td', {}, '📅 Most sessions in a day'), el('td', {}, String(S.rec.dayN.v)), el('td', {}, new Date(S.rec.dayN.date).toLocaleDateString())));
+      const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
+      const SUB = { Ship: [el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
+        Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan)], Logs: [trans, evLog] };
+      const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
+      shipPane.replaceChildren(el('div', { class: 'sl-stabs sl-shiptabs', role: 'tablist' }, subBtns), el('div', { class: 'sl-subpane' }, SUB[shipTab]));
     }
 
     /* ---------- logbook ---------- */
