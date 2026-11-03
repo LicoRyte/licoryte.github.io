@@ -510,6 +510,7 @@
     const status = el('span', {}), status2 = el('span', {});
     root.replaceChildren(el('div', { class: 'sl-tabs', role: 'tablist' }, tabTimer, tabLog, tabShip), el('div', { class: 'sl-body sunken' }, timerPane, logPane, shipPane), el('div', { class: 'statusbar' }, status, status2));
     function tab(t) {
+      if (t === 'log' && !logPane.hidden) openNum = null; // clicking Logbook again goes back to the grid
       tabTimer.setAttribute('aria-selected', String(t === 'timer')); tabLog.setAttribute('aria-selected', String(t === 'log')); tabShip.setAttribute('aria-selected', String(t === 'ship'));
       timerPane.hidden = t !== 'timer'; logPane.hidden = t !== 'log'; shipPane.hidden = t !== 'ship';
       if (t === 'ship') drawShip();
@@ -555,7 +556,7 @@
         reps.length ? el('ol', { class: 'sl-reports', reversed: true }, reps.map(r => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, 'Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), ' ', r.t)))
           : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.'));
     }
-    const HEAD = { new: '★ New world discovered · ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ', log: '' };
+    const HEAD = { new: '★ New world discovered · ', log: 'World ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ' };
     function planetCard(p, kind) {
       const tuned = S.tuned === p.num && !!p.post;
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
@@ -733,8 +734,17 @@
     }
 
     /* ---------- logbook ---------- */
-    let openNum = null;
+    // the Logbook: a grid of every world you've found; click one to open its own page (Back returns to the grid)
+    let openNum = null, gridScroll = 0, shownList = [];
+    const body = () => root.querySelector('.sl-body');
+    function openWorld(n) { if (openNum == null) gridScroll = body().scrollTop; openNum = n; drawLog(); body().scrollTop = 0; }
+    function closeWorld() { openNum = null; drawLog(); body().scrollTop = gridScroll; }
     function drawLog() {
+      const tools = logPane.querySelector('.sl-tools');
+      const f0 = openNum != null && byNum(openNum);
+      logHead.hidden = tools.hidden = !!f0;
+      if (f0) { drawWorld(f0); return; }
+      openNum = null;
       const ly = S.found.reduce((a, f) => a + f.p.dist, 0);
       const counts = {}; S.found.forEach(f => { counts[f.p.rarity] = (counts[f.p.rarity] || 0) + 1; });
       const tp = tunedP(), pc = posts().length;
@@ -742,28 +752,43 @@
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
         el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
-        el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' Listening Post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) + ' (' + tp.post.reports.length + ' transmissions)' : ' · 📡 Satellite not tuned') : '🗼 No Listening Posts yet. Open a world below and choose "Build a Listening Post here".'));
+        el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) : ' · 📡 Satellite not tuned') : '🗼 No posts yet. Open a world and choose "Build a Listening Post here".'));
+      logList.className = 'sl-list';
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
       const q = find.value.trim().toLowerCase(), ty = typeSel.value, ra = rarSel.value;
-      const list = S.found.slice().reverse().filter(f => (!ty || (ty === '@post' ? !!f.p.post : f.p.type === ty)) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
-      if (!list.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds match.')); return; }
-      logList.replaceChildren(...list.slice(0, 300).map(f => {
-        const p = f.p, open = openNum === p.num, tuned = S.tuned === p.num && !!p.post;
-        const row = el('button', { type: 'button', class: 'sl-row', 'aria-expanded': String(open), onclick: () => { openNum = open ? null : p.num; drawLog(); } },
-          el('img', { src: paint(p, 32), alt: '', width: 48, height: 48 }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.lucky ? ' 🧭' : '', p.post ? (p.post.tp ? ' 🏘' : ' 🗼') : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
-          el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity));
-        const busy = running && mode === 'focus';
-        const acts = open ? el('div', { class: 'sl-acts' },
-          !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { setJob('post:' + p.num + ':'); tab('timer'); } }, S.mission > 0 && S.job && S.job.k === 'post' && S.job.num === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
-            : !p.post.tp ? el('button', { type: 'button', class: 'btn', title: 'Your next study session upgrades this post', disabled: busy || null, onclick: () => { setJob('upgrade:' + p.num + ':'); tab('timer'); } }, '🏘 Upgrade to Travelers\' Post') : null,
-          p.post ? (tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune satellite')
-              : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite here')) : null,
-          p.post ? el('button', { type: 'button', class: 'btn', title: 'Worlds with a Listening Post can be renamed', onclick: () => rename(p) }, 'Rename...') : null) : null;
-        return el('div', { class: 'sl-entry' + (open ? ' open' : '') }, row, open ? el('div', { class: 'sl-detail' }, acts, ...planetCard(p, 'log').slice(1)) : null);
+      shownList = S.found.slice().reverse().filter(f => (!ty || (ty === '@post' ? !!f.p.post : f.p.type === ty)) && (!ra || f.p.rarity === ra) && (!q || ((f.p.custom || '') + ' ' + f.p.name + ' ' + f.p.code + ' ' + f.p.log + ' ' + f.p.biomes.join(' ')).toLowerCase().includes(q)));
+      if (!shownList.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds match.')); return; }
+      logList.className = 'sl-grid';
+      logList.replaceChildren(...shownList.slice(0, 400).map(f => {
+        const p = f.p, tuned = S.tuned === p.num && !!p.post;
+        const marks = (p.lucky ? '🧭' : '') + (p.post ? (p.post.tp ? '🏘' : '🗼') : '') + (tuned ? '📡' : '');
+        return el('button', { type: 'button', class: 'sl-tile sl-t-' + p.rarity.toLowerCase(), title: nm(p) + ' · ' + p.type + ' · ' + p.rarity, onclick: () => openWorld(p.num) },
+          el('span', { class: 'sl-tile-pic' }, el('img', { src: paint(p, 32), alt: '' }), marks ? el('span', { class: 'sl-tile-m' }, marks) : null),
+          el('b', {}, nm(p)), el('small', {}, pad(p.num) + ' · ' + p.type));
       }));
-      const det = logList.querySelector('.sl-detail details'); if (det) det.open = true;
     }
+    function drawWorld(f) {
+      const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';
+      const list = shownList.length ? shownList : S.found.slice().reverse(), i = list.findIndex(x => x.p.num === p.num);
+      const prev = i > 0 ? list[i - 1] : null, next = i >= 0 && i < list.length - 1 ? list[i + 1] : null;
+      const nav = el('div', { class: 'sl-wnav' },
+        el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'),
+        el('span', { class: 'sl-muted' }, i >= 0 ? (i + 1) + ' of ' + list.length : ''),
+        el('span', { class: 'sl-wnav-r' },
+          el('button', { type: 'button', class: 'btn', title: prev ? 'Previous: ' + nm(prev.p) : '', disabled: !prev || null, onclick: () => prev && openWorld(prev.p.num) }, '◂'),
+          el('button', { type: 'button', class: 'btn', title: next ? 'Next: ' + nm(next.p) : '', disabled: !next || null, onclick: () => next && openWorld(next.p.num) }, '▸')));
+      const acts = el('div', { class: 'sl-acts' },
+        !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { setJob('post:' + p.num + ':'); tab('timer'); } }, S.mission > 0 && S.job && S.job.k === 'post' && S.job.num === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
+          : !p.post.tp ? el('button', { type: 'button', class: 'btn', title: 'Your next study session upgrades this post', disabled: busy || null, onclick: () => { setJob('upgrade:' + p.num + ':'); tab('timer'); } }, '🏘 Upgrade to Travelers\' Post') : null,
+        p.post ? (tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune')
+          : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite')) : null,
+        p.post ? el('button', { type: 'button', class: 'btn', title: 'Worlds with a post can be renamed', onclick: () => rename(p) }, 'Rename...') : null);
+      const cardEl = el('div', { class: 'sl-card sl-world' }, ...planetCard(p, 'log'));
+      const sv = cardEl.querySelector('details.sl-more'); if (sv) sv.open = true;
+      logList.className = 'sl-wpage';
+      logList.replaceChildren(nav, el('div', { class: 'sl-muted sl-found-on' }, 'Discovered ' + new Date(f.at).toLocaleString()), acts.childNodes.length ? acts : null, cardEl);
+    }
+    logPane.addEventListener('keydown', e => { if (openNum == null || e.target.closest('input, select')) return; if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); closeWorld(); } });
     function rename(p) {
       const v = window.prompt('Name this world (leave empty to restore "' + p.name + '"):', nm(p));
       if (v == null) return;

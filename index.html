@@ -809,6 +809,22 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-fac { font: 11px var(--f-ui); padding: 1px 6px; background: #FFFFFF; border: 1px solid var(--shade); }
 .sl-trans-i + .sl-trans-i { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #BBBBBB; }
 .sl-reports .sl-rep-fac { color: #5A3A00; }
+.sl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 4px; padding: 4px; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.sl-tile { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px 5px; background: none; border: 1px solid transparent; font: 11px/1.25 var(--f-ui); color: var(--text); cursor: var(--cur-hand); text-align: center; min-width: 0; }
+.sl-tile:hover { background: var(--hover); border-color: var(--shade); }
+.sl-tile:focus-visible { outline: 1px dotted var(--text); }
+.sl-tile-pic { position: relative; width: 56px; height: 56px; background: #000000; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
+.sl-tile-pic img { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.sl-tile-m { position: absolute; right: -4px; bottom: -6px; font-size: 11px; line-height: 1; background: var(--silver); border: 1px solid var(--shade); padding: 1px 2px; }
+.sl-tile b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--navy); margin-top: 3px; }
+.sl-tile small { color: #666666; font-size: 10px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-t-uncommon .sl-tile-pic { border-color: #2E8B4A; } .sl-t-rare .sl-tile-pic { border-color: #2F62B8; } .sl-t-legendary .sl-tile-pic { border-color: #C9A400; box-shadow: 0 0 0 1px #FFE070; }
+.sl-wpage { display: flex; flex-direction: column; gap: 6px; }
+.sl-wnav { display: flex; align-items: center; gap: 8px; font: 12px var(--f-ui); }
+.sl-wnav .btn { padding: 2px 10px; }
+.sl-wnav-r { margin-left: auto; display: flex; gap: 2px; }
+.sl-found-on { font-size: 11px; }
+.sl-world .sl-more { margin: 0 6px 6px; }
 .sl-tower { position: absolute; right: 4px; bottom: 2px; z-index: 3; font-size: 14px; line-height: 1; filter: drop-shadow(1px 1px 0 #000000); }
 .sl-trans { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 6px 8px; }
 .sl-trans[hidden] { display: none; }
@@ -3050,7 +3066,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=9').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=10').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
