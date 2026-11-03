@@ -7,7 +7,7 @@
 (() => {
   'use strict';
   const KEY = 'lico-solarist', OLD_KEY = 'lico-archivist';
-  const MODES = { focus: 'Travel', short: 'Short recharge', long: 'Long recharge' };
+  const MODES = { focus: 'Study', short: 'Short break', long: 'Long break' };
 
   /* =====================================================================
      Planet generator. Everything comes from one random seed, and the finished planet is saved as data,
@@ -260,7 +260,7 @@
       const it = q[i];
       if (it.k === 'core') { post.core = it.v; rep = { k: 'core', t: 'Core scan complete: ' + it.v.charAt(0).toLowerCase() + it.v.slice(1) + '.' }; }
       else if (it.k === 'species') { post.species = it.v; rep = { k: 'species', t: 'Native species identified and named: the ' + it.v + '.' }; }
-      else if (it.k === 'odd') { post.oddX = it.v; rep = { k: 'odd', t: 'Anomaly studied. The ' + p.odd + ' is ' + it.v + '.' }; }
+      else if (it.k === 'odd') { post.oddX = it.v; rep = { k: 'odd', t: 'Anomaly studied. The ' + p.odd.replace(/^(a|an|the) /, '') + ' is ' + it.v + '.' }; }
       else rep = { k: 'secret', t: it.v };
     } else {
       const r = rng((p.seed + post.reports.length * 7919) >>> 0);
@@ -371,7 +371,7 @@
       if (p.deep && !p.post) {
         const d = p.deep, at = d.at || Date.now(), reports = [{ k: 'core', t: 'Core scan complete: ' + d.core.charAt(0).toLowerCase() + d.core.slice(1) + '.', at, day: 1 }];
         if (d.species) reports.push({ k: 'species', t: 'Native species identified and named: the ' + d.species + '.', at, day: 1 });
-        if (d.oddX) reports.push({ k: 'odd', t: 'Anomaly studied. The ' + p.odd + ' is ' + d.oddX + '.', at, day: 1 });
+        if (d.oddX) reports.push({ k: 'odd', t: 'Anomaly studied. The ' + p.odd.replace(/^(a|an|the) /, '') + ' is ' + d.oddX + '.', at, day: 1 });
         p.post = { built: at, reports, core: d.core, species: d.species, oddX: d.oddX };
       }
       delete p.deep; delete p.probed; delete p.boosted;
@@ -398,6 +398,7 @@
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
     const tabLog = el('button', { type: 'button', role: 'tab', 'aria-selected': 'false', onclick: () => tab('log') }, '🪐 Logbook');
+    const tabShip = el('button', { type: 'button', role: 'tab', 'aria-selected': 'false', onclick: () => tab('ship') }, '🛰 Ship');
     const modeBtns = Object.keys(MODES).map(m => el('button', { type: 'button', class: 'sl-mode', 'data-m': m, onclick: () => { if (!running) setMode(m); } }, MODES[m]));
     const bigText = el('span', {}), dots = el('span', { class: 'sl-dots', 'aria-hidden': 'true' });
     const timeText = el('div', { class: 'sl-time' }, '25:00');
@@ -420,14 +421,26 @@
     const sel = (k, opts) => { const s = el('select', { 'aria-label': k }, opts.map(v => el('option', { value: v, selected: S.set[k] === v || null }, String(v)))); s.addEventListener('change', () => { S.set[k] = +s.value; save(); if (!running && mode === k) { left = length(mode); persistRun(); } draw(); }); return s; };
     const settings = el('details', { class: 'sl-set' }, el('summary', {}, 'Settings'),
       el('div', { class: 'sl-set-row' },
-        el('label', {}, 'Travel ', sel('focus', [1, 10, 15, 20, 25, 30, 40, 45, 50, 60]), ' min'),
-        el('label', {}, 'Short recharge ', sel('short', [3, 5, 10]), ' min'),
-        el('label', {}, 'Long recharge ', sel('long', [10, 15, 20, 30]), ' min'),
-        el('label', {}, 'Long recharge every ', sel('every', [2, 3, 4, 5, 6]), ' trips')));
+        el('label', {}, 'Study ', sel('focus', [1, 10, 15, 20, 25, 30, 40, 45, 50, 60]), ' min'),
+        el('label', {}, 'Short break ', sel('short', [3, 5, 10]), ' min'),
+        el('label', {}, 'Long break ', sel('long', [10, 15, 20, 30]), ' min'),
+        el('label', {}, 'Long break every ', sel('every', [2, 3, 4, 5, 6]), ' study sessions')));
     // what the next study session is for: travel to a new world, or build a Listening Post on one you've found
-    const missionSel = el('select', { class: 'sl-mission-sel', 'aria-label': 'Next trip' });
-    missionSel.addEventListener('change', () => { S.mission = +missionSel.value; save(); hint.textContent = ''; draw(); });
-    const mission = el('label', { class: 'sl-mission' }, 'Next trip: ', missionSel);
+    // the mission: what this study session is for. Exactly one is pressed.
+    const MISSIONS = [['explore', '🚀', 'Explore', 'Find a new world'], ['build', '🗼', 'Build', 'Build a Listening Post on a world you found'], ['charge', '🧭', 'Charge', 'Charge the Interplanetary Coordinator: your next Explore is a lucky one']];
+    const unposted = () => S.found.slice().reverse().filter(f => !f.p.post);
+    const curMission = () => S.mission > 0 ? 'build' : S.mission === -1 ? 'charge' : 'explore';
+    function setMission(m, num) {
+      if (running && mode === 'focus') return;
+      if (m === 'explore') S.mission = 0;
+      else if (m === 'charge') { if (S.coord) return; S.mission = -1; }
+      else { const list = unposted(); if (!list.length) return; S.mission = num || (building() ? S.mission : list[0].p.num); }
+      save(); hint.textContent = ''; draw();
+    }
+    const misBtns = MISSIONS.map(([k, ic, label, tip]) => el('button', { type: 'button', class: 'sl-mis', 'data-m': k, role: 'radio', title: tip, onclick: () => setMission(k) }, el('span', { class: 'sl-mis-i', 'aria-hidden': 'true' }, ic), label));
+    const buildSel = el('select', { class: 'sl-build-sel', 'aria-label': 'World to build on' });
+    buildSel.addEventListener('change', () => setMission('build', +buildSel.value));
+    const mission = el('div', { class: 'sl-missions' }, el('span', { class: 'sl-mis-l' }, 'Mission:'), el('div', { class: 'sl-mis-g', role: 'radiogroup', 'aria-label': 'Mission' }, misBtns), buildSel);
     const timerPane = el('div', { class: 'sl-pane' }, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
 
     const find = el('input', { type: 'search', class: 'sl-find', placeholder: 'Search worlds...', 'aria-label': 'Search your logbook' });
@@ -436,12 +449,14 @@
     const logHead = el('div', { class: 'sl-ahead' });
     const logList = el('div', { class: 'sl-list' });
     const logPane = el('div', { class: 'sl-pane', hidden: true }, logHead, el('div', { class: 'sl-tools' }, typeSel, rarSel, find), logList);
+    const shipPane = el('div', { class: 'sl-pane', hidden: true });
 
     const status = el('span', {}), status2 = el('span', {});
-    root.replaceChildren(el('div', { class: 'sl-tabs', role: 'tablist' }, tabTimer, tabLog), el('div', { class: 'sl-body sunken' }, timerPane, logPane), el('div', { class: 'statusbar' }, status, status2));
+    root.replaceChildren(el('div', { class: 'sl-tabs', role: 'tablist' }, tabTimer, tabLog, tabShip), el('div', { class: 'sl-body sunken' }, timerPane, logPane, shipPane), el('div', { class: 'statusbar' }, status, status2));
     function tab(t) {
-      tabTimer.setAttribute('aria-selected', String(t === 'timer')); tabLog.setAttribute('aria-selected', String(t === 'log'));
-      timerPane.hidden = t !== 'timer'; logPane.hidden = t !== 'log';
+      tabTimer.setAttribute('aria-selected', String(t === 'timer')); tabLog.setAttribute('aria-selected', String(t === 'log')); tabShip.setAttribute('aria-selected', String(t === 'ship'));
+      timerPane.hidden = t !== 'timer'; logPane.hidden = t !== 'log'; shipPane.hidden = t !== 'ship';
+      if (t === 'ship') drawShip();
       if (t === 'log') drawLog();
     }
 
@@ -522,7 +537,7 @@
       running = false; clearInterval(tickT);
       const wasBuilding = mode === 'focus' && building(), wasCharging = mode === 'focus' && charging();
       if (mode === 'focus') toBreak(); else setMode('focus');
-      hint.textContent = mode === 'focus' ? 'Recharge skipped. Next jump is ready.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : wasCharging ? 'Charging stopped early. The Coordinator is still empty.' : 'Turned back early. No new world this time.';
+      hint.textContent = mode === 'focus' ? 'Break skipped. Ready for the next session.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : wasCharging ? 'Charging stopped early. The Coordinator is still empty.' : 'Turned back early. No new world this time.';
       persistRun();
     }
     function toBreak() { setMode(S.cycle > 0 && S.cycle % S.set.every === 0 ? 'long' : 'short'); }
@@ -550,7 +565,7 @@
           if (hooks.show) hooks.show();
           showCard(target, 'built'); showTrans(tp, rep);
           toBreak();
-          hint.textContent = 'Listening Post built on ' + nm(target) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it in the Logbook to hear from it.') + ' Now a ' + MODES[mode].toLowerCase() + '.';
+          hint.textContent = 'Listening Post built on ' + nm(target) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it on the Ship tab to hear from it.') + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
           const lucky = !!S.coord; S.coord = false;
           const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
@@ -587,17 +602,53 @@
       if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session to build a Listening Post on ' + nm(building()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
       if (S.mission > 0 && !building()) S.mission = 0;
       if (S.mission === -1 && S.coord) S.mission = 0;
-      mission.hidden = !S.found.length;
-      missionSel.disabled = running && mode === 'focus';
-      missionSel.replaceChildren(el('option', { value: 0 }, S.coord ? '🚀 Travel (🧭 Coordinator charged: lucky trip)' : '🚀 Travel to a new world'),
-        el('option', { value: -1, disabled: S.coord || null }, S.coord ? '🧭 Interplanetary Coordinator: already charged' : '🧭 Recharge Interplanetary Coordinator (next trip is lucky)'),
-        ...S.found.slice().reverse().filter(f => !f.p.post).slice(0, 300).map(f => el('option', { value: f.p.num }, '🗼 Build a Listening Post on ' + nm(f.p) + ' (' + pad(f.p.num) + ')')));
-      missionSel.value = String(S.mission || 0);
+      const cm = curMission(), locked = running && mode === 'focus', canBuild = unposted().length > 0;
+      mission.classList.toggle('off', mode !== 'focus');
+      misBtns.forEach(b => {
+        const k = b.dataset.m, on = k === cm;
+        b.setAttribute('aria-checked', String(on)); b.classList.toggle('on', on);
+        b.disabled = (locked && !on) || (k === 'build' && !canBuild) || (k === 'charge' && !!S.coord && !on);
+        if (k === 'explore') b.lastChild.textContent = S.coord ? 'Explore 🧭' : 'Explore';
+        if (k === 'charge') b.title = S.coord ? 'Already charged: your next Explore is a lucky one' : MISSIONS[2][3];
+        if (k === 'build') b.title = canBuild ? MISSIONS[1][3] : 'Every world you found already has a Listening Post';
+      });
+      buildSel.hidden = cm !== 'build'; buildSel.disabled = locked;
+      if (cm === 'build') { buildSel.replaceChildren(...unposted().slice(0, 300).map(f => el('option', { value: f.p.num }, nm(f.p) + ' (' + pad(f.p.num) + ')'))); buildSel.value = String(S.mission); }
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
       const tp = tunedP();
       status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '') + (S.coord ? ' · 🧭 charged' : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
+      if (!shipPane.hidden) drawShip();
+    }
+
+    /* ---------- the Ship tab: Coordinator, Listening Posts and all their transmissions in one place ---------- */
+    function drawShip() {
+      const group = (title, ...kids) => el('fieldset', { class: 'sl-group' }, el('legend', {}, title), ...kids);
+      const cm = curMission(), b = building(), locked = running && mode === 'focus';
+      const next = cm === 'build' && b ? '🗼 Build a Listening Post on ' + nm(b) : cm === 'charge' ? '🧭 Charge the Interplanetary Coordinator' : S.coord ? '🚀 Explore (lucky, Coordinator charged)' : '🚀 Explore a new world';
+      const coord = group('🧭 Interplanetary Coordinator',
+        el('p', {}, S.coord ? el('b', {}, 'Charged. ') : el('b', {}, 'Empty. '), S.coord ? 'Your next Explore session heads somewhere promising: better odds of Rare and Legendary, livable worlds.' : 'Spend one study session charging it, and your next Explore is a lucky one. It holds one charge.'),
+        S.coord ? null : el('button', { type: 'button', class: 'btn', disabled: locked || cm === 'charge' || null, onclick: () => { setMission('charge'); drawShip(); } }, cm === 'charge' ? 'Charging next session' : 'Charge it next session'));
+      const pl = posts().slice().reverse();
+      const postRows = pl.length ? el('div', { class: 'sl-posts' }, pl.map(f => {
+        const p = f.p, tuned = S.tuned === p.num;
+        return el('div', { class: 'sl-post' + (tuned ? ' tuned' : '') }, el('img', { src: paint(p, 32), alt: '' }),
+          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), tuned ? ' 📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.post.reports.length + ' transmission' + (p.post.reports.length === 1 ? '' : 's'))),
+          tuned ? el('button', { type: 'button', class: 'btn', onclick: () => { S.tuned = 0; save(); draw(); } }, 'Untune') : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); draw(); } }, 'Tune'));
+      })) : el('p', { class: 'sl-muted' }, 'No posts yet. Choose the 🗼 Build mission on the Voyage tab (or open a world in the Logbook).');
+      const up = unposted();
+      const plan = up.length ? (() => { const s2 = el('select', { 'aria-label': 'World to build on' }, up.slice(0, 300).map(f => el('option', { value: f.p.num }, nm(f.p) + ' (' + pad(f.p.num) + ')'))); if (b) s2.value = String(b.num);
+        return el('div', { class: 'sl-plan' }, 'New post on ', s2, el('button', { type: 'button', class: 'btn', disabled: locked || null, onclick: () => { setMission('build', +s2.value); drawShip(); } }, 'Build next session')); })() : null;
+      const feed = [];
+      posts().forEach(f => f.p.post.reports.forEach(r => feed.push({ p: f.p, r })));
+      feed.sort((a, c) => c.r.at - a.r.at);
+      const trans = group('📡 Transmissions' + (feed.length ? ' (' + feed.length + ')' : ''),
+        feed.length ? el('ol', { class: 'sl-reports sl-feed' }, feed.slice(0, 60).map(({ p, r }) => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, nm(p) + ' · Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), el('br', {}), r.t)))
+          : el('p', { class: 'sl-muted' }, 'Nothing yet. A tuned post sends one transmission every study session.'));
+      shipPane.replaceChildren(
+        el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)),
+        coord, group('🗼 Listening Posts (' + pl.length + ')', postRows, plan), trans);
     }
 
     /* ---------- logbook ---------- */
