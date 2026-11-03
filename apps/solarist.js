@@ -300,6 +300,27 @@
       .replace(/\{w\}/g, p.weather).replace(/\{b\}/g, p.biomes[0].toLowerCase()).replace(/\{star\}/g, p.star.startsWith('none') ? 'darkness' : p.star);
   }
 
+  /* ---------- Deep-space events: about 1 study session in 15 ends with a little surprise. Mostly flavor;
+     a few of them refill the Interplanetary Coordinator for free. ---------- */
+  const EVENTS = [
+    ['🛰', 'Derelict ship', 'A derelict freighter was drifting off the bow. The crew salvaged its old navigation core.', 'charge'],
+    ['📦', 'Lost cargo pod', 'A lost cargo pod floated by, packed with spare Coordinator cells. Finders keepers.', 'charge'],
+    ['☄', 'Comet flyby', 'A comet passed close enough to light up the whole cabin. {who} took about a hundred photos.'],
+    ['📨', 'Message in a bottle', 'A sealed capsule drifted past the window. Inside, a note: "{msg}" Signed, {who}.'],
+    ['🆘', 'Distress call', 'A distress call came in from {post}. False alarm: {fix}.'],
+    ['🐋', 'Space whale', 'Something enormous swam past in the dark. The sensors said "unknown". The crew said "space whale".'],
+    ['⚡', 'Ion storm', 'An ion storm rattled the hull for an hour. Everyone is fine. The coffee machine is not.'],
+    ['🎶', 'Strange signal', 'The radio picked up a slow melody from deep space. {who} has been humming it ever since.'],
+    ['🌌', 'Nebula crossing', 'The ship drifted through a glowing nebula. Nobody said a word for ten minutes.'],
+    ['🛸', 'Fellow explorer', 'Passed another explorer, {who}, heading toward {world}. They waved. We waved back.'],
+    ['🪨', 'Asteroid shower', 'Dodged an asteroid shower. The autopilot is very proud of itself.'],
+    ['🔭', 'Supernova', 'A star exploded somewhere far away. For one night it was the brightest thing in the sky.'],
+    ['🧊', 'Ice comet', 'Topped up the water tanks from a passing ice comet. Showers for everyone.'],
+    ['🌠', 'Meteor storm', 'A meteor storm streaked past for hours. {who} made a wish on every single one.'],
+  ];
+  const BOTTLE = ['If you found this, keep going.', 'The view from here is worth the trip.', 'Anyone else out here? Say hi.', 'Took a wrong turn at the last nebula. Worth it.', 'Remember to drink water.', 'The best world is the next one.'];
+  const FIX = ['someone left the Diner\'s oven on', 'a traveler locked themselves out of the Inn', 'the antenna was pointing the wrong way', 'a very loud bird sat on the transmitter', 'the Arcade high score got beaten and someone panicked'];
+
   // the ship's satellite: a tiny pixel sprite (made once)
   let satUrl = null;
   function satSprite() {
@@ -389,7 +410,7 @@
     const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
     /* ---------- saved state (settings, stats and a running timer carry over from Archivist) ---------- */
-    let S = { found: [], tuned: 0, mission: 0, total: 0, minutes: 0, day: today(), todayN: 0, cycle: 0, set: { focus: 25, short: 5, long: 15, every: 4 }, run: null };
+    let S = { found: [], tuned: 0, mission: 0, events: [], fc: { n: 0, broken: false }, total: 0, minutes: 0, day: today(), todayN: 0, cycle: 0, set: { focus: 25, short: 5, long: 15, every: 4 }, run: null };
     try {
       let s = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (!s) { const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null'); if (old) { s = { total: old.total, minutes: old.minutes, day: old.day, todayN: old.todayN, cycle: old.cycle, set: old.set, run: old.run, found: [] }; } }
@@ -451,6 +472,25 @@
     // Interplanetary Coordinator: spend one study session charging it, and your next trip is a lucky one (one charge, no stacking)
     const charging = () => S.mission === -1 && !S.coord;
     const posts = () => S.found.filter(f => f.p.post);
+    if (!S.events) S.events = []; if (!S.fc) S.fc = { n: 0, broken: false };
+    function rollEvent(force) {
+      if (!force && Math.random() >= 1 / 15) return null;
+      const pk = a => a[Math.floor(Math.random() * a.length)];
+      const nameBit = () => { let n = ''; for (let i = 0; i < 2; i++) n += pk(SYL); return n.charAt(0).toUpperCase() + n.slice(1); };
+      const pl = posts(); const pool = EVENTS.filter(e => e[1] !== 'Distress call' || pl.length);
+      const [ic, title, tpl, reward] = pk(pool);
+      let t = tpl.replace('{who}', pk(TITLE) + ' ' + nameBit()).replace('{msg}', pk(BOTTLE)).replace('{fix}', pk(FIX))
+        .replace('{post}', pl.length ? nm(pk(pl).p) : 'nowhere').replace('{world}', S.found.length ? nm(pk(S.found).p) : nameBit());
+      let got = null;
+      if (reward === 'charge') { if (!S.coord) { S.coord = true; got = '🧭 The Interplanetary Coordinator is charged!'; } else t += ' (The Coordinator was already full.)'; }
+      const ev = { ic, title, t, got, at: Date.now() };
+      S.events.push(ev); if (S.events.length > 200) S.events.shift();
+      return ev;
+    }
+    // Codex: every class × rarity combination; a slot fills with the first world that matches
+    const codexKey = p => p.type + '|' + p.rarity;
+    const codexFirst = () => { const m = new Map(); S.found.forEach(f => { const k = codexKey(f.p); if (!m.has(k)) m.set(k, f.p); }); return m; };
+    const CODEX_TOTAL = Object.keys(TYPES).length * RARITY.length;
 
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
@@ -594,7 +634,9 @@
     function showTrans(list) {
       if (!list || !list.length) { trans.hidden = true; trans.replaceChildren(); return; }
       trans.hidden = false;
-      trans.replaceChildren(...list.map(({ p, rep, passive }) => el('div', { class: 'sl-trans-i' },
+      trans.replaceChildren(...list.map(({ p, rep, passive, ev }) => ev ? el('div', { class: 'sl-trans-i sl-event' },
+          el('div', { class: 'sl-trans-h' }, el('span', { class: 'sl-ev-i' }, ev.ic), ' Deep-space event: ' + ev.title), el('p', {}, ev.t), ev.got ? el('p', { class: 'sl-ev-got' }, ev.got) : null)
+        : el('div', { class: 'sl-trans-i' },
         el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), (passive ? ' Overheard from ' : ' Transmission from ') + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t))));
     }
 
@@ -608,6 +650,7 @@
     function reset() { running = false; clearInterval(tickT); left = length(mode); persistRun(); draw(); }
     function skip() {
       running = false; clearInterval(tickT);
+      S.fc.broken = true; // skipping anything breaks this cycle's Full Cycle bonus
       const wasBuilding = mode === 'focus' && building(), wasCharging = mode === 'focus' && charging();
       if (mode === 'focus') toBreak(); else setMode('focus');
       hint.textContent = mode === 'focus' ? 'Break skipped. Ready for the next session.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : wasCharging ? 'Charging stopped early. The Coordinator is still empty.' : 'Turned back early. No new world this time.';
@@ -619,10 +662,12 @@
       clearInterval(tickT); running = false; left = 0;
       if (mode === 'focus') {
         rollDay();
-        S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus;
+        S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus; S.fc.n++;
         const target = building();
         // the tuned post reports in every study session (also while building somewhere else)
         const tp = tunedP(), reps = sessionReports();
+        const forced = !!S.eventNext; S.eventNext = false;
+        const ev = rollEvent(forced); if (ev) reps.unshift({ ev });
         if (charging()) {
           S.coord = true; S.mission = 0;
           if (!quiet && hooks.tada) hooks.tada();
@@ -650,20 +695,30 @@
           toBreak();
           hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
-          const lucky = !!S.coord; S.coord = false;
+          const lucky = !!S.coord && !(ev && ev.got); if (lucky) S.coord = false;
           const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
+          const newCodex = !codexFirst().has(codexKey(p));
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(p, lucky ? 'lucky' : 'new'); showTrans(reps);
           toBreak();
-          hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = 'Arrived! ' + (newCodex ? '📖 New Codex entry: ' + p.rarity + ' ' + p.type + '! ' : '') + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
       } else {
         if (!quiet && hooks.ding) hooks.ding();
         if (hooks.show) hooks.show();
+        const wasLong = mode === 'long';
         setMode('focus');
         hint.textContent = 'Cores recharged. Press Launch for the next jump.';
+        if (wasLong) { // Full Cycle: every session and break of the cycle finished, nothing skipped
+          if (!S.fc.broken && S.fc.n >= S.set.every) {
+            if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
+            else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
+            showTrans([]);
+          }
+          S.fc = { n: 0, broken: false };
+        }
       }
       persistRun(); draw();
     }
@@ -698,7 +753,9 @@
       buildSel.hidden = cm !== 'build'; buildSel.disabled = locked;
       if (cm === 'build') { fillBuildSel(buildSel); buildSel.value = jobKey(building()); }
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
-      status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
+      const stars = S.fc.broken ? '' : ' ' + '★'.repeat(Math.min(S.set.every, S.fc.n)) + '☆'.repeat(Math.max(0, S.set.every - S.fc.n));
+      status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every + stars;
+      status.title = S.fc.broken ? 'Full Cycle broken this time (something was skipped). It resets after the long break.' : 'Full Cycle: finish every session and break of this cycle without skipping for a bonus after the long break';
       const tp = tunedP();
       status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '') + (S.coord ? ' · 🧭 charged' : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
@@ -728,9 +785,13 @@
       const trans = group('📡 Transmissions' + (feed.length ? ' (' + feed.length + ')' : ''),
         feed.length ? el('ol', { class: 'sl-reports sl-feed' }, feed.slice(0, 60).map(({ p, r }) => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, nm(p) + ' · Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), el('br', {}), r.t)))
           : el('p', { class: 'sl-muted' }, 'Nothing yet. A tuned post sends one transmission every study session.'));
+      const evs = S.events.slice().reverse();
+      const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? el('ol', { class: 'sl-reports sl-feed' }, evs.slice(0, 60).map(e => el('li', { class: 'sl-rep-ev' }, el('small', {}, e.ic + ' ' + e.title + ' · ' + new Date(e.at).toLocaleDateString()), el('br', {}), e.t, e.got ? el('b', {}, ' ' + e.got) : null)))
+        : el('p', { class: 'sl-muted' }, 'No deep-space events yet. About one study session in 15 runs into something.'));
       shipPane.replaceChildren(
         el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)),
-        coord, group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, and a tuned one adds news from its facilities.'), postRows, plan), trans);
+        group('★ Full Cycle', el('p', {}, S.fc.broken ? 'Broken this cycle (something was skipped). A fresh cycle starts after the long break.' : 'Finish all ' + S.set.every + ' study sessions and their breaks without skipping: ' + '★'.repeat(Math.min(S.set.every, S.fc.n)) + '☆'.repeat(Math.max(0, S.set.every - S.fc.n)) + '. The long break then charges the Coordinator for free (or, if it\'s already charged, guarantees a deep-space event).')),
+        coord, group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, and a tuned one adds news from its facilities.'), postRows, plan), trans, evLog);
     }
 
     /* ---------- logbook ---------- */
@@ -741,6 +802,7 @@
     function closeWorld() { openNum = null; drawLog(); body().scrollTop = gridScroll; }
     function drawLog() {
       const tools = logPane.querySelector('.sl-tools');
+      if (openNum === 'codex') { logHead.hidden = tools.hidden = true; drawCodex(); return; }
       const f0 = openNum != null && byNum(openNum);
       logHead.hidden = tools.hidden = !!f0;
       if (f0) { drawWorld(f0); return; }
@@ -751,7 +813,8 @@
       logHead.replaceChildren(
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
-        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
+        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0))),
+          el('button', { type: 'button', class: 'btn sl-codex-b', title: 'Every class × rarity combination you\'ve found', onclick: () => openWorld('codex') }, '📖 Codex ' + codexFirst().size + ' / ' + CODEX_TOTAL)),
         el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) : ' · 📡 Satellite not tuned') : '🗼 No posts yet. Open a world and choose "Build a Listening Post here".'));
       logList.className = 'sl-list';
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
@@ -766,6 +829,18 @@
           el('span', { class: 'sl-tile-pic' }, el('img', { src: paint(p, 32), alt: '' }), marks ? el('span', { class: 'sl-tile-m' }, marks) : null),
           el('b', {}, nm(p)), el('small', {}, pad(p.num) + ' · ' + p.type));
       }));
+    }
+    function drawCodex() {
+      const have = codexFirst();
+      const nav = el('div', { class: 'sl-wnav' }, el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'), el('b', {}, '📖 Codex: ' + have.size + ' / ' + CODEX_TOTAL), el('span', { class: 'sl-muted' }, Math.round(have.size / CODEX_TOTAL * 100) + '%'));
+      const head = el('div', { class: 'sl-cx-row sl-cx-head' }, el('span', {}), RARITY.map(([r]) => el('span', { class: 'sl-rar sl-r-' + r.toLowerCase() }, r)));
+      const rows = Object.keys(TYPES).map(t => el('div', { class: 'sl-cx-row' }, el('span', { class: 'sl-cx-t' }, t), RARITY.map(([r]) => {
+        const p = have.get(t + '|' + r);
+        return p ? el('button', { type: 'button', class: 'sl-cx-c', title: r + ' ' + t + ': first found ' + nm(p), onclick: () => openWorld(p.num) }, el('img', { src: paint(p, 32), alt: nm(p) }))
+          : el('span', { class: 'sl-cx-c none', title: r + ' ' + t + ': not found yet' }, '???');
+      })));
+      logList.className = 'sl-wpage';
+      logList.replaceChildren(nav, el('p', { class: 'sl-muted' }, 'Every planet is one of a kind, but each one has a class and a rarity. Find one of each combination to fill the Codex. Click a filled slot to open the first world you found.'), el('div', { class: 'sl-codex' }, head, rows));
     }
     function drawWorld(f) {
       const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';

@@ -825,6 +825,18 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-wnav-r { margin-left: auto; display: flex; gap: 2px; }
 .sl-found-on { font-size: 11px; }
 .sl-world .sl-more { margin: 0 6px 6px; }
+.sl-event .sl-trans-h { color: #8A3A00; } .sl-ev-i { font-size: 13px; }
+.sl-ev-got { margin-top: 3px !important; font-style: normal !important; font-weight: bold; color: #1F6417 !important; }
+.sl-reports .sl-rep-ev small { color: #8A3A00; }
+.sl-rarcount .sl-codex-b { margin-left: auto; padding: 0 8px; font: bold 11px var(--f-ui); }
+.sl-codex { display: flex; flex-direction: column; background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 4px; }
+.sl-cx-row { display: grid; grid-template-columns: 96px repeat(4, minmax(0, 1fr)); gap: 3px; align-items: center; padding: 1px 0; }
+.sl-cx-row + .sl-cx-row { border-top: 1px solid #EEEEEE; }
+.sl-cx-head { position: sticky; top: 0; background: #FFFFFF; z-index: 1; padding-bottom: 3px; } .sl-cx-head .sl-rar { text-align: center; }
+.sl-cx-t { font: bold 11px var(--f-ui); color: var(--navy); }
+.sl-cx-c { justify-self: center; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; background: #000000; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); cursor: var(--cur-hand); }
+.sl-cx-c img { width: 36px; height: 36px; image-rendering: pixelated; }
+.sl-cx-c.none { background: #EEEEEE; color: #AAAAAA; font: bold 10px var(--f-ui); cursor: default; }
 .sl-tower { position: absolute; right: 4px; bottom: 2px; z-index: 3; font-size: 14px; line-height: 1; filter: drop-shadow(1px 1px 0 #000000); }
 .sl-trans { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 6px 8px; }
 .sl-trans[hidden] { display: none; }
@@ -3066,7 +3078,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=10').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=11').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
