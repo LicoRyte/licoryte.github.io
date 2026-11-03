@@ -766,6 +766,22 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-detail { padding: 6px; background: var(--silver); border-top: 1px solid var(--shade); }
 .sl-detail .sl-more { margin-top: 6px; }
 .sl-list .sl-empty { padding: 14px 8px; }
+.sl-picwrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; background: #000000; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); overflow: hidden; }
+.sl-picwrap .sl-pic { position: relative; z-index: 1; width: 100%; height: 100%; border: 0; background: transparent; display: block; }
+.sl-orbit { position: absolute; left: 50%; top: 50%; width: 18px; height: 12px; margin: -6px 0 0 -9px; animation: sl-orbit 7s linear infinite; }
+.sl-orbit img { width: 18px; height: 12px; image-rendering: pixelated; display: block; }
+.sl-orbit::after { content: ""; position: absolute; left: 8px; top: 0; width: 2px; height: 2px; background: #FF4040; animation: sl-blink 1s steps(2) infinite; }
+@keyframes sl-orbit { 0.0% { transform: translate(-54.0px, 0.0px); z-index: 2; } 6.25% { transform: translate(-49.9px, 6.1px); z-index: 2; } 12.5% { transform: translate(-38.2px, 11.3px); z-index: 2; } 18.75% { transform: translate(-20.7px, 14.8px); z-index: 2; } 25.0% { transform: translate(-0.0px, 16.0px); z-index: 2; } 31.25% { transform: translate(20.7px, 14.8px); z-index: 2; } 37.5% { transform: translate(38.2px, 11.3px); z-index: 2; } 43.75% { transform: translate(49.9px, 6.1px); z-index: 2; } 50.0% { transform: translate(54.0px, 0.0px); z-index: 2; } 56.25% { transform: translate(49.9px, -6.1px); z-index: 0; } 62.5% { transform: translate(38.2px, -11.3px); z-index: 0; } 68.75% { transform: translate(20.7px, -14.8px); z-index: 0; } 75.0% { transform: translate(0.0px, -16.0px); z-index: 0; } 81.25% { transform: translate(-20.7px, -14.8px); z-index: 0; } 87.5% { transform: translate(-38.2px, -11.3px); z-index: 0; } 93.75% { transform: translate(-49.9px, -6.1px); z-index: 0; } 100.0% { transform: translate(-54.0px, -0.0px); z-index: 0; } }
+@keyframes sl-blink { 50% { opacity: 0; } }
+.sl-tag { display: inline-block; margin-left: 6px; padding: 0 5px; font: bold 10px var(--f-ui); color: #1F6417; background: #E4F6E0; border: 1px solid #2E8B4A; vertical-align: 2px; }
+.sl-deep { margin-top: 6px !important; padding-top: 6px; border-top: 1px dashed #BBBBBB; }
+.sl-mission { display: flex; align-items: center; justify-content: center; gap: 6px; font: 12px var(--f-ui); }
+.sl-mission[hidden] { display: none; }
+.sl-mission-sel { font: 12px var(--f-ui); max-width: 300px; }
+.sl-acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.sl-was { color: #777777; font-weight: normal; }
+.sl-entry.open > .sl-row .sl-was { color: #DDDDDD; }
+@media (prefers-reduced-motion: reduce) { .sl-orbit { animation: none; transform: translate(40px, 14px); z-index: 2; } .sl-orbit::after { animation: none; } }
 .rw-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 var(--hi); }
 .rw-outline .rw-files .rw-pic > .rw-fn { color: #3A3A3A; }
 .rw-scroll.rw-wide .rw-doc { max-width: none; }
@@ -2995,7 +3011,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=1').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=3').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
