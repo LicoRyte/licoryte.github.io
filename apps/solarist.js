@@ -23,6 +23,7 @@
   const CATALOG = ['KS', 'HX', 'TRA', 'VND', 'OGL', 'SLR', 'GX', 'PMR', 'NEB', 'K2', 'TOI', 'QZ'];
   const ROMAN = ['II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const RARITY = [['Common', 60], ['Uncommon', 26], ['Rare', 11], ['Legendary', 3]];
+  const RARITY_LUCKY = [['Common', 22], ['Uncommon', 40], ['Rare', 28], ['Legendary', 10]];
   const STARS = [['red dwarf', 34], ['orange dwarf', 22], ['yellow dwarf', 18], ['white dwarf', 6], ['blue giant', 5], ['red giant', 6], ['binary pair', 7], ['pulsar', 2]];
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
@@ -117,10 +118,11 @@
     return '#' + [r1, g1, b1].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
   }
 
-  function makePlanet(seed, num) {
+  function makePlanet(seed, num, lucky) {
     const r = rng(seed);
-    const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w])), T = TYPES[type];
-    const rarity = weighted(r, RARITY);
+    const LUCK = { Garden: 4, Ocean: 2, Jungle: 2.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
+    const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w * (lucky ? LUCK[k] || 1 : 1)])), T = TYPES[type];
+    const rarity = weighted(r, lucky ? RARITY_LUCKY : RARITY); // a charged Interplanetary Coordinator steers toward better worlds
     // name: 2-3 made-up syllables + a numeral or letter; plus a survey catalog code
     let name = ''; const ns = r() < .6 ? 2 : 3; for (let i = 0; i < ns; i++) name += pick(r, SYL);
     name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -128,7 +130,7 @@
     const code = pick(r, CATALOG) + '-' + (100 + Math.floor(r() * 9900)) + ' ' + 'bcdefg'[Math.floor(r() * 6)];
     const star = T.rogue ? 'none (drifting alone)' : weighted(r, STARS);
     // stats lean toward friendly, Earth-like numbers (but anything can still happen)
-    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < .55 && l < h ? between(r, l, h) : between(r, lo, hi); };
+    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < (lucky ? .85 : .55) && l < h ? between(r, l, h) : between(r, lo, hi); };
     const temp = Math.round(lean(T.t[0], T.t[1], -10, 32));
     const tempNight = T.locked ? Math.round(between(r, -200, -60)) : null;
     const gravity = T.noGround ? +(between(r, 0.9, 3.4)).toFixed(2) : +(lean(0.15, 2.4, 0.75, 1.35)).toFixed(2);
@@ -140,7 +142,7 @@
     const b = T.bio.slice().sort(() => r() - .5);
     const atm = pick(r, T.atm);
     const mild = !T.noGround && temp > -15 && temp < 45 && type !== 'Toxic' && type !== 'Lava';
-    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .15 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
+    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .15 : 0) + (lucky ? .2 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
     if (type === 'Garden' && lifeLvl < 3) lifeLvl = 3;
     const life = LIFE[Math.min(6, lifeLvl)][0];
     const pool = T.noGround ? WEATHER.gas : WEATHER.any.concat( temp > 80 ? WEATHER.hot : temp < -20 ? WEATHER.cold : (type === 'Ocean' || type === 'Jungle' || type === 'Garden') ? WEATHER.wet : []);
@@ -161,7 +163,7 @@
     const pal = T.pal.map(c => shiftHex(c, hue, lit));
     const land = T.land ? T.land.map(c => shiftHex(c, hue / 2, lit)) : null;
     const planet = {
-      v: 1, seed, num, type, rarity, name, code, star, temp, tempNight, gravity, day, year, moons, rings, dist, atm, life, lifeLvl, weather,
+      v: 1, seed, num, lucky: !!lucky || undefined, type, rarity, name, code, star, temp, tempNight, gravity, day, year, moons, rings, dist, atm, life, lifeLvl, weather,
       biomes: b.slice(0, 2), res, odd, log: lines.join(' '),
       look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: shiftHex(pick(r, ['#d8c8a0', '#a8b8d0', '#c0a0d8', '#e0d0b0']), hue, 0), noise: Math.floor(r() * 1e9) },
     };
@@ -388,7 +390,9 @@
     const byNum = n => S.found.find(f => f.p.num === n);
     const nm = p => p.custom || p.name;
     const tunedP = () => { const f = S.tuned && byNum(S.tuned); return f && f.p.post ? f.p : null; };
-    const building = () => { const f = S.mission && byNum(S.mission); return f && !f.p.post ? f.p : null; };
+    const building = () => { const f = S.mission > 0 && byNum(S.mission); return f && !f.p.post ? f.p : null; };
+    // Interplanetary Coordinator: spend one study session charging it, and your next trip is a lucky one (one charge, no stacking)
+    const charging = () => S.mission === -1 && !S.coord;
     const posts = () => S.found.filter(f => f.p.post);
 
     /* ---------- UI ---------- */
@@ -400,9 +404,9 @@
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
     function headline() {
-      const b = building();
-      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? 'Ready to build' : 'Ready for launch') : 'Docked. Ready to recharge';
-      return mode === 'focus' ? (b ? 'Building a Listening Post on ' + nm(b) : 'Traveling to an uncharted world') : 'Recharging ship cores';
+      const b = building(), c = charging();
+      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? 'Ready to build' : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Ready to recharge';
+      return mode === 'focus' ? (b ? 'Building a Listening Post on ' + nm(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Recharging ship cores';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -480,7 +484,7 @@
         reps.length ? el('ol', { class: 'sl-reports', reversed: true }, reps.map(r => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, 'Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), ' ', r.t)))
           : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.'));
     }
-    const HEAD = { new: '★ New world discovered · ', built: '🗼 Listening Post built · ', last: 'Last discovery · ', log: '' };
+    const HEAD = { new: '★ New world discovered · ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', last: 'Last discovery · ', log: '' };
     function planetCard(p, kind) {
       const tuned = S.tuned === p.num && !!p.post;
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
@@ -497,7 +501,7 @@
     }
     function showCard(p, kind) {
       if (!p) { card.hidden = true; card.replaceChildren(); return; }
-      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' ? ' new' : '');
+      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' ? ' new' : '');
       card.replaceChildren(...planetCard(p, kind));
     }
     function showTrans(p, rep) {
@@ -516,9 +520,9 @@
     function reset() { running = false; clearInterval(tickT); left = length(mode); persistRun(); draw(); }
     function skip() {
       running = false; clearInterval(tickT);
-      const wasBuilding = mode === 'focus' && building();
+      const wasBuilding = mode === 'focus' && building(), wasCharging = mode === 'focus' && charging();
       if (mode === 'focus') toBreak(); else setMode('focus');
-      hint.textContent = mode === 'focus' ? 'Recharge skipped. Next jump is ready.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : 'Turned back early. No new world this time.';
+      hint.textContent = mode === 'focus' ? 'Recharge skipped. Next jump is ready.' : wasBuilding ? 'Construction stopped early. Nothing was built.' : wasCharging ? 'Charging stopped early. The Coordinator is still empty.' : 'Turned back early. No new world this time.';
       persistRun();
     }
     function toBreak() { setMode(S.cycle > 0 && S.cycle % S.set.every === 0 ? 'long' : 'short'); }
@@ -531,7 +535,14 @@
         const target = building();
         // the tuned post reports in every study session (also while building somewhere else)
         const tp = tunedP(); const rep = tp ? transmit(tp) : null;
-        if (target) {
+        if (charging()) {
+          S.coord = true; S.mission = 0;
+          if (!quiet && hooks.tada) hooks.tada();
+          if (hooks.show) hooks.show();
+          showTrans(tp, rep);
+          toBreak();
+          hint.textContent = '🧭 Interplanetary Coordinator charged. Your next trip will head somewhere promising. Now a ' + MODES[mode].toLowerCase() + '.';
+        } else if (target) {
           target.post = { built: Date.now(), reports: [] };
           S.mission = 0;
           const autoTune = !tp; if (autoTune) S.tuned = target.num;
@@ -541,13 +552,14 @@
           toBreak();
           hint.textContent = 'Listening Post built on ' + nm(target) + '. ' + (autoTune ? 'The satellite is tuned to it, so it reports in every study session.' : 'Tune the satellite to it in the Logbook to hear from it.') + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
-          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1);
+          const lucky = !!S.coord; S.coord = false;
+          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky);
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(p, 'new'); showTrans(tp, rep);
+          showCard(p, lucky ? 'lucky' : 'new'); showTrans(tp, rep);
           toBreak();
-          hint.textContent = 'Arrived! Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
       } else {
         if (!quiet && hooks.ding) hooks.ding();
@@ -565,24 +577,26 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? 'Building' : 'Traveling') : 'Recharging') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? 'Building' : charging() ? 'Charging' : 'Traveling') : 'Recharging') : 'Solarist');
     }
     function draw() {
       drawClock();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? 'Build' : 'Launch') : 'Recharge');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session to build a Listening Post on ' + nm(building()) + '.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
-      if (S.mission && !building()) S.mission = 0;
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? 'Build' : charging() ? 'Charge' : 'Launch') : 'Recharge');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session to build a Listening Post on ' + nm(building()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
+      if (S.mission > 0 && !building()) S.mission = 0;
+      if (S.mission === -1 && S.coord) S.mission = 0;
       mission.hidden = !S.found.length;
       missionSel.disabled = running && mode === 'focus';
-      missionSel.replaceChildren(el('option', { value: 0 }, '🚀 Travel to a new world'),
+      missionSel.replaceChildren(el('option', { value: 0 }, S.coord ? '🚀 Travel (🧭 Coordinator charged: lucky trip)' : '🚀 Travel to a new world'),
+        el('option', { value: -1, disabled: S.coord || null }, S.coord ? '🧭 Interplanetary Coordinator: already charged' : '🧭 Recharge Interplanetary Coordinator (next trip is lucky)'),
         ...S.found.slice().reverse().filter(f => !f.p.post).slice(0, 300).map(f => el('option', { value: f.p.num }, '🗼 Build a Listening Post on ' + nm(f.p) + ' (' + pad(f.p.num) + ')')));
       missionSel.value = String(S.mission || 0);
       const round = mode === 'focus' ? S.cycle % S.set.every + 1 : (S.cycle % S.set.every || S.set.every);
       status.textContent = 'Today: ' + S.todayN + ' trip' + (S.todayN === 1 ? '' : 's') + ' · leg ' + round + ' of ' + S.set.every;
       const tp = tunedP();
-      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '');
+      status2.textContent = S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted' + (tp ? ' · 📡 ' + nm(tp) : '') + (S.coord ? ' · 🧭 charged' : '');
       tabLog.textContent = '🪐 Logbook (' + S.found.length + ')';
     }
 
@@ -605,7 +619,7 @@
         const p = f.p, open = openNum === p.num, tuned = S.tuned === p.num && !!p.post;
         const row = el('button', { type: 'button', class: 'sl-row', 'aria-expanded': String(open), onclick: () => { openNum = open ? null : p.num; drawLog(); } },
           el('img', { src: paint(p, 32), alt: '', width: 48, height: 48 }),
-          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.post ? ' 🗼' : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
+          el('span', { class: 'sl-row-t' }, el('b', {}, nm(p), p.lucky ? ' 🧭' : '', p.post ? ' 🗼' : '', tuned ? '📡' : ''), el('small', {}, pad(p.num) + ' · ' + p.type + ' · ' + new Date(f.at).toLocaleDateString())),
           el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity));
         const busy = running && mode === 'focus';
         const acts = open ? el('div', { class: 'sl-acts' },
