@@ -697,48 +697,71 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .rw-files mark { background: #FFFF66; color: #000000; }
 .rw-files li.cur .rw-where, .rw-files li.cur .rw-snip { color: #FFFFFF; }
 .rw-tools .rw-nav { padding: 2px 6px; min-width: 24px; }
-/* Archivist */
-#arRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; font: 12px var(--f-ui); }
-.ar-tabs { display: flex; gap: 2px; padding: 2px 2px 0; flex-shrink: 0; }
-.ar-tabs button { padding: 3px 12px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) transparent var(--hi); border-bottom: 0; cursor: var(--cur-hand); position: relative; top: 2px; }
-.ar-tabs button[aria-selected="true"] { top: 0; padding-bottom: 5px; font-weight: bold; z-index: 1; }
-.ar-body { flex: 1; min-height: 0; overflow: auto; background: var(--silver); }
-.ar-pane { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.ar-modes { display: flex; gap: 4px; justify-content: center; }
-.ar-mode { padding: 3px 10px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand); }
-.ar-mode.on { border-color: var(--dark) var(--hi) var(--hi) var(--dark); background: #DCDCDC; font-weight: bold; }
-.ar-mode:disabled { color: #8A8A8A; }
-.ar-screen { background: #0B120D; padding: 18px 10px 14px; text-align: center; }
-.ar-big { font: bold 22px/1.25 var(--f-head); color: #3DDC6E; min-height: 1.25em; }
-.ar-dots i { font-style: normal; } .ar-dots i.off { visibility: hidden; }
-.ar-time { margin-top: 6px; font: 15px var(--f-ui); color: #FFFFFF; font-variant-numeric: tabular-nums; }
-.ar-bar { height: 22px; background: #FFFFFF; padding: 2px; }
-.ar-bar.thin { height: 12px; margin: 4px 0; }
-.ar-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 10px, transparent 10px 12px); transition: width .25s linear; }
-#arRoot[data-mode="short"] .ar-pane:first-child .ar-fill, #arRoot[data-mode="long"] .ar-pane:first-child .ar-fill { background: repeating-linear-gradient(90deg, #2E8B22 0 10px, transparent 10px 12px); }
-.ar-btns { display: flex; gap: 6px; justify-content: center; }
-.ar-btns .btn { min-width: 78px; padding: 4px 10px; }
-.ar-btns .ar-go { font-weight: bold; }
-.ar-hint { text-align: center; color: #333333; min-height: 1.3em; }
-.ar-card, .ar-entry { background: #FFFDF2; border: 1px solid #A0A0A0; border-left: 4px solid #C9A400; padding: 8px 10px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .15); }
-.ar-card[hidden] { display: none; }
-.ar-card.new { animation: ar-pop .5s ease-out; border-left-color: var(--blue); background: #FFFFF0; }
-@keyframes ar-pop { 0% { transform: scale(.9); opacity: 0; } 70% { transform: scale(1.03); opacity: 1; } 100% { transform: none; } }
-.ar-card-h { display: flex; justify-content: space-between; gap: 8px; font: bold 11px var(--f-ui); color: var(--navy); margin-bottom: 4px; }
-.ar-cat { font-weight: normal; color: #555555; white-space: nowrap; }
-.ar-card p, .ar-entry p { margin: 0; font: 13px/1.5 var(--f-body); color: #1A1A1A; }
-.ar-set summary { cursor: var(--cur-hand); color: #333333; }
-.ar-set-row { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 2px 0; }
-.ar-set select { font: 12px var(--f-ui); }
-.ar-ahead { display: flex; flex-direction: column; gap: 2px; }
-.ar-muted { color: #555555; font-size: 11px; }
-.ar-tools { display: flex; gap: 6px; }
-.ar-tools select { font: 12px var(--f-ui); }
-.ar-find { flex: 1; min-width: 0; font: 12px var(--f-ui); padding: 2px 4px; }
-.ar-list { display: flex; flex-direction: column; gap: 8px; }
-.ar-entry { box-shadow: none; }
-.ar-empty { text-align: center; color: #555555; padding: 10px 0; margin: 0; }
-@media (prefers-reduced-motion: reduce) { .ar-card.new { animation: none; } .ar-fill { transition: none; } }
+/* Solarist */
+#slRoot { flex: 1; min-height: 0; display: flex; flex-direction: column; font: 12px var(--f-ui); }
+.sl-tabs { display: flex; gap: 2px; padding: 2px 2px 0; flex-shrink: 0; }
+.sl-tabs button { padding: 3px 12px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) transparent var(--hi); border-bottom: 0; cursor: var(--cur-hand); position: relative; top: 2px; }
+.sl-tabs button[aria-selected="true"] { top: 0; padding-bottom: 5px; font-weight: bold; z-index: 1; }
+.sl-body { flex: 1; min-height: 0; overflow: auto; background: var(--silver); }
+.sl-pane { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.sl-modes { display: flex; gap: 4px; justify-content: center; }
+.sl-mode { padding: 3px 10px; font: 12px var(--f-ui); background: var(--silver); color: var(--text); border: 2px solid; border-color: var(--hi) var(--dark) var(--dark) var(--hi); cursor: var(--cur-hand); }
+.sl-mode.on { border-color: var(--dark) var(--hi) var(--hi) var(--dark); background: #DCDCDC; font-weight: bold; }
+.sl-mode:disabled { color: #8A8A8A; }
+.sl-screen { background: #0B120D; padding: 18px 10px 14px; text-align: center; }
+.sl-big { font: bold 22px/1.25 var(--f-head); color: #3DDC6E; min-height: 1.25em; }
+.sl-dots i { font-style: normal; } .sl-dots i.off { visibility: hidden; }
+.sl-time { margin-top: 6px; font: 15px var(--f-ui); color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.sl-bar { height: 22px; background: #FFFFFF; padding: 2px; }
+.sl-bar.thin { height: 12px; margin: 4px 0; }
+.sl-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 10px, transparent 10px 12px); transition: width .25s linear; }
+#slRoot[data-mode="short"] .sl-pane:first-child .sl-fill, #slRoot[data-mode="long"] .sl-pane:first-child .sl-fill { background: repeating-linear-gradient(90deg, #2E8B22 0 10px, transparent 10px 12px); }
+.sl-btns { display: flex; gap: 6px; justify-content: center; }
+.sl-btns .btn { min-width: 78px; padding: 4px 10px; }
+.sl-btns .sl-go { font-weight: bold; }
+.sl-hint { text-align: center; color: #333333; min-height: 1.3em; }
+.sl-card { background: #FFFDF2; border: 1px solid #A0A0A0; border-left: 4px solid #C9A400; padding: 8px 10px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .15); }
+.sl-card[hidden] { display: none; }
+.sl-card.new { animation: sl-pop .5s ease-out; border-left-color: var(--blue); background: #FFFFF0; }
+@keyframes sl-pop { 0% { transform: scale(.9); opacity: 0; } 70% { transform: scale(1.03); opacity: 1; } 100% { transform: none; } }
+.sl-card-h { display: flex; justify-content: space-between; gap: 8px; font: bold 11px var(--f-ui); color: var(--navy); margin-bottom: 4px; }
+.sl-cat { font-weight: normal; color: #555555; white-space: nowrap; }
+.sl-entry p { margin: 0; font: 13px/1.5 var(--f-body); color: #1A1A1A; }
+.sl-set summary { cursor: var(--cur-hand); color: #333333; }
+.sl-set-row { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 2px 0; }
+.sl-set select { font: 12px var(--f-ui); }
+.sl-ahead { display: flex; flex-direction: column; gap: 2px; }
+.sl-muted { color: #555555; font-size: 11px; }
+.sl-tools { display: flex; gap: 6px; }
+.sl-tools select { font: 12px var(--f-ui); }
+.sl-find { flex: 1; min-width: 0; font: 12px var(--f-ui); padding: 2px 4px; }
+.sl-list { display: flex; flex-direction: column; gap: 8px; }
+.sl-entry { box-shadow: none; }
+.sl-empty { text-align: center; color: #555555; padding: 10px 0; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .sl-card.new { animation: none; } .sl-fill { transition: none; } }
+.sl-card { background: #0F1424; border: 1px solid #000000; border-left: 4px solid #3DDC6E; color: #E6E9F2; }
+.sl-card.new { background: #111A30; border-left-color: #FFD34A; }
+.sl-card .sl-card-h, .sl-detail .sl-card-h { color: #9EC0FF; }
+.sl-pl { display: flex; gap: 10px; align-items: flex-start; }
+.sl-pic { width: 112px; height: 112px; flex-shrink: 0; image-rendering: pixelated; background: radial-gradient(circle at 30% 30%, #1B2444, #070A14 70%); border: 1px solid #2A3256; }
+.sl-pl-t { min-width: 0; }
+.sl-name { display: block; font: bold 17px var(--f-head); color: #FFFFFF; }
+.sl-code { font: 11px var(--f-ui); color: #8C96B8; margin-bottom: 4px; }
+.sl-card p, .sl-detail p { margin: 0; font: 13px/1.5 var(--f-body); color: #E6E9F2; }
+.sl-more { margin-top: 6px; } .sl-more summary { cursor: var(--cur-hand); color: #9EC0FF; font: 12px var(--f-ui); }
+.sl-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; margin: 6px 0 0; font: 12px var(--f-ui); }
+.sl-facts dt { color: #8C96B8; } .sl-facts dd { margin: 0; color: #FFFFFF; }
+.sl-rar { font: bold 10px var(--f-ui); padding: 1px 6px; border: 1px solid; white-space: nowrap; align-self: center; }
+.sl-r-common { color: #C8CCD8; border-color: #6A7088; } .sl-r-uncommon { color: #6FE38C; border-color: #2E8B4A; }
+.sl-r-rare { color: #7FB8FF; border-color: #2F62B8; } .sl-r-legendary { color: #FFD34A; border-color: #B88A10; background: rgba(255, 211, 74, .1); }
+.sl-rarcount { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; } .sl-rarcount .sl-rar { background: #0F1424; }
+.sl-entry { background: #0F1424; border: 1px solid #000000; }
+.sl-row { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px 8px 4px 4px; background: none; border: 0; color: #E6E9F2; text-align: left; cursor: var(--cur-hand); font: 12px var(--f-ui); }
+.sl-row:hover { background: #18203A; }
+.sl-row img { width: 48px; height: 48px; image-rendering: pixelated; flex-shrink: 0; }
+.sl-row-t { flex: 1; min-width: 0; display: flex; flex-direction: column; } .sl-row-t b { color: #FFFFFF; } .sl-row-t small { color: #8C96B8; }
+.sl-detail { padding: 2px 10px 10px; border-top: 1px solid #1E2744; }
+.sl-detail .sl-pl { margin-top: 8px; }
 .rw-tools .btn:disabled { color: #8A8A8A; text-shadow: 1px 1px 0 var(--hi); }
 .rw-outline .rw-files .rw-pic > .rw-fn { color: #3A3A3A; }
 .rw-scroll.rw-wide .rw-doc { max-width: none; }
@@ -936,7 +959,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <button type="button" class="dicon" data-open="netman"><img src="img/icons/netman.png" alt=""><span>Network Man</span></button>
   <button type="button" class="dicon" data-open="readworm"><img src="img/icons/readworm.png" alt=""><span>Readworm</span></button>
   <button type="button" class="dicon" data-open="papercut"><img src="img/icons/papercut.png" alt=""><span>Papercut</span></button>
-  <button type="button" class="dicon" data-open="archivist"><img src="img/icons/archivist.png" alt=""><span>Archivist</span></button>
+  <button type="button" class="dicon" data-open="solarist"><img src="img/icons/solarist.png" alt=""><span>Solarist</span></button>
   <button type="button" class="dicon" data-open="pancake"><img src="img/icons/pancake.png" alt=""><span>Pancake</span></button>
   <button type="button" class="dicon" data-open="saturn"><img src="img/icons/saturn.png" alt=""><span>Saturn Archive</span></button>
   <button type="button" class="dicon" data-open="paint"><img src="img/icons/paint.png" alt=""><span>Paint</span></button>
@@ -1058,9 +1081,9 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   <div class="tbar"><span class="name" id="t-papercut"></span></div>
   <div id="pcRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Papercut...</p></div>
 </section>
-<section class="win raised app" id="w-archivist" data-app="archivist" data-title="Archivist" data-icon="img/icons/archivist-16.png" data-w="440" data-h="540" hidden aria-labelledby="t-archivist">
-  <div class="tbar"><span class="name" id="t-archivist"></span></div>
-  <div id="arRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Archivist...</p></div>
+<section class="win raised app" id="w-solarist" data-app="solarist" data-title="Solarist" data-icon="img/icons/solarist-16.png" data-w="480" data-h="600" hidden aria-labelledby="t-solarist">
+  <div class="tbar"><span class="name" id="t-solarist"></span></div>
+  <div id="slRoot"><p style="padding:20px;font:12px var(--f-ui)">Loading Solarist...</p></div>
 </section>
 
 <section class="win raised app" id="w-saturn" data-app="saturn" data-title="Saturn Archive" data-icon="img/icons/saturn-16.png" data-w="900" data-h="600" hidden aria-labelledby="t-saturn">
@@ -1210,7 +1233,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     <li><button type="button" role="menuitem" data-act="open" data-app="netman"><img src="img/icons/netman.png" alt="">Network Man</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="readworm"><img src="img/icons/readworm.png" alt="">Readworm</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="papercut"><img src="img/icons/papercut.png" alt="">Papercut</button></li>
-    <li><button type="button" role="menuitem" data-act="open" data-app="archivist"><img src="img/icons/archivist.png" alt="">Archivist</button></li>
+    <li><button type="button" role="menuitem" data-act="open" data-app="solarist"><img src="img/icons/solarist.png" alt="">Solarist</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="pancake"><img src="img/icons/pancake.png" alt="">Pancake</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="saturn"><img src="img/icons/saturn.png" alt="">Saturn Archive</button></li>
     <li><button type="button" role="menuitem" data-act="open" data-app="paint"><img src="img/icons/paint.png" alt="">Paint</button></li>
@@ -1827,7 +1850,8 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     if (id === 'netman') loadNetMan();
     if (id === 'readworm') loadReadworm();
     if (id === 'saturn') loadSaturn();
-    if (id === 'archivist') loadArchivist();
+    if (id === 'archivist') id = 'solarist';
+    if (id === 'solarist') loadSolarist();
     if (id === 'papercut') loadPapercut();
     const w = APPS[id]; if (!w) return;
     if (!openOrder.includes(id)) openOrder.push(id);
@@ -2050,7 +2074,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
 
   /* ---------- Run... ---------- */
   const RUN = {
-    help: 'Programs: library, archivist, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
+    help: 'Programs: library, solarist, pancake, screensaver, notepad, explorer, mspaint, control, texty, workstation, dude, netman, readworm, saturn, papercut, gmail, twitter, youtube, (or type a website), coffee, dave, clancies, mon, pancake, minesweeper, rain, quit, sudo',
     coffee: () => { say('*sips coffee* ...okay. I can see sounds now.'); return 'Coffee.exe dispensed one (1) coffee to Dave.'; },
     dave: () => { pokeDaveFromMenu(); return 'Dave is already running. He never stops running. Help him.'; },
     explorer: () => { openApp('games'); return 'Opened My Games.'; },
@@ -2059,9 +2083,10 @@ summary.rw-co-h { cursor: var(--cur-hand); }
     dude: () => { openApp('dude'); return 'Opened Your Dude. Pick an emoji. Any emoji.'; },
     netman: () => { openApp('netman'); return 'Opened Network Man. Have you tried turning it off and on again?'; },
     readworm: () => { openApp('readworm'); return 'Opened Readworm. Feed it a .md file.'; },
-    archivist: () => { openApp('archivist'); return 'Opened Archivist. 25 minutes. You can do 25 minutes.'; },
-    pomodoro: () => { openApp('archivist'); return 'Opened Archivist.'; },
-    timer: () => { openApp('archivist'); return 'Opened Archivist.'; },
+    solarist: () => { openApp('solarist'); return 'Opened Solarist. Strap in. 25 minutes to the next world.'; },
+    archivist: () => { openApp('solarist'); return 'Archivist became Solarist. It finds planets now. Keep up.'; },
+    pomodoro: () => { openApp('solarist'); return 'Opened Solarist.'; },
+    timer: () => { openApp('solarist'); return 'Opened Solarist.'; },
     library: () => { openApp('readworm'); return 'Opened Readworm, the library. Shh.'; },
     saturn: () => { openApp('saturn'); return 'Opened Saturn Archive. It would float in a bathtub, you know.'; },
     papercut: () => { openApp('papercut'); return 'Opened Papercut. Careful, the pages are sharp.'; },
@@ -2962,21 +2987,21 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   }
 
   /* ---------- Saturn Archive (apps/saturn.js, loaded the first time the window opens) ---------- */
-  /* ---------- Archivist (apps/archivist.js + apps/archivist-facts.js): Pomodoro timer that unlocks fun facts ---------- */
-  let archivistLoading = null;
-  function loadArchivist() {
-    if (archivistLoading) return archivistLoading;
-    archivistLoading = loadScript('apps/archivist-facts.js?v=2').then(() => loadScript('apps/archivist.js?v=2')).then(() => window.Archivist.mount($('#arRoot'), {
+  /* ---------- Solarist (apps/solarist.js): Pomodoro timer; every finished study session discovers a random planet ---------- */
+  let solaristLoading = null;
+  function loadSolarist() {
+    if (solaristLoading) return solaristLoading;
+    solaristLoading = loadScript('apps/solarist.js?v=1').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
-      show: () => openApp('archivist'),
+      show: () => openApp('solarist'),
       // the countdown shows on the title bar and taskbar button while it runs
-      title: t => { if (t !== 'Archivist') { resetIdle(); saver.bump(); } /* no screensaver (or idle chatter) over a running timer */ const w = APPS.archivist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
-    })).catch(() => { $('#arRoot').textContent = "Couldn't load Archivist. Check your connection and open it again."; archivistLoading = null; });
-    return archivistLoading;
+      title: t => { if (t !== 'Solarist') { resetIdle(); saver.bump(); } /* no screensaver (or idle chatter) over a running timer */ const w = APPS.solarist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
+    })).catch(() => { $('#slRoot').textContent = "Couldn't load Solarist. Check your connection and open it again."; solaristLoading = null; });
+    return solaristLoading;
   }
   // a timer that was running when the page closed keeps going in the background (the window stays closed until it ends)
-  try { const a = JSON.parse(localStorage.getItem('lico-archivist') || 'null'); if (a && a.run && a.run.running) setTimeout(loadArchivist, 1500); } catch (e) {}
+  try { const a = JSON.parse(localStorage.getItem('lico-solarist') || localStorage.getItem('lico-archivist') || 'null'); if (a && a.run && a.run.running) setTimeout(loadSolarist, 1500); } catch (e) {}
 
   let saturnLoading = null;
   function loadSaturn() {
