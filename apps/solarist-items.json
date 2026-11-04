@@ -40,7 +40,10 @@
     "Crystal Pebble",
     "Box of Mismatched Screws",
     "Weathered Flag",
-    "Sticky Note Saying \"Back in 5\""
+    "Sticky Note Saying \"Back in 5\"",
+    "Hard Wood",
+    "Frozen Wood",
+    "Strange Electronic Manual"
   ],
   "Uncommon": [
     "Glowing Jellyfish in a Jar",
@@ -70,7 +73,9 @@
     "Living Stone",
     "Echo in a Box",
     "The Diner's Secret Recipe",
-    "Lantern of Captured Aurora"
+    "Lantern of Captured Aurora",
+    "Yagi Satellite",
+    "Glittered Rock"
   ],
   "Rare": [
     "Fragment of a Shooting Star",
@@ -102,6 +107,8 @@
     "Map of the Whole Galaxy",
     "An Egg That Is Still Warm",
     "Mirror of Another Universe",
-    "Dave's Lost Coffee Mug"
+    "Dave's Lost Coffee Mug",
+    "Pickle Jar",
+    "Redshift Pylon"
   ]
 }
