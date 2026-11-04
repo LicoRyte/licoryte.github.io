@@ -23,7 +23,7 @@
   const CATALOG = ['KS', 'HX', 'TRA', 'VND', 'OGL', 'SLR', 'GX', 'PMR', 'NEB', 'K2', 'TOI', 'QZ'];
   const ROMAN = ['II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const RARITY = [['Common', 60], ['Uncommon', 26], ['Rare', 11], ['Legendary', 3]];
-  const RARITY_LUCKY = [['Common', 22], ['Uncommon', 40], ['Rare', 28], ['Legendary', 10]];
+  const RARITY_LUCKY = [['Common', 36], ['Uncommon', 38], ['Rare', 20], ['Legendary', 6]];
   const STARS = [['red dwarf', 34], ['orange dwarf', 22], ['yellow dwarf', 18], ['white dwarf', 6], ['blue giant', 5], ['red giant', 6], ['binary pair', 7], ['pulsar', 2]];
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
@@ -130,7 +130,7 @@
 
   function makePlanet(seed, num, lucky, oddBoost) {
     const r = rng(seed);
-    const LUCK = { Garden: 7, Ocean: 2.5, Jungle: 3, Savanna: 3.5, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
+    const LUCK = { Garden: 3, Ocean: 1.6, Jungle: 2, Savanna: 2.2, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
     const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w * (lucky ? LUCK[k] || 1 : 1)])), T = TYPES[type];
     const rarity = weighted(r, lucky ? RARITY_LUCKY : RARITY); // a charged Interplanetary Coordinator steers toward better worlds
     // name: 2-3 made-up syllables + a numeral or letter; plus a survey catalog code
@@ -140,7 +140,7 @@
     const code = pick(r, CATALOG) + '-' + (100 + Math.floor(r() * 9900)) + ' ' + 'bcdefg'[Math.floor(r() * 6)];
     const star = T.rogue ? 'none (drifting alone)' : weighted(r, STARS);
     // stats lean toward friendly, Earth-like numbers (but anything can still happen)
-    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < (lucky ? .85 : .25) && l < h ? between(r, l, h) : between(r, lo, hi); };
+    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < (lucky ? .5 : .25) && l < h ? between(r, l, h) : between(r, lo, hi); };
     const temp = Math.round(lean(T.t[0], T.t[1], -10, 32));
     const tempNight = T.locked ? Math.round(between(r, -200, -60)) : null;
     const gravity = T.noGround ? +(between(r, 0.9, 3.4)).toFixed(2) : +(lean(0.15, 2.4, 0.75, 1.35)).toFixed(2);
@@ -152,7 +152,7 @@
     const b = T.bio.slice().sort(() => r() - .5);
     const atm = pick(r, T.atm);
     const mild = !T.noGround && temp > -15 && temp < 45 && type !== 'Toxic' && type !== 'Lava';
-    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .08 : 0) + (lucky ? .25 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
+    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .08 : 0) + (lucky ? .15 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
     if (type === 'Garden' && lifeLvl < 3) lifeLvl = 3;
     const life = LIFE[Math.min(6, lifeLvl)][0];
     const pool = T.noGround ? WEATHER.gas : WEATHER.any.concat( temp > 80 ? WEATHER.hot : temp < -20 ? WEATHER.cold : (type === 'Ocean' || type === 'Jungle' || type === 'Garden') ? WEATHER.wet : []);
