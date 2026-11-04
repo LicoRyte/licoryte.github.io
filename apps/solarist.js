@@ -27,29 +27,29 @@
   const STARS = [['red dwarf', 34], ['orange dwarf', 22], ['yellow dwarf', 18], ['white dwarf', 6], ['blue giant', 5], ['red giant', 6], ['binary pair', 7], ['pulsar', 2]];
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
-    Rocky: { w: 14, t: [-80, 60], pal: ['#d2ad85', '#a8825f', '#7f6045', '#58412e'], bio: ['Rocky plains', 'Canyon mazes', 'Cratered highlands', 'Dust basins', 'Stone arches', 'Boulder fields'], atm: ['Thin nitrogen', 'Carbon dioxide', 'Almost none', 'Argon haze'], life: .15 },
-    Ocean: { w: 9, t: [2, 34], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#77b864', '#c8b47a'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
-    Jungle: { w: 7, t: [18, 48], pal: ['#8fdc6a', '#4caf50', '#2e7d32', '#1b4f20'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
-    Desert: { w: 10, t: [25, 95], pal: ['#f6dc9c', '#e0b268', '#c08844', '#8e5f2c'], bio: ['Dune seas', 'Salt flats', 'Glass deserts', 'Mesa country', 'Dry riverbeds', 'Rust plains'], atm: ['Dry carbon dioxide', 'Thin nitrogen', 'Dusty nitrogen'], life: .25 },
-    Ice: { w: 11, t: [-220, -25], pal: ['#ffffff', '#d8eef8', '#a8d0e8', '#76a8c8'], bio: ['Glacier fields', 'Frozen oceans', 'Ice caves', 'Snow plains', 'Cryovolcano fields', 'Blue ice cliffs'], atm: ['Thin nitrogen', 'Methane traces', 'Almost none'], life: .12 },
-    Lava: { w: 7, t: [350, 1500], pal: ['#ffd04a', '#ff7a1a', '#4a2a22', '#241414'], bio: ['Lava seas', 'Volcanic chains', 'Obsidian plains', 'Ash fields', 'Magma rivers', 'Basalt towers'], atm: ['Sulfur dioxide', 'Volcanic ash and CO₂', 'Almost none'], life: .02 },
-    'Gas giant': { w: 10, t: [-170, 900], pal: ['#f2e2c0', '#dbb486', '#b77a50', '#86503a'], bio: ['Banded cloud belts', 'Endless storms', 'Ammonia skies', 'Hydrogen depths'], atm: ['Hydrogen and helium'], life: .04, noGround: true },
-    'Ice giant': { w: 6, t: [-225, -170], pal: ['#c4f2fa', '#8adaec', '#55b4d4', '#2f84aa'], bio: ['Methane haze', 'Diamond rain layers', 'Deep water-ice mantle', 'Supersonic winds'], atm: ['Hydrogen, helium and methane'], life: .01, noGround: true },
-    Toxic: { w: 5, t: [60, 480], pal: ['#e4ec7a', '#bcc84a', '#8e9a32', '#5e6a20'], bio: ['Acid lakes', 'Sulfur fields', 'Yellow haze plains', 'Corroded canyons', 'Bubbling mud pits'], atm: ['Sulfuric acid clouds', 'Chlorine haze', 'Thick carbon dioxide'], life: .06 },
-    Crystal: { w: 3, t: [-120, 40], pal: ['#f4dcff', '#d2a2f2', '#a46ed6', '#6e3ea8'], bio: ['Crystal spires', 'Mirror plains', 'Prism caves', 'Singing quartz forests', 'Geode valleys'], atm: ['Thin neon', 'Almost none', 'Argon and nitrogen'], life: .1 },
-    'Tidally locked': { w: 5, t: [-140, 260], pal: ['#ffd9a0', '#e0a060', '#3a4a7a', '#1a2244'], bio: ['Twilight band', 'Scorched dayside', 'Frozen nightside', 'Eternal sunset strip'], atm: ['Nitrogen', 'Thin carbon dioxide', 'Wind-whipped nitrogen'], life: .3, locked: true },
-    Garden: { w: 3, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
-    Savanna: { w: 4, t: [15, 42], pal: ['#f2dc86', '#d6b652', '#a98d3a', '#6c8a3c'], bio: ['Golden grasslands', 'Lone giant trees', 'Termite-mound fields', 'Seasonal watering holes', 'Red-rock outcrops', 'Dry riverbeds'], atm: ['Nitrogen and oxygen, dry', 'Warm nitrogen and oxygen'], life: .85 },
-    Tundra: { w: 5, t: [-40, 8], pal: ['#eef3f4', '#bcc8b4', '#8c9c82', '#5e6e5a'], bio: ['Frozen moss plains', 'Permafrost bogs', 'Rocky taiga', 'Snowy foothills', 'Frost-cracked flats', 'Ice-edged lakes'], atm: ['Cold nitrogen and oxygen', 'Thin, crisp nitrogen'], life: .45 },
-    Swamp: { w: 4, t: [12, 38], pal: ['#6c8c5c', '#4c6c42', '#36522f', '#22361e'], land: ['#7c6c3c', '#5c7c36'], bio: ['Mangrove-like mazes', 'Steaming bogs', 'Reed marshes', 'Floating plant mats', 'Muddy deltas', 'Fog-filled hollows'], atm: ['Humid, methane-scented air', 'Thick, wet nitrogen and oxygen'], life: .85 },
-    Fungal: { w: 3, t: [5, 30], pal: ['#f6b6e2', '#d27cc2', '#9c4c9c', '#5e2a6a'], bio: ['Giant mushroom forests', 'Spore meadows', 'Glowing mycelium caves', 'Puffball plains', 'Shelf-fungus cliffs'], atm: ['Spore-heavy nitrogen', 'Damp carbon dioxide and oxygen'], life: .95 },
-    Hycean: { w: 4, t: [-10, 60], pal: ['#a2f2e2', '#4ccac2', '#2a8c9c', '#1a5a72'], clouds: true, bio: ['Warm global ocean', 'Hydrogen sky', 'Deep thermal vents', 'Glowing plankton seas'], atm: ['Thick hydrogen over a warm ocean'], life: .6 },
-    Iron: { w: 3, t: [-50, 300], pal: ['#e2e6ec', '#b2b8c2', '#7e8692', '#4e545e'], bio: ['Metal plains', 'Rust canyons', 'Magnetite dunes', 'Mirror-bright craters', 'Iron spire fields'], atm: ['Almost none', 'Thin argon'], life: .05 },
-    Carbon: { w: 2, t: [-80, 600], pal: ['#4c4c56', '#36363e', '#24242a', '#141418'], sparkle: true, bio: ['Graphite plains', 'Diamond-studded cliffs', 'Tar lakes', 'Soot deserts', 'Carbide mountains'], atm: ['Carbon monoxide haze', 'Thick methane'], life: .05 },
-    Shattered: { w: 2, t: [100, 900], pal: ['#ff5c3a', '#c42c1a', '#3c2c32', '#1a1418'], bio: ['Broken crust plates', 'Glowing fault lines', 'Floating rock shards', 'Magma rifts'], atm: ['Almost none', 'Volcanic ash and CO₂'], life: .01 },
-    Dwarf: { w: 5, t: [-230, -60], pal: ['#d2cac2', '#aaa29a', '#827a72', '#5a524a'], bio: ['Cratered plains', 'Frozen nitrogen fields', 'Dusty highlands', 'Tiny ice volcanoes'], atm: ['Almost none', 'Frozen solid'], life: .03 },
-    'Glass storm': { w: 2, t: [700, 1100], pal: ['#d2f2ff', '#7cbaf2', '#3c7ad2', '#1a3c8c'], bio: ['Silicate cloud bands', 'Sideways glass rain', 'Supersonic winds', 'Molten silicate depths'], atm: ['Hydrogen with silicate clouds'], life: 0, noGround: true },
-    Rogue: { w: 2, t: [-235, -205], pal: ['#4a4f6e', '#353950', '#25283a', '#16182a'], bio: ['Eternal night', 'Frozen crust', 'Geothermal hot spots', 'Black ice plains'], atm: ['Frozen solid', 'Almost none'], life: .05, rogue: true },
+    Rocky: { w: 14, t: [-80, 60], pal: ['#aea47e', '#6f6e72', '#764032', '#402e2b'], bio: ['Rocky plains', 'Canyon mazes', 'Cratered highlands', 'Dust basins', 'Stone arches', 'Boulder fields'], atm: ['Thin nitrogen', 'Carbon dioxide', 'Almost none', 'Argon haze'], life: .15 },
+    Ocean: { w: 9, t: [2, 34], pal: ['#2a7d75', '#2a7d75', '#24505f', '#2a2942'], land: ['#6dba79', '#aea47e'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
+    Jungle: { w: 7, t: [18, 48], pal: ['#6dba79', '#349c58', '#56642e', '#24505f'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
+    Desert: { w: 10, t: [25, 95], pal: ['#fff1a9', '#ebb85b', '#c78539', '#a15c34'], bio: ['Dune seas', 'Salt flats', 'Glass deserts', 'Mesa country', 'Dry riverbeds', 'Rust plains'], atm: ['Dry carbon dioxide', 'Thin nitrogen', 'Dusty nitrogen'], life: .25 },
+    Ice: { w: 11, t: [-220, -25], pal: ['#fff1a9', '#aea47e', '#2a7d75', '#24505f'], bio: ['Glacier fields', 'Frozen oceans', 'Ice caves', 'Snow plains', 'Cryovolcano fields', 'Blue ice cliffs'], atm: ['Thin nitrogen', 'Methane traces', 'Almost none'], life: .12 },
+    Lava: { w: 7, t: [350, 1500], pal: ['#ebb85b', '#e67146', '#402e2b', '#120e23'], bio: ['Lava seas', 'Volcanic chains', 'Obsidian plains', 'Ash fields', 'Magma rivers', 'Basalt towers'], atm: ['Sulfur dioxide', 'Volcanic ash and CO₂', 'Almost none'], life: .02 },
+    'Gas giant': { w: 10, t: [-170, 900], pal: ['#aea47e', '#c78539', '#a15c34', '#764032'], bio: ['Banded cloud belts', 'Endless storms', 'Ammonia skies', 'Hydrogen depths'], atm: ['Hydrogen and helium'], life: .04, noGround: true },
+    'Ice giant': { w: 6, t: [-225, -170], pal: ['#6dba79', '#2a7d75', '#24505f', '#2a2942'], bio: ['Methane haze', 'Diamond rain layers', 'Deep water-ice mantle', 'Supersonic winds'], atm: ['Hydrogen, helium and methane'], life: .01, noGround: true },
+    Toxic: { w: 5, t: [60, 480], pal: ['#c9c03d', '#7e9432', '#56642e', '#402e2b'], bio: ['Acid lakes', 'Sulfur fields', 'Yellow haze plains', 'Corroded canyons', 'Bubbling mud pits'], atm: ['Sulfuric acid clouds', 'Chlorine haze', 'Thick carbon dioxide'], life: .06 },
+    Crystal: { w: 3, t: [-120, 40], pal: ['#e67a84', '#c23753', '#7a2849', '#3a1b40'], bio: ['Crystal spires', 'Mirror plains', 'Prism caves', 'Singing quartz forests', 'Geode valleys'], atm: ['Thin neon', 'Almost none', 'Argon and nitrogen'], life: .1 },
+    'Tidally locked': { w: 5, t: [-140, 260], pal: ['#ebb85b', '#c78539', '#2a2942', '#120e23'], bio: ['Twilight band', 'Scorched dayside', 'Frozen nightside', 'Eternal sunset strip'], atm: ['Nitrogen', 'Thin carbon dioxide', 'Wind-whipped nitrogen'], life: .3, locked: true },
+    Garden: { w: 3, t: [6, 28], pal: ['#2a7d75', '#2a7d75', '#24505f', '#2a2942'], land: ['#349c58', '#6dba79'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
+    Savanna: { w: 4, t: [15, 42], pal: ['#ebb85b', '#c78539', '#7e9432', '#56642e'], bio: ['Golden grasslands', 'Lone giant trees', 'Termite-mound fields', 'Seasonal watering holes', 'Red-rock outcrops', 'Dry riverbeds'], atm: ['Nitrogen and oxygen, dry', 'Warm nitrogen and oxygen'], life: .85 },
+    Tundra: { w: 5, t: [-40, 8], pal: ['#fff1a9', '#aea47e', '#6f6e72', '#56642e'], bio: ['Frozen moss plains', 'Permafrost bogs', 'Rocky taiga', 'Snowy foothills', 'Frost-cracked flats', 'Ice-edged lakes'], atm: ['Cold nitrogen and oxygen', 'Thin, crisp nitrogen'], life: .45 },
+    Swamp: { w: 4, t: [12, 38], pal: ['#7e9432', '#56642e', '#24505f', '#2a2942'], land: ['#764032', '#56642e'], bio: ['Mangrove-like mazes', 'Steaming bogs', 'Reed marshes', 'Floating plant mats', 'Muddy deltas', 'Fog-filled hollows'], atm: ['Humid, methane-scented air', 'Thick, wet nitrogen and oxygen'], life: .85 },
+    Fungal: { w: 3, t: [5, 30], pal: ['#e67a84', '#c23753', '#534664', '#3a1b40'], bio: ['Giant mushroom forests', 'Spore meadows', 'Glowing mycelium caves', 'Puffball plains', 'Shelf-fungus cliffs'], atm: ['Spore-heavy nitrogen', 'Damp carbon dioxide and oxygen'], life: .95 },
+    Hycean: { w: 4, t: [-10, 60], pal: ['#6dba79', '#2a7d75', '#24505f', '#2a2942'], clouds: true, bio: ['Warm global ocean', 'Hydrogen sky', 'Deep thermal vents', 'Glowing plankton seas'], atm: ['Thick hydrogen over a warm ocean'], life: .6 },
+    Iron: { w: 3, t: [-50, 300], pal: ['#aea47e', '#6f6e72', '#534664', '#2a2942'], bio: ['Metal plains', 'Rust canyons', 'Magnetite dunes', 'Mirror-bright craters', 'Iron spire fields'], atm: ['Almost none', 'Thin argon'], life: .05 },
+    Carbon: { w: 2, t: [-80, 600], pal: ['#6f6e72', '#534664', '#2a2942', '#120e23'], sparkle: true, bio: ['Graphite plains', 'Diamond-studded cliffs', 'Tar lakes', 'Soot deserts', 'Carbide mountains'], atm: ['Carbon monoxide haze', 'Thick methane'], life: .05 },
+    Shattered: { w: 2, t: [100, 900], pal: ['#e67146', '#b74132', '#7a2849', '#120e23'], bio: ['Broken crust plates', 'Glowing fault lines', 'Floating rock shards', 'Magma rifts'], atm: ['Almost none', 'Volcanic ash and CO₂'], life: .01 },
+    Dwarf: { w: 5, t: [-230, -60], pal: ['#aea47e', '#6f6e72', '#534664', '#2a2942'], bio: ['Cratered plains', 'Frozen nitrogen fields', 'Dusty highlands', 'Tiny ice volcanoes'], atm: ['Almost none', 'Frozen solid'], life: .03 },
+    'Glass storm': { w: 2, t: [700, 1100], pal: ['#fff1a9', '#2a7d75', '#24505f', '#2a2942'], bio: ['Silicate cloud bands', 'Sideways glass rain', 'Supersonic winds', 'Molten silicate depths'], atm: ['Hydrogen with silicate clouds'], life: 0, noGround: true },
+    Rogue: { w: 2, t: [-235, -205], pal: ['#534664', '#2a2942', '#3a1b40', '#120e23'], bio: ['Eternal night', 'Frozen crust', 'Geothermal hot spots', 'Black ice plains'], atm: ['Frozen solid', 'Almost none'], life: .05, rogue: true },
   };
   const LIFE = [['No signs of life', 0], ['Microbial traces', 1], ['Moss-like mats', 2], ['Plant-like life', 3], ['Swimming creatures', 4], ['Large animal herds', 5], ['Signs of intelligence', 6]];
   const WEATHER = {
@@ -175,7 +175,7 @@
     const planet = {
       v: 1, seed, num, lucky: !!lucky || undefined, type, rarity, name, code, star, temp, tempNight, gravity, day, year, moons, rings, dist, atm, life, lifeLvl, weather,
       biomes: b.slice(0, 2), res, odd, log: lines.join(' '),
-      look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava' || type === 'Shattered', sparkle: !!T.sparkle || type === 'Crystal', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: shiftHex(pick(r, ['#d8c8a0', '#a8b8d0', '#c0a0d8', '#e0d0b0']), hue, 0), noise: Math.floor(r() * 1e9) },
+      look: { pal, land, clouds: !!T.clouds || (type === 'Ocean' && r() < .4), bands: !!T.noGround, locked: !!T.locked, lava: type === 'Lava' || type === 'Shattered', sparkle: !!T.sparkle || type === 'Crystal', crystal: type === 'Crystal', tilt: between(r, -0.35, 0.35), ringCol: pick(r, ['#aea47e', '#6f6e72', '#e67a84', '#ebb85b', '#6dba79', '#c78539']), noise: Math.floor(r() * 1e9) },
     };
     planet.x = makeExtra(planet);
     return planet;
@@ -373,6 +373,17 @@
     satUrl = cv.toDataURL(); return satUrl;
   }
 
+  // the planet palette: every pixel of every portrait is snapped to one of these 24 colours
+  const PALETTE = ['#aea47e', '#6f6e72', '#534664', '#349c58', '#6dba79', '#2a7d75', '#24505f', '#2a2942', '#120e23', '#3a1b40', '#7a2849', '#b74132',
+    '#e67146', '#ebb85b', '#c78539', '#a15c34', '#764032', '#402e2b', '#56642e', '#7e9432', '#c9c03d', '#fff1a9', '#e67a84', '#c23753'].map(h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; });
+  const snapCache = new Map();
+  function snap(c) { // nearest palette colour (weighted RGB distance, close to how eyes see it)
+    const r = Math.max(0, Math.min(255, c[0] | 0)), g = Math.max(0, Math.min(255, c[1] | 0)), b = Math.max(0, Math.min(255, c[2] | 0)), key = (r >> 2) << 12 | (g >> 2) << 6 | (b >> 2);
+    let hit = snapCache.get(key); if (hit) return hit;
+    let best = PALETTE[0], bd = Infinity;
+    for (const q of PALETTE) { const rm = (r + q[0]) / 2, dr = r - q[0], dg = g - q[1], db = b - q[2]; const d = (2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db; if (d < bd) { bd = d; best = q; } }
+    snapCache.set(key, best); return best;
+  }
   /* ---------- pixel-art planet painter (deterministic, so the same planet always looks the same) ---------- */
   const cache = new Map();
   function paint(p, size) {
@@ -386,7 +397,7 @@
     const hex = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
     const pal = L.pal.map(hex), land = L.land && L.land.map(hex);
     const R0 = S * (p.rings ? .27 : .38), cx = S / 2, cy = S / 2, ringR = R0 * 1.75; // ringed planets are drawn smaller so the rings fit
-    const put = (i, c, a = 255) => { img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = a; };
+    const put = (i, c0, a = 255) => { const c = snap(c0); img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = a; };
     const ringAt = (px, py, front) => { // a flat, tilted ellipse
       if (!p.rings) return null;
       const dx = px - cx, dy = py - cy, ct = Math.cos(L.tilt), st = Math.sin(L.tilt);
@@ -413,16 +424,16 @@
         if (land) c = n > .56 ? land[n > .66 ? 1 : 0] : pal[n > .46 ? 1 : n > .38 ? 2 : 3];
         else if (L.lava) c = n > .62 ? pal[0] : n > .55 ? pal[1] : n > .4 ? pal[2] : pal[3];
         else c = pal[Math.min(3, Math.floor((1 - n) * 4.2))];
-        if (L.locked) { const night = Math.max(0, Math.min(1, (dx + .2) * 1.8)); c = c.map((v, k) => v * (1 - night) + [26, 34, 68][k] * night); }
-        if (!L.lava && !L.locked && Math.abs(lat) > .8 && (land || L.clouds)) c = [240, 246, 252]; // ice caps
-        if (L.clouds && fbm(lon * 1.7 + 9, (lat + 1) * 6) > .62) c = [248, 250, 255];
+        if (L.locked) { const night = Math.max(0, Math.min(1, (dx + .2) * 1.8)); c = c.map((v, k) => v * (1 - night) + [42, 41, 66][k] * night); }
+        if (!L.lava && !L.locked && Math.abs(lat) > .8 && (land || L.clouds)) c = [255, 241, 169]; // ice caps
+        if (L.clouds && fbm(lon * 1.7 + 9, (lat + 1) * 6) > .62) c = [255, 241, 169];
       }
       // light from the upper left, in 4 chunky steps with a little dithering
       const lightDot = Math.max(0, -dx * .55 - dy * .45 + dz * .7);
       let shade = lightDot + ((px + py) % 2 ? .04 : -.04);
       shade = shade > .75 ? 1.12 : shade > .45 ? 1 : shade > .2 ? .72 : .45;
       if (L.lava && c === pal[0]) shade = Math.max(shade, 1);
-      if (L.sparkle && sr() < .035) { c = [255, 255, 255]; shade = Math.max(shade, .9); } // glints of diamond and crystal
+      if (L.sparkle && sr() < .035) { c = [255, 241, 169]; shade = Math.max(shade, .9); } // glints of diamond and crystal
       put(i, c.map(v => Math.min(255, v * shade)));
       const front = ringAt(px + .5, py + .5, true); if (front) put(i, ringCol.map(v => v * front));
     }
@@ -432,7 +443,7 @@
     const out = new Uint8ClampedArray(img.data);
     for (let py = 1; py < S - 1; py++) for (let px = 1; px < S - 1; px++) {
       const i = (py * S + px) * 4; if (img.data[i + 3]) continue;
-      if (img.data[i + 4 + 3] || img.data[i - 4 + 3] || img.data[i + S * 4 + 3] || img.data[i - S * 4 + 3]) { out[i] = 10; out[i + 1] = 12; out[i + 2] = 24; out[i + 3] = 255; }
+      if (img.data[i + 4 + 3] || img.data[i - 4 + 3] || img.data[i + S * 4 + 3] || img.data[i - S * 4 + 3]) { out[i] = 18; out[i + 1] = 14; out[i + 2] = 35; out[i + 3] = 255; }
     }
     img.data.set(out); x.putImageData(img, 0, 0);
     const url = cv.toDataURL(); cv.width = cv.height = 0;
