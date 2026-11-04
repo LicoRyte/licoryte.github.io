@@ -609,7 +609,7 @@
       hull: ['🛡', 'Hull', l => '+' + (25 + (l - 1) * 8) + ' ✦', 'for every Full Cycle'],
     };
     const modCost = k => Math.round(50 * Math.pow(1.25, lvl(k) - 1));
-    const facCost = lv => Math.round(100 * Math.pow(1.6, lv - 2)); // lv = the level you're upgrading to
+    const facCost = lv => Math.round(64 * Math.pow(1.6, lv - 2)); // lv = the level you're upgrading to
     const FAC_MAX = 10;
     function addDust(n) { n = Math.max(0, Math.round(n)); S.dust += n; S.dustTotal += n; return n; }
     // Captain Level (XP: everything that moves the game forward) and Knowledge Level (what you learn). 1-100, a new title every 10.
