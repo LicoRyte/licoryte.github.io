@@ -27,7 +27,7 @@
   "encounters": { "chance": 0.15, "scale": 1, "rareWorldMultiplier": 1.5 },
   "_encounters": "Arrival encounters on new worlds: chance per Explore trip (0.1 = 1 in 10), scale multiplies every encounter's own min-max range, rareWorldMultiplier applies on Rare and Legendary worlds.",
 
-  "trade": { "perFacilityLevel": 2, "cap": 280 },
+  "trade": { "perFacilityLevel": 2, "cap": 100 },
   "_trade": "Travelers' Posts pay perFacilityLevel per facility level (all posts together) every study session, up to cap.",
 
   "sell": {
