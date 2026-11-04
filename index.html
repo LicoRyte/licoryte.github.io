@@ -872,9 +872,10 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-rarcount .sl-col-b { margin-left: auto; padding: 0 8px; font: bold 11px var(--f-ui); }
 .sl-col-g { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); }
 .sl-col-h { display: flex; justify-content: space-between; padding: 3px 8px; background: var(--silver); font: 12px var(--f-ui); }
-.sl-col-l { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 4px 8px 6px; font: 12px var(--f-ui); }
-.sl-col-i { white-space: nowrap; } .sl-ci-none { color: #BBBBBB; }
-.sl-ci-uncommon { color: #1F7A32; } .sl-ci-rare { color: #1A47A0; font-weight: bold; } .sl-ci-legendary { color: #8A5A00; font-weight: bold; text-decoration: underline dotted; }
+.sl-col-l { list-style: none; margin: 0; padding: 4px 8px 6px; columns: 2; column-gap: 14px; font: 12px/1.6 var(--f-ui); }
+.sl-col-i { break-inside: avoid; } .sl-col-i small { color: #666666; } .sl-ci-none { color: #BBBBBB; }
+.sl-ci-uncommon { color: #1F7A32; } .sl-ci-rare { color: #1A47A0; font-weight: bold; } .sl-ci-legendary { color: #8A5A00; font-weight: bold; }
+.sl-col-more { padding: 3px 8px 6px; font: 11px var(--f-ui); color: #999999; } .sl-col-more.done { color: #1F6417; font-weight: bold; }
 .sl-tower { position: absolute; right: 4px; bottom: 2px; z-index: 3; font-size: 14px; line-height: 1; filter: drop-shadow(1px 1px 0 #000000); }
 .sl-trans { background: #FFFFFF; border: 2px solid; border-color: var(--shade) var(--hi) var(--hi) var(--shade); padding: 6px 8px; }
 .sl-trans[hidden] { display: none; }
@@ -3116,7 +3117,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=20').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=22').then(() => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),

@@ -331,22 +331,34 @@
   const BOTTLE = ['If you found this, keep going.', 'The view from here is worth the trip.', 'Anyone else out here? Say hi.', 'Took a wrong turn at the last nebula. Worth it.', 'Remember to drink water.', 'The best world is the next one.'];
   const FIX = ['someone left the Diner\'s oven on', 'a traveler locked themselves out of the Inn', 'the antenna was pointing the wrong way', 'a very loud bird sat on the transmitter', 'the Arcade high score got beaten and someone panicked'];
 
-  /* ---------- Collectibles: 16 materials × 16 objects = 256 to find. Materials come from the planet you're on
-     (its resources, plus a few class flavors), so a full collection means visiting all kinds of worlds. ---------- */
-  const MATS = ['Iron', 'Nickel', 'Water Ice', 'Helium-3', 'Titanium', 'Silicon', 'Carbon', 'Rare-Earth', 'Diamond', 'Platinum', 'Deuterium', 'Lithium', 'Star Crystal', 'Obsidian', 'Amber', 'Glass'];
-  const RES_MAT = { iron: 'Iron', nickel: 'Nickel', 'water ice': 'Water Ice', 'helium-3': 'Helium-3', titanium: 'Titanium', silicon: 'Silicon', carbon: 'Carbon', 'rare-earth metals': 'Rare-Earth', 'diamond dust': 'Diamond', platinum: 'Platinum', deuterium: 'Deuterium', lithium: 'Lithium', 'unknown crystals': 'Star Crystal' };
-  const CLASS_MAT = { Lava: ['Obsidian'], Shattered: ['Obsidian'], Jungle: ['Amber'], Fungal: ['Amber'], Swamp: ['Amber'], Savanna: ['Amber'], Garden: ['Amber'], Desert: ['Glass'], 'Glass storm': ['Glass'], Crystal: ['Star Crystal'], Carbon: ['Diamond', 'Carbon'], Ice: ['Water Ice'], Tundra: ['Water Ice'], Dwarf: ['Water Ice'], Iron: ['Iron', 'Nickel'], 'Gas giant': ['Helium-3'], 'Ice giant': ['Deuterium'], Hycean: ['Water Ice'], Ocean: ['Water Ice'] };
-  const FORMS = [['Shard', 'Common'], ['Nugget', 'Common'], ['Coin', 'Common'], ['Marble', 'Common'], ['Dice', 'Common'], ['Ring', 'Uncommon'], ['Gear', 'Uncommon'], ['Key', 'Uncommon'], ['Bell', 'Uncommon'], ['Arrowhead', 'Uncommon'],
-    ['Lens', 'Rare'], ['Locket', 'Rare'], ['Compass', 'Rare'], ['Figurine', 'Rare'], ['Idol', 'Legendary'], ['Music Box', 'Legendary']];
-  const FORM_W = { Common: 50, Uncommon: 30, Rare: 15, Legendary: 5 };
-  const ITEM_TOTAL = MATS.length * FORMS.length;
-  const matsOf = p => { const m = new Set(p.res.map(x => RES_MAT[x]).filter(Boolean)); (CLASS_MAT[p.type] || []).forEach(x => m.add(x)); return m.size ? [...m] : ['Silicon']; };
-  function rollItem(p, better) { // one collectible from this world's materials; "better" leans toward rarer objects
-    const mats = matsOf(p), mat = mats[Math.floor(Math.random() * mats.length)];
-    const list = FORMS.map(([f, r]) => [f, FORM_W[r] * (better && r !== 'Common' ? 2 : 1)]);
-    let x = Math.random() * list.reduce((a, b) => a + b[1], 0), form = list[0][0];
-    for (const [f, w] of list) { if ((x -= w) < 0) { form = f; break; } }
-    return { mat, form, name: mat + ' ' + form, rar: FORMS.find(f => f[0] === form)[1] };
+  /* ---------- Collectibles: 96 one-of-a-kind items scattered across the universe, each with its own rarity.
+     ADD NEW ONES AT THE END OF A LIST ONLY: your collection remembers items by their place in these lists. ---------- */
+  const ITEMS = {
+    Common: ['Bent Spoon from a Space Diner', 'Faded Star Map', 'Cracked Helmet Visor', 'Rusty Docking Bolt', 'Compass That Points Nowhere', 'Jar of Moon Dust', 'Lost Glove (Left)', 'Spare Antenna',
+      'Freeze-Dried Ice Cream', 'Smooth River Pebble', 'Old Ration Bar', 'Torn Mission Patch', 'Flickering Flashlight', 'Postcard from a Gas Giant', 'Wind-Up Robot Toy', 'Tin of Glow Paint',
+      'Chipped Coffee Mug', 'Unlabeled Data Chip', 'Meteorite Fragment', 'Bag of Alien Seeds', 'Rubber Duck in a Space Suit', 'Spool of Copper Wire', 'Burned-Out Fuse', 'Souvenir Snow Globe',
+      'Lucky Space Dice', 'Bottle of Recycled Water', 'Sketch of a Sunset', 'Broken Pocket Watch', 'Fossil Shell', 'Pilot\'s Logbook Page', 'Fuzzy Moss Sample', 'Old Radio Tube',
+      'Vial of Sea Water', 'Dented Thermos', 'Tiny Solar Panel', 'Hand-Knitted Scarf', 'Crystal Pebble', 'Box of Mismatched Screws', 'Weathered Flag', 'Sticky Note Saying "Back in 5"'],
+    Uncommon: ['Glowing Jellyfish in a Jar', 'Singing Seashell', 'Ice That Never Melts', 'Brass Telescope', 'Holographic Trading Card', 'Petrified Alien Feather', 'Music Box with No Song',
+      'Map of a Hidden Cave', 'Clockwork Beetle', 'Bottled Lightning', 'Captain\'s Medal', 'Pressed Glow-Flower', 'Mirror That Shows Stars', 'Gravity-Defying Marble', 'Thread from a Comet\'s Tail',
+      'Old Explorer\'s Journal', 'Carved Bone Flute', 'Self-Heating Teapot', 'Bubble That Won\'t Pop', 'Seed That Hums', 'Rainbow Quartz', 'Outlaw Wanted Poster', 'Antique Space Helmet',
+      'Tiny Terrarium', 'Living Stone', 'Echo in a Box', 'The Diner\'s Secret Recipe', 'Lantern of Captured Aurora'],
+    Rare: ['Fragment of a Shooting Star', 'Crown of an Outlaw King', 'Compass That Points Home', 'Ancient Alien Coin', 'Feather of a Space Whale', 'Clock That Runs Backwards', 'Map Drawn by Another Explorer',
+      'Hourglass of Black Sand', 'Bell That Rings in Silence', 'Starfish Fossil the Size of a Plate', 'Dreamcatcher of Nebula Thread', 'Glass Rose from a Glass Storm', 'Golden Gear from a Lost Ship',
+      'Sealed Letter from the Future', 'Moonstone Locket', 'A Robot\'s First Painting'],
+    Legendary: ['Heart of a Dying Star', 'The First Explorer\'s Helmet', 'Seed of the Last Garden', 'A Piece of the Big Bang', 'Crown of Saturn\'s Rings', 'Pocket Black Hole (Stable, Probably)',
+      'Song of the Space Whales', 'Key to an Unknown Door', 'Map of the Whole Galaxy', 'An Egg That Is Still Warm', 'Mirror of Another Universe', 'Dave\'s Lost Coffee Mug'],
+  };
+  const ITEM_RARS = ['Common', 'Uncommon', 'Rare', 'Legendary'];
+  const ITEM_TOTAL = ITEM_RARS.reduce((a, r) => a + ITEMS[r].length, 0);
+  const ITEM_W = { normal: { Common: 55, Uncommon: 28, Rare: 13, Legendary: 4 }, better: { Common: 30, Uncommon: 38, Rare: 24, Legendary: 8 } };
+  const itemName = id => { const [r, i] = id.split(':'); return (ITEMS[r] || [])[+i] || '???'; };
+  function rollItem(p, better) { // pick a rarity, then any item of that rarity
+    const w = ITEM_W[better ? 'better' : 'normal'];
+    let x = Math.random() * ITEM_RARS.reduce((a, r) => a + w[r], 0), rar = 'Common';
+    for (const r of ITEM_RARS) { if ((x -= w[r]) < 0) { rar = r; break; } }
+    const i = Math.floor(Math.random() * ITEMS[rar].length);
+    return { id: rar + ':' + i, name: ITEMS[rar][i], rar };
   }
 
   // the ship's satellite: a tiny pixel sprite (made once)
@@ -506,8 +518,15 @@
     if (S.at == null && S.found.length) S.at = S.found[S.found.length - 1].p.num;
     const atP = () => { const f = S.at && byNum(S.at); return f ? f.p : null; };
     const discovering = () => S.mission === -2 && !!atP() && !(atP().outlaw && !atP().outlaw.cleared);
+    // the old material × object collection becomes the same number of new items, of the same rarity
+    const OLD_FORM_R = { Shard: 'Common', Nugget: 'Common', Coin: 'Common', Marble: 'Common', Dice: 'Common', Ring: 'Uncommon', Gear: 'Uncommon', Key: 'Uncommon', Bell: 'Uncommon', Arrowhead: 'Uncommon', Lens: 'Rare', Locket: 'Rare', Compass: 'Rare', Figurine: 'Rare', Idol: 'Legendary', 'Music Box': 'Legendary' };
+    Object.keys(S.items).filter(k => k.includes('|')).forEach(k => {
+      const old = S.items[k], rar = OLD_FORM_R[k.split('|')[1]] || 'Common'; let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      const id = rar + ':' + (h % ITEMS[rar].length); delete S.items[k];
+      S.items[id] = S.items[id] ? Object.assign(S.items[id], { n: S.items[id].n + old.n }) : old;
+    });
     function gainItem(it, fromP) {
-      const k = it.mat + '|' + it.form, cur = S.items[k];
+      const k = it.id, cur = S.items[k];
       S.items[k] = cur ? Object.assign(cur, { n: cur.n + 1 }) : { n: 1, at: Date.now(), from: fromP ? fromP.num : 0 };
       return !cur; // true = new to the collection
     }
@@ -867,14 +886,14 @@
           S.mission = 0; S.surveys = (S.surveys || 0) + 1;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          reps.unshift({ ev: { battle: true, ic: '🔍', title: 'Survey of ' + nm(a), t: 'The survey team combed the ' + a.biomes[Math.floor(Math.random() * a.biomes.length)].toLowerCase() + ' and came back with: ' + got.map((it, i) => it.name + (fresh[i] ? ' (new!)' : '')).join(', ') + '.', got: '🎒 Collection ' + itemCount() + ' / ' + ITEM_TOTAL } });
+          reps.unshift({ ev: { battle: true, ic: '🔍', title: 'Survey of ' + nm(a), t: 'The survey team combed the ' + a.biomes[Math.floor(Math.random() * a.biomes.length)].toLowerCase() + ' and came back with: ' + got.map((it, i) => it.name + ' (' + it.rar + (fresh[i] ? ', new!' : '') + ')').join(' and ') + '.', got: '🎒 Collection ' + itemCount() + ' / ' + ITEM_TOTAL } });
           showCard(a, 'last');
           toBreak();
           hint.textContent = 'Survey done: ' + got.map(it => it.name).join(' and ') + '. Now a ' + MODES[mode].toLowerCase() + '.';
         } else if (heldP()) {
           const o = heldP(), pk = a => a[Math.floor(Math.random() * a.length)];
           o.outlaw.cleared = Date.now(); S.outlaw = 0; S.fights = (S.fights || 0) + 1;
-          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(20 + Math.random() * 30), loot = 'a ' + lootIt.name + (isNew ? ' (new to your collection!)' : '');
+          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(20 + Math.random() * 30), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
           S.at = o.num;
           const story = pk(FIGHT).replace('{G}', o.outlaw.gang.replace(/^the/, 'The')).replace('{g}', o.outlaw.gang).replace('{b}', o.biomes[0].toLowerCase());
           S.events.push({ ic: '⚔', title: 'Outlaws driven out of ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦', at: Date.now() });
@@ -1045,15 +1064,15 @@
     }
     function drawItems() {
       const nav = el('div', { class: 'sl-wnav' }, el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'), el('b', {}, '🎒 Collection: ' + itemCount() + ' / ' + ITEM_TOTAL), el('span', { class: 'sl-muted' }, Math.round(itemCount() / ITEM_TOTAL * 100) + '%'));
-      const groups = MATS.map(m => {
-        const have = FORMS.filter(([f]) => S.items[m + '|' + f]);
-        return el('div', { class: 'sl-col-g' }, el('div', { class: 'sl-col-h' }, el('b', {}, m), el('span', { class: 'sl-muted' }, have.length + ' / ' + FORMS.length)),
-          el('div', { class: 'sl-col-l' }, FORMS.map(([f, r]) => { const it = S.items[m + '|' + f];
-            return it ? el('span', { class: 'sl-col-i sl-ci-' + r.toLowerCase(), title: r + ' · first found ' + new Date(it.at).toLocaleDateString() + (it.from && byNum(it.from) ? ' on ' + nm(byNum(it.from).p) : '') }, m + ' ' + f + (it.n > 1 ? ' ×' + it.n : ''))
-              : el('span', { class: 'sl-col-i sl-ci-none' }, '???'); })));
+      const groups = ITEM_RARS.map(r => {
+        const list = ITEMS[r], have = list.filter((_, i) => S.items[r + ':' + i]).length;
+        return el('div', { class: 'sl-col-g' }, el('div', { class: 'sl-col-h' }, el('span', { class: 'sl-rar sl-r-' + r.toLowerCase() }, r), el('span', { class: 'sl-muted' }, have + ' / ' + list.length)),
+          have ? el('ul', { class: 'sl-col-l' }, list.map((name, i) => [name, S.items[r + ':' + i]]).filter(x => x[1]).sort((x, y) => x[0].localeCompare(y[0])).map(([name, it]) =>
+            el('li', { class: 'sl-col-i sl-ci-' + r.toLowerCase(), title: 'First found ' + new Date(it.at).toLocaleDateString() + (it.from && byNum(it.from) ? ' on ' + nm(byNum(it.from).p) : '') }, name, it.n > 1 ? el('small', {}, ' ×' + it.n) : null))) : null,
+          have < list.length ? el('div', { class: 'sl-col-more' }, '??? ' + (list.length - have) + ' more ' + r.toLowerCase() + ' item' + (list.length - have === 1 ? '' : 's') + ' still out there') : el('div', { class: 'sl-col-more done' }, '★ All ' + r.toLowerCase() + ' items found!'));
       });
       logList.className = 'sl-wpage';
-      logList.replaceChildren(nav, el('p', { class: 'sl-muted' }, 'Collectibles come from 🔍 Discover (surveying the world you\'re at) and from beating outlaws. Each is made of a material from that world, so you\'ll need to visit all kinds of planets. Rarer objects (rings, lockets, idols, music boxes) turn up less often.'), ...groups);
+      logList.replaceChildren(nav, el('p', { class: 'sl-muted' }, '96 one-of-a-kind items are scattered across the universe. 🔍 Discover (surveying the world you\'re at) turns up one or two, and beating outlaws hands over their hoard, which leans toward the rarer ones.'), ...groups);
     }
     function drawWorld(f) {
       const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';
