@@ -1,6 +1,6 @@
 /* Solarist: a Pomodoro timer for space explorers. Every finished study session is a jump through deep space that ends
    at a brand-new, randomly generated planet (name, class, climate, biomes, life, a pixel-art portrait...).
-   Breaks recharge the ship. Every world you find goes in your Logbook. Build a Listening Post on a world and tune the
+   Breaks are spent preparing equipment for the next mission. Every world you find goes in your Logbook. Build a Listening Post on a world and tune the
    ship's satellite to it, and it sends back a transmission every study session (purely for fun: no effect on finds).
    Saved in this browser: the logbook, today's count, settings and a running timer.
    Loaded by index.html the first time the window opens. */
@@ -603,8 +603,8 @@
     let dotN = 0, dotT = 0;
     function headline() {
       const b = building(), c = charging();
-      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Ready to recharge';
-      return mode === 'focus' ? (b ? jobText(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Recharging ship cores';
+      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Take a breather';
+      return mode === 'focus' ? (b ? jobText(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Preparing equipment for the next mission';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -839,7 +839,7 @@
         if (hooks.show) hooks.show();
         const wasLong = mode === 'long';
         setMode('focus');
-        hint.textContent = 'Cores recharged. Press Launch for the next jump.';
+        hint.textContent = 'Equipment ready. Pick a mission and press Start.';
         if (wasLong) { // Full Cycle: every session and break of the cycle finished, nothing skipped
           if (!S.fc.broken && S.fc.n >= S.set.every) {
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
@@ -861,14 +861,14 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : 'Traveling') : 'Recharging') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : 'Traveling') : 'Preparing') : 'Solarist');
     }
     function draw() {
       drawClock();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : 'Launch') : 'Recharge');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Rest up. The ship needs it too.';
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : 'Launch') : 'Start break');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Break time. The crew is getting the gear ready for the next mission.';
       if (S.mission > 0 && !building()) { S.mission = 0; S.job = null; }
       if (S.mission === -1 && S.coord) S.mission = 0;
       const cm = curMission(), locked = running && mode === 'focus', canBuild = anyBuild();
@@ -1010,7 +1010,7 @@
     /* ---------- resume a timer that was running when the page closed ---------- */
     if (S.run && S.run.running) {
       if (S.run.endAt > Date.now()) { running = true; endAt = S.run.endAt; loop(); }
-      else { const was = S.run.mode; mode = was; finish(true); hint.textContent = was === 'focus' ? 'Your session finished while you were away.' : 'The cores finished recharging while you were away.'; }
+      else { const was = S.run.mode; mode = was; finish(true); hint.textContent = was === 'focus' ? 'Your session finished while you were away.' : 'Your break finished while you were away. Equipment ready.'; }
     }
     if (S.found.length && card.hidden) showCard(S.found[S.found.length - 1].p, 'last');
     draw();
