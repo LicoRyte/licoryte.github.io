@@ -553,6 +553,31 @@
     const OUTLAW_CHANCE = 1 / 8;
     const GANG_A = ['Rust', 'Void', 'Red Comet', 'Dust', 'Iron', 'Grinning', 'Black Sun', 'Scrap', 'Howling', 'Neon'], GANG_B = ['Jackals', 'Raiders', 'Vultures', 'Syndicate', 'Rats', 'Wolves', 'Pirates', 'Crows', 'Gang', 'Marauders'];
     const FIGHT = ['{G} put up a fight, but the crew drove them off the {b}.', 'A long standoff over the {b}. {G} blinked first and fled.', '{G} tried an ambush in the {b}. It did not go well for them.', 'After a tense chase through the {b}, {g} gave up and jumped away.', '{G} surrendered once the ship\'s floodlights hit their camp in the {b}.'];
+    // Arrival encounters: about 1 trip in 10, something near the new world pays out a little stardust. {p} = the world's name.
+    const ENC_CHANCE = 1 / 10;
+    const ENCOUNTERS = [
+      ['🔬', 'Intergalactic Research Station Nearby!', 'You settled near an Intergalactic Research Station, reported your findings on {p} and traded a few spare parts.', 40, 90],
+      ['🐫', 'Trading Caravan Passing By!', 'A long caravan of cargo haulers drifted past {p}. You swapped star charts for a sack of stardust.', 30, 70],
+      ['⛏', 'Abandoned Mining Rig!', 'An old mining rig was still parked in orbit around {p}. Its hoppers weren\'t quite empty.', 50, 110],
+      ['🍜', 'Space Diner in Orbit!', 'A floating diner circles {p}. The cook paid the crew to review the soup. (It was fine.)', 20, 50],
+      ['🗺', 'Cartographers\' Guild Outpost!', 'The Guild bought your survey of {p} for their next atlas edition.', 40, 100],
+      ['☄', 'Comet Tail Harvest!', 'A comet swept past {p} just as you arrived. The crew scooped stardust straight out of its tail.', 30, 80],
+      ['🛰', 'Derelict Satellite Salvaged!', 'A dead satellite was tumbling around {p}. Its solar panels sold for a decent price.', 30, 70],
+      ['🎥', 'Film Crew on Location!', 'A film crew is shooting a space opera on {p}. They paid for the use of your ship as a background prop.', 40, 90],
+      ['🙏', 'Pilgrim Fleet Blessing!', 'A fleet of pilgrims on their way to {p} shared supplies and wished the crew safe travels.', 20, 60],
+      ['📦', 'Lost Cargo Pod!', 'A drifting cargo pod near {p} still had its delivery fee attached. Finders keepers.', 30, 80],
+      ['🏛', 'Museum Curator Visit!', 'A museum curator bought your first photos of {p} for a new exhibit.', 40, 100],
+      ['🎟', 'Space Lottery Ticket!', 'A ticket stuck to the hull since three jumps ago turned out to be a winner. Small prize, but a prize.', 20, 120],
+      ['📮', 'Postal Drone Delivery!', 'A postal drone caught up with the ship near {p} with a refund from a very old order.', 20, 50],
+      ['🧪', 'Scientists Rent Your Sensors!', 'A science team stuck near {p} with broken gear rented your scanners for a day.', 40, 90],
+      ['🌋', 'Stardust Geyser!', 'One of {p}\'s moons vents glittering dust every few hours. The crew filled every container on board.', 50, 120],
+      ['🤝', 'Friendly Smugglers!', 'A smuggler crew near {p} paid well for a "no questions asked" fuel top-up.', 30, 90],
+      ['🎓', 'Academy Field Trip!', 'A class of cadets on a field trip to {p} paid for a tour of the ship.', 20, 60],
+      ['📡', 'Signal Bounty!', 'The signal you picked up near {p} matched an old bounty notice. Someone had been looking for it.', 40, 100],
+      ['🏪', 'Wandering Market!', 'A wandering market set up its stalls in orbit around {p}. You sold off the junk from the cargo bay.', 30, 70],
+      ['⚙', 'Mining Guild Finder\'s Fee!', 'The Mining Guild paid a finder\'s fee for the resources you charted on {p}.', 40, 110],
+    ];
+    let encGot = null;
     const heldP = () => { const f = S.outlaw && byNum(S.outlaw); return f && f.p.outlaw && !f.p.outlaw.cleared ? f.p : null; };
     const held = p => !!(p.outlaw && !p.outlaw.cleared);
     if (!S.events) S.events = []; if (!S.fc) S.fc = { n: 0, broken: false };
@@ -583,8 +608,8 @@
       comms: ['📻', 'Comms', l => '1 in ' + Math.round(1 / evChance(l)), 'sessions has a deep-space event'],
       hull: ['🛡', 'Hull', l => '+' + (25 + (l - 1) * 8) + ' ✦', 'for every Full Cycle'],
     };
-    const modCost = k => Math.round(40 * Math.pow(1.35, lvl(k) - 1));
-    const facCost = lv => Math.round(30 * Math.pow(1.8, lv - 1));
+    const modCost = k => Math.round(50 * Math.pow(1.25, lvl(k) - 1));
+    const facCost = lv => Math.round(40 * Math.pow(1.5, lv - 2)); // lv = the level you're upgrading to
     const FAC_MAX = 10;
     function addDust(n) { n = Math.max(0, Math.round(n)); S.dust += n; S.dustTotal += n; return n; }
     // Captain Level (XP: everything that moves the game forward) and Knowledge Level (what you learn). 1-100, a new title every 10.
@@ -608,10 +633,12 @@
       return out;
     }
     const KN_REP = { core: 25, species: 25, odd: 25, secret: 18, log: 10, fac: 8 };
-    const RAR_BONUS = { Common: 0, Uncommon: 5, Rare: 15, Legendary: 40 }, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
+    const RAR_BONUS = { Common: 0, Uncommon: 10, Rare: 30, Legendary: 80 }, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
     // settlements: Travelers' Posts grow a population every study session (faster with more and better facilities)
     const TIERS = [[0, 'Outpost'], [100, 'Village'], [1000, 'Town'], [10000, 'City'], [100000, 'Metropolis'], [1000000, 'Megacity']];
     const tierOf = n => TIERS.filter(t => n >= t[0]).pop()[1];
+    // Travelers' Posts pay a little trade every study session: 1 per facility level, at most 60
+    const tradeIncome = () => Math.min(60, posts().reduce((n, { p }) => n + (p.post.tp ? p.post.tp.fac.reduce((a, f) => a + (f.lv || 1), 0) : 0), 0));
     function growPosts(notes) {
       posts().forEach(({ p }) => {
         const t = p.post.tp; if (!t) return;
@@ -635,10 +662,10 @@
         else if (k === 'sessions') { const v = 2 + Math.floor(Math.random() * 4); b = { v, t: 'Finish ' + v + ' study sessions', reward: 15 * v, prog: 0 }; }
         else if (k === 'cycle') b = { t: 'Finish a Full Cycle (nothing skipped)', reward: 60 };
         else { const v = pk(['hot', 'cold']); b = { v, t: v === 'hot' ? 'Find a world hotter than 500 °C' : 'Find a world colder than −150 °C', reward: 35 }; }
-        b.k = k; b.id = Date.now() + '' + Math.random();
+        b.k = k; b.id = Date.now() + '' + Math.random(); b.reward = Math.round(b.reward * 1.5);
         if (!S.bounties.some(x => x.t === b.t)) return b;
       }
-      return { k: 'sessions', v: 3, t: 'Finish 3 study sessions', reward: 45, prog: 0, id: Date.now() + '' + Math.random() };
+      return { k: 'sessions', v: 3, t: 'Finish 3 study sessions', reward: 70, prog: 0, id: Date.now() + '' + Math.random() };
     }
     while (S.bounties.length < 3) S.bounties.push(newBounty());
     function bountyHit(b, ctx) {
@@ -679,9 +706,11 @@
     // everything that happens at the end of a study session, shown together under the timer
     function sessionEnd(reps, p, ev) {
       const notes = [];
-      let earned = Math.max(4, Math.round(S.set.focus * .4)) + (p ? RAR_BONUS[p.rarity] : 0) + (ev ? 10 : 0);
+      let earned = Math.max(6, Math.round(S.set.focus * .8)) + (p ? RAR_BONUS[p.rarity] : 0) + (ev ? 20 : 0);
       earned *= 1 + (lvl('engine') - 1) * .03;
       notes.push('✦ +' + addDust(earned) + ' stardust');
+      if (encGot) { notes.push(encGot.ic + ' +' + encGot.dust + ' stardust (' + encGot.title.replace(/!$/, '') + ')'); encGot = null; }
+      const trade = tradeIncome(); if (trade) notes.push('🏘 +' + addDust(trade) + ' stardust in trade from your Travelers\' Posts');
       if (p) { checkRecords(p, notes); checkBounties({ planet: p }, notes); }
       checkBounties({ session: true }, notes);
       growPosts(notes);
@@ -721,6 +750,7 @@
     const hint = el('div', { class: 'sl-hint' });
     const trans = el('div', { class: 'sl-trans', hidden: true });
     const card = el('div', { class: 'sl-card', hidden: true });
+    const encBox = el('div', { class: 'sl-enc', hidden: true, 'aria-live': 'polite' });
     const sel = (k, opts) => { const s = el('select', { 'aria-label': k }, opts.map(v => el('option', { value: v, selected: S.set[k] === v || null }, String(v)))); s.addEventListener('change', () => { S.set[k] = +s.value; save(); if (!running && mode === k) { left = length(mode); persistRun(); } draw(); }); return s; };
     const settings = el('details', { class: 'sl-set' }, el('summary', {}, 'Settings'),
       el('div', { class: 'sl-set-row' },
@@ -755,7 +785,7 @@
         el('small', { class: 'sl-muted' }, i.need ? (i.need - i.into) + (k === 'xp' ? ' XP' : ' Knowledge') + ' to Lv ' + (i.L + 1) : 'Maxed out. ' + (S[k] || 0).toLocaleString() + ' total.'));
     }
     function drawLv() { lvStrip.replaceChildren(lvBar('xp', '⭐', CAPT), lvBar('kn', '📚', KNOW)); }
-    const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
+    const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, encBox, card, settings);
 
     const find = el('input', { type: 'search', class: 'sl-find', placeholder: 'Search worlds...', 'aria-label': 'Search your logbook' });
     const typeSel = el('select', { 'aria-label': 'Planet class' }, el('option', { value: '' }, 'All classes'), el('option', { value: '@post' }, '🗼 With a Listening Post'), ...Object.keys(TYPES).map(t => el('option', { value: t }, t)));
@@ -857,6 +887,8 @@
       ].filter(Boolean);
     }
     function showCard(p, kind) {
+      const e = p && p.enc && (kind === 'new' || kind === 'lucky') ? p.enc : null;
+      encBox.hidden = !e; encBox.replaceChildren(...(e ? [el('div', { class: 'sl-enc-h' }, '- ' + e.ic + ' ' + e.title + ' -'), el('p', {}, e.t), el('p', { class: 'sl-enc-got' }, 'You gain ✦ ' + e.dust + ' stardust')] : []));
       if (!p) { card.hidden = true; card.replaceChildren(); return; }
       card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' || kind === 'upgraded' || kind === 'opened' || kind === 'freed' ? ' new' : kind === 'outlaw' ? ' new sl-held' : '');
       card.replaceChildren(...planetCard(p, kind));
@@ -956,7 +988,7 @@
         } else if (heldP()) {
           const o = heldP(), pk = a => a[Math.floor(Math.random() * a.length)];
           o.outlaw.cleared = Date.now(); S.outlaw = 0; S.fights = (S.fights || 0) + 1;
-          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(20 + Math.random() * 30), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
+          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(40 + Math.random() * 40), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
           S.at = o.num; award(35, isNew ? 12 : 0);
           const story = pk(FIGHT).replace('{G}', o.outlaw.gang.replace(/^the/, 'The')).replace('{g}', o.outlaw.gang).replace('{b}', o.biomes[0].toLowerCase());
           S.events.push({ ic: '⚔', title: 'Outlaws driven out of ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦', at: Date.now() });
@@ -972,6 +1004,12 @@
           if (outlaws) { const pk = a => a[Math.floor(Math.random() * a.length)]; p.outlaw = { gang: 'the ' + pk(GANG_A) + ' ' + pk(GANG_B), at: Date.now() }; S.outlaw = p.num; }
           S.found.push({ at: Date.now(), p }); S.at = p.num;
           award(20 + ({ Uncommon: 10, Rare: 25, Legendary: 60 }[p.rarity] || 0), 0);
+          if (!outlaws && Math.random() < ENC_CHANCE) {
+            const [ic, title, tpl, lo, hi] = ENCOUNTERS[Math.floor(Math.random() * ENCOUNTERS.length)];
+            const dust = addDust((lo + Math.random() * (hi - lo)) * (RANK[p.rarity] >= 2 ? 1.5 : 1)), t = tpl.split('{p}').join(nm(p));
+            p.enc = { ic, title, t, dust }; encGot = p.enc; award(10, 5);
+            S.events.push({ ic, title, t, got: '+' + dust + ' ✦', at: Date.now() });
+          }
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(p, outlaws ? 'outlaw' : lucky ? 'lucky' : 'new'); foundP = p;
@@ -990,7 +1028,7 @@
           if (!S.fc.broken && S.fc.n >= S.set.every) {
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
-            const notes = ['✦ +' + addDust(25 + (lvl('hull') - 1) * 8) + ' stardust (Full Cycle)'];
+            const notes = ['✦ +' + addDust(50 + (lvl('hull') - 1) * 15) + ' stardust (Full Cycle)'];
             checkBounties({ cycle: true }, notes);
             award(40, 0); flushXP(notes);
             showTrans([{ notes }]);
@@ -1084,7 +1122,7 @@
       const evs = S.events.slice().reverse();
       const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? renderFeed(evs.map(e => ({ at: e.at, k: 'ev', icon: e.ic, title: e.title, t: e.t, extra: e.got })), 'events', false, drawShip)
         : el('p', { class: 'sl-muted' }, 'No deep-space events yet. About one study session in 15 runs into something.'));
-      const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session (more for rarer worlds, events, Full Cycles and bounties). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
+      const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session, plus extra for rarer worlds, events, arrival encounters, fights, Full Cycles, bounties and trade from your Travelers\' Posts (' + tradeIncome() + ' per session now, up to 60). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
         el('div', { class: 'sl-mods' }, Object.entries(MODS).map(([k, [ic, name, eff, what]]) => { const l = lvl(k), c = modCost(k);
           return el('div', { class: 'sl-mod' }, el('span', { class: 'sl-mod-i' }, ic), el('span', { class: 'sl-row-t' }, el('b', {}, name + ' · Lv ' + l), el('small', {}, eff(l) + ' ' + what + ' (next: ' + eff(l + 1) + ')')),
             el('button', { type: 'button', class: 'btn', disabled: S.dust < c || null, onclick: () => upgradeMod(k) }, 'Upgrade ✦ ' + c.toLocaleString())); })));
