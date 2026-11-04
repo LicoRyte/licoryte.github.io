@@ -587,6 +587,27 @@
     const facCost = lv => Math.round(30 * Math.pow(1.8, lv - 1));
     const FAC_MAX = 10;
     function addDust(n) { n = Math.max(0, Math.round(n)); S.dust += n; S.dustTotal += n; return n; }
+    // Captain Level (XP: everything that moves the game forward) and Knowledge Level (what you learn). 1-100, a new title every 10.
+    const LV_MAX = 100, lvNeed = L => 40 + L * 6;
+    const CAPT = ['Cadet', 'Ensign', 'Pilot', 'Navigator', 'Lieutenant', 'Captain', 'Commander', 'Commodore', 'Admiral', 'Fleet Admiral', 'Star Legend'];
+    const KNOW = ['Curious Mind', 'Student', 'Apprentice Scholar', 'Scholar', 'Researcher', 'Scientist', 'Archivist', 'Professor', 'Sage', 'Oracle', 'Keeper of the Cosmos'];
+    function lvInfo(total) { let L = 1, t = total || 0; while (L < LV_MAX && t >= lvNeed(L)) { t -= lvNeed(L); L++; } return { L, into: t, need: L < LV_MAX ? lvNeed(L) : 0 }; }
+    const titleOf = (list, L) => list[Math.min(10, Math.floor(L / 10))];
+    let pend = { xp: 0, kn: 0 };
+    const award = (xp, kn) => { pend.xp += xp || 0; pend.kn += kn || 0; };
+    function flushXP(notes) { // add what's pending; level-ups go into notes
+      const { xp, kn } = pend; pend = { xp: 0, kn: 0 };
+      if (!xp && !kn) return;
+      const out = notes || [], ups = [];
+      [['xp', xp, CAPT, '⭐ Captain'], ['kn', kn, KNOW, '📚 Knowledge']].forEach(([k, n, list, label]) => {
+        if (!n) return;
+        const b = lvInfo(S[k]).L; S[k] = (S[k] || 0) + n; const a = lvInfo(S[k]).L;
+        if (a > b) ups.push('🎉 ' + label + ' Level ' + a + '!' + (titleOf(list, a) !== titleOf(list, b) ? ' New title: ' + titleOf(list, a) + '.' : ''));
+      });
+      out.push((xp ? '⭐ +' + xp + ' XP' : '') + (xp && kn ? ' · ' : '') + (kn ? '📚 +' + kn + ' Knowledge' : ''), ...ups);
+      return out;
+    }
+    const KN_REP = { core: 25, species: 25, odd: 25, secret: 18, log: 10, fac: 8 };
     const RAR_BONUS = { Common: 0, Uncommon: 5, Rare: 15, Legendary: 40 }, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
     // settlements: Travelers' Posts grow a population every study session (faster with more and better facilities)
     const TIERS = [[0, 'Outpost'], [100, 'Village'], [1000, 'Town'], [10000, 'City'], [100000, 'Metropolis'], [1000000, 'Megacity']];
@@ -630,7 +651,7 @@
         : b.k === 'rings' ? p.rings : b.k === 'life' ? (p.lifeLvl || 0) >= b.v : b.k === 'temp' ? (b.v === 'hot' ? p.temp > 500 : coldest < -150) : false;
     }
     function checkBounties(ctx, notes) {
-      S.bounties.forEach((b, i) => { if (bountyHit(b, ctx)) { const got = addDust(b.reward); notes.push('🎯 Bounty complete: ' + b.t + ' (+' + got + ' ✦)'); S.bDone++; S.bounties[i] = newBounty(); } });
+      S.bounties.forEach((b, i) => { if (bountyHit(b, ctx)) { const got = addDust(b.reward); notes.push('🎯 Bounty complete: ' + b.t + ' (+' + got + ' ✦)'); award(30, 0); S.bDone++; S.bounties[i] = newBounty(); } });
     }
     // personal records: the extremes of everything you've found
     const REC = [
@@ -648,6 +669,12 @@
       });
     }
     S.found.forEach(({ p }) => checkRecords(p, null)); // fill records from worlds found before this existed
+    if (S.xp == null) { // credit saves from before levels existed for what they've already done
+      const pl = posts().map(f => f.p), tps = pl.filter(p => p.post.tp), facs = tps.reduce((n, p) => n + p.post.tp.fac.length, 0);
+      const modUps = Object.keys(MODS).reduce((n, k) => n + lvl(k) - 1, 0), heard = pl.reduce((n, p) => n + p.post.reports.length, 0);
+      S.xp = S.found.length * 20 + pl.length * 30 + tps.length * 40 + facs * 25 + modUps * 15 + (S.fights || 0) * 35 + (S.surveys || 0) * 20 + (S.bDone || 0) * 30;
+      S.kn = S.found.length * 10 + heard * 15 + itemCount() * 12 + (S.events || []).length * 15;
+    }
     save();
     // everything that happens at the end of a study session, shown together under the timer
     function sessionEnd(reps, p, ev) {
@@ -659,10 +686,16 @@
       checkBounties({ session: true }, notes);
       growPosts(notes);
       if (!S.rec.dayN || S.todayN > S.rec.dayN.v) { if (S.rec.dayN && S.todayN > S.rec.dayN.v) notes.push('🏆 New record! Most sessions in a day: ' + S.todayN); S.rec.dayN = { v: S.todayN, date: Date.now() }; }
+      reps.forEach(({ rep }) => { if (rep) award(0, KN_REP[rep.k] || 10); }); // everything heard teaches you something
+      if (ev && !ev.battle) award(10, 15);
+      if (p) award(0, 10); // the new world's survey log
+      flushXP(notes);
       showTrans(reps.concat(notes.length ? [{ notes }] : []));
     }
-    function upgradeMod(k) { const c = modCost(k); if (S.dust < c) return; S.dust -= c; S.mods[k] = lvl(k) + 1; save(); draw(); }
-    function upgradeFac(p, f) { const lv = f.lv || 1, c = facCost(lv + 1); if (lv >= FAC_MAX || S.dust < c) return; S.dust -= c; f.lv = lv + 1; save(); draw(); }
+    function shopXP(n) { award(n, 0); const out = flushXP([]); const msg = out.join(' '); hint.textContent = msg; lvMsg = msg; lvMsgAt = Date.now(); }
+    let lvMsg = '', lvMsgAt = 0;
+    function upgradeMod(k) { const c = modCost(k); if (S.dust < c) return; S.dust -= c; S.mods[k] = lvl(k) + 1; shopXP(15); save(); draw(); }
+    function upgradeFac(p, f) { const lv = f.lv || 1, c = facCost(lv + 1); if (lv >= FAC_MAX || S.dust < c) return; S.dust -= c; f.lv = lv + 1; shopXP(10 + 5 * lv); save(); draw(); }
 
     /* ---------- UI ---------- */
     const tabTimer = el('button', { type: 'button', role: 'tab', 'aria-selected': 'true', onclick: () => tab('timer') }, '🚀 Voyage');
@@ -711,7 +744,19 @@
     const buildSel = el('select', { class: 'sl-build-sel', 'aria-label': 'World to build on' });
     buildSel.addEventListener('change', () => setJob(buildSel.value));
     const mission = el('div', { class: 'sl-missions' }, el('span', { class: 'sl-mis-l' }, 'Mission:'), el('div', { class: 'sl-mis-g', role: 'radiogroup', 'aria-label': 'Mission' }, misBtns), buildSel);
-    const timerPane = el('div', { class: 'sl-pane' }, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
+    const lvStrip = el('div', { class: 'sl-lv', title: 'Captain Level (XP) and Knowledge Level. Details on Ship → Ship.' });
+    function lvBar(k, ic, list, full) {
+      const i = lvInfo(S[k]), pct = i.need ? Math.round(i.into / i.need * 100) : 100, t = titleOf(list, i.L);
+      const bar = el('span', { class: 'sl-lv-bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct, 'aria-label': (k === 'xp' ? 'Captain' : 'Knowledge') + ' level progress' }, el('i', { style: 'width:' + pct + '%' }));
+      if (!full) return el('span', { class: 'sl-lv-i sl-lv-' + k }, el('b', {}, ic + ' Lv ' + i.L), el('span', { class: 'sl-lv-t' }, t), bar);
+      const nextT = i.L >= LV_MAX ? null : Math.min(LV_MAX, (Math.floor(i.L / 10) + 1) * 10);
+      return el('div', { class: 'sl-lv-row sl-lv-' + k },
+        el('div', { class: 'sl-lv-head' }, el('b', {}, ic + ' ' + (k === 'xp' ? 'Captain' : 'Knowledge') + ' Level ' + i.L), el('span', {}, t)), bar,
+        el('small', { class: 'sl-muted' }, i.L >= LV_MAX ? 'Maxed out. ' + (S[k] || 0).toLocaleString() + ' total.' : i.into + ' / ' + i.need + (k === 'xp' ? ' XP' : ' Knowledge') + ' to Lv ' + (i.L + 1) + ' · ' + list[nextT / 10] + ' at Lv ' + nextT),
+        el('div', { class: 'sl-lv-ladder' }, list.map((n, j) => el('span', { class: i.L >= Math.max(1, j * 10) ? 'on' : '', title: 'Level ' + Math.max(1, j * 10) }, el('small', {}, Math.max(1, j * 10)), ' ' + n))));
+    }
+    function drawLv() { lvStrip.replaceChildren(lvBar('xp', '⭐', CAPT), lvBar('kn', '📚', KNOW)); }
+    const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
 
     const find = el('input', { type: 'search', class: 'sl-find', placeholder: 'Search worlds...', 'aria-label': 'Search your logbook' });
     const typeSel = el('select', { 'aria-label': 'Planet class' }, el('option', { value: '' }, 'All classes'), el('option', { value: '@post' }, '🗼 With a Listening Post'), ...Object.keys(TYPES).map(t => el('option', { value: t }, t)));
@@ -873,7 +918,7 @@
         const ev = rollEvent(forced); if (ev) reps.unshift({ ev });
         let foundP = null;
         if (charging()) {
-          S.coord = true; S.mission = 0;
+          S.coord = true; S.mission = 0; award(15, 0);
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           toBreak();
@@ -891,6 +936,7 @@
             tp2.post.tp.fac.push({ k: target.fac, at: Date.now() });
             msg = FAC[target.fac][0] + ' ' + FAC[target.fac][1] + ' opened at ' + nm(tp2) + '. When the post is tuned, you\'ll hear what goes on there.';
           }
+          award(target.k === 'post' ? 30 : target.k === 'upgrade' ? 40 : 25, 0);
           S.mission = 0; S.job = null;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
@@ -901,6 +947,7 @@
           const a = atP(), got = [rollItem(a, false)]; if (Math.random() < .3) got.push(rollItem(a, false));
           const fresh = got.map(it => gainItem(it, a));
           S.mission = 0; S.surveys = (S.surveys || 0) + 1;
+          award(20 + 10 * fresh.filter(Boolean).length, 12 + 12 * fresh.filter(Boolean).length);
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           reps.unshift({ ev: { battle: true, ic: '🔍', title: 'Survey of ' + nm(a), t: 'The survey team combed the ' + a.biomes[Math.floor(Math.random() * a.biomes.length)].toLowerCase() + ' and came back with: ' + got.map((it, i) => it.name + ' (' + it.rar + (fresh[i] ? ', new!' : '') + ')').join(' and ') + '.', got: '🎒 Collection ' + itemCount() + ' / ' + ITEM_TOTAL } });
@@ -911,7 +958,7 @@
           const o = heldP(), pk = a => a[Math.floor(Math.random() * a.length)];
           o.outlaw.cleared = Date.now(); S.outlaw = 0; S.fights = (S.fights || 0) + 1;
           const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(20 + Math.random() * 30), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
-          S.at = o.num;
+          S.at = o.num; award(35, isNew ? 12 : 0);
           const story = pk(FIGHT).replace('{G}', o.outlaw.gang.replace(/^the/, 'The')).replace('{g}', o.outlaw.gang).replace('{b}', o.biomes[0].toLowerCase());
           S.events.push({ ic: '⚔', title: 'Outlaws driven out of ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦', at: Date.now() });
           if (!quiet && hooks.tada) hooks.tada();
@@ -925,6 +972,7 @@
           const outlaws = Math.random() < OUTLAW_CHANCE && p.type !== 'Rogue';
           if (outlaws) { const pk = a => a[Math.floor(Math.random() * a.length)]; p.outlaw = { gang: 'the ' + pk(GANG_A) + ' ' + pk(GANG_B), at: Date.now() }; S.outlaw = p.num; }
           S.found.push({ at: Date.now(), p }); S.at = p.num;
+          award(20 + ({ Uncommon: 10, Rare: 25, Legendary: 60 }[p.rarity] || 0), 0);
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           showCard(p, outlaws ? 'outlaw' : lucky ? 'lucky' : 'new'); foundP = p;
@@ -945,6 +993,7 @@
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
             const notes = ['✦ +' + addDust(25 + (lvl('hull') - 1) * 8) + ' stardust (Full Cycle)'];
             checkBounties({ cycle: true }, notes);
+            award(40, 0); flushXP(notes);
             showTrans([{ notes }]);
           }
           S.fc = { n: 0, broken: false };
@@ -963,7 +1012,7 @@
       if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : discovering() ? 'Surveying' : heldP() ? 'Fighting' : 'Traveling') : 'Preparing') : 'Solarist');
     }
     function draw() {
-      drawClock();
+      drawClock(); drawLv();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
       startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : discovering() ? 'Survey' : heldP() ? 'Fight' : 'Launch') : 'Start break');
@@ -1046,7 +1095,9 @@
       const recRows = REC.filter(([k]) => S.rec[k]).map(([k, ic, label, , f]) => { const r = S.rec[k], fw = byNum(r.num); return el('tr', {}, el('td', {}, ic + ' ' + label), el('td', {}, f(r.v)), el('td', {}, fw ? el('button', { type: 'button', class: 'sl-link', onclick: () => { tab('log'); openWorld(r.num); } }, nm(fw.p)) : '')); });
       if (S.rec.dayN) recRows.unshift(el('tr', {}, el('td', {}, '📅 Most sessions in a day'), el('td', {}, String(S.rec.dayN.v)), el('td', {}, new Date(S.rec.dayN.date).toLocaleDateString())));
       const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
-      const SUB = { Ship: [el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
+      const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. A new title every 10 levels.'),
+        lvMsg && Date.now() - lvMsgAt < 10000 ? el('p', { class: 'sl-lv-msg' }, lvMsg) : null, lvBar('xp', '⭐', CAPT, true), lvBar('kn', '📚', KNOW, true));
+      const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
         Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog] };
       const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
       shipPane.replaceChildren(el('div', { class: 'sl-stabs sl-shiptabs', role: 'tablist' }, subBtns), el('div', { class: 'sl-subpane' }, SUB[shipTab]));
