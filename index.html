@@ -3152,7 +3152,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
     const optJson = f => fetch(f, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null); // optional files; bad JSON falls back to the defaults
-    solaristLoading = loadScript('apps/solarist.js?v=42').then(() => Promise.all([optJson('apps/solarist-economy.json'), optJson('apps/solarist-items.json')]))
+    solaristLoading = loadScript('apps/solarist.js?v=43').then(() => Promise.all([optJson('apps/solarist-economy.json'), optJson('apps/solarist-items.json')]))
       .then(([econ, items]) => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
