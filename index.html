@@ -865,6 +865,7 @@ html.crt43 body { width: var(--scr-w); height: var(--scr-h); margin: calc((100dv
 .sl-m-sci .sl-msg-x { font-weight: bold; } .sl-m-sec .sl-msg-x { font-style: italic; }
 .sl-older { display: block; margin: 6px auto 2px; padding: 2px 12px; }
 .sl-postlog .sl-feedbox { margin-top: 4px; max-height: none; }
+.sl-tag-coord { color: #3A2A8C; background: #ECEBFF; border-color: #6D80FA; }
 .sl-tag-bad { color: #8E1B1B; background: #FDECEC; border-color: #C62828; }
 .sl-card.sl-held { border-color: #C62828 #5A0000 #5A0000 #C62828; }
 .sl-card.sl-held .sl-card-h { background: linear-gradient(90deg, #6A0000, #C62828); }
@@ -3152,7 +3153,7 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
     const optJson = f => fetch(f, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null); // optional files; bad JSON falls back to the defaults
-    solaristLoading = loadScript('apps/solarist.js?v=44').then(() => Promise.all([optJson('apps/solarist-economy.json'), optJson('apps/solarist-items.json')]))
+    solaristLoading = loadScript('apps/solarist.js?v=45').then(() => Promise.all([optJson('apps/solarist-economy.json'), optJson('apps/solarist-items.json')]))
       .then(([econ, items]) => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
