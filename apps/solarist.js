@@ -300,6 +300,10 @@
     arcade: ['🕹', 'Arcade', ['{who} beat the high score on the Arcade cabinet.', 'Arcade tournament: travelers from {from} took first place.', 'The claw machine finally gave out a prize.', '{num} coins jammed the old pinball table.']],
     inn: ['🛏', 'Inn', ['The Inn had {num} guests tonight.', '{who} checked in for one night and stayed a week.', 'A traveling crew from {from} took every room.', 'The Inn\'s guestbook is filling up with doodles of {n}.']],
   };
+  const FAC_DESC = { diner: 'Hot food for tired travelers.', depot: 'Stores cargo and ships it across the sector.', hangar: 'Docking and repairs for passing ships.', greenhouse: 'Grows fresh food under glass.',
+    observatory: 'Watches the sky for comets and far-off stars.', clinic: 'Patches travelers up after long jumps.', lounge: 'Music, games and stories late into the night.', radio: 'Picks up signals and runs a call-in show.',
+    workshop: 'Builds and fixes anything with spare parts.', library: 'Books, old maps and a cozy reading corner.', market: 'Traders swap goods from many worlds.', bathhouse: 'Hot springs for sore explorers.',
+    arcade: 'Old cabinets and fierce high-score battles.', inn: 'Beds for travelers who stay the night.' };
   const FOOD = ['noodles', 'dumplings', 'space soup', 'fried rice', 'pancakes', 'curry', 'moon pie', 'tea', 'hot cocoa', 'grilled fish', 'mystery stew', 'sticky rice'];
   const PLANT = ['glow-beans', 'blue melons', 'star lettuce', 'spiral carrots', 'purple chilies', 'moss tea leaves', 'crystal berries'];
   const TITLE = ['Captain', 'Pilot', 'Trader', 'Engineer', 'Doctor', 'Old', 'Navigator', 'Cook', 'Miner'];
@@ -519,9 +523,9 @@
       return out;
     }
     const anyBuild = () => { const o = buildOptions(); return Object.values(o).some(a => a.length); };
-    function fillBuildSel(selEl) {
+    function fillBuildSel(selEl, skip) {
       const o = buildOptions();
-      selEl.replaceChildren(...Object.entries(o).filter(([, a]) => a.length).map(([g, a]) => el('optgroup', { label: g }, a.slice(0, 300).map(j => el('option', { value: j.k + ':' + j.num + ':' + (j.fac || '') }, j.label)))));
+      selEl.replaceChildren(...Object.entries(o).filter(([g, a]) => a.length && g !== skip).map(([g, a]) => el('optgroup', { label: g }, a.slice(0, 300).map(j => el('option', { value: j.k + ':' + j.num + ':' + (j.fac || '') }, j.label)))));
     }
     function setJob(key) { const [k, n, fac] = key.split(':'); S.mission = 1; S.job = { k, num: +n, fac: fac || undefined }; save(); hint.textContent = ''; draw(); }
     // Interplanetary Coordinator: spend one study session charging it, and your next trip is a lucky one (one charge, no stacking)
@@ -991,7 +995,7 @@
     }
 
     /* ---------- the Ship tab: Coordinator, Listening Posts and all their transmissions in one place ---------- */
-    let shipTab = 'Ship';
+    let shipTab = 'Ship', facPost = 0;
     function drawShip() {
       const group = (title, ...kids) => el('fieldset', { class: 'sl-group' }, el('legend', {}, title), ...kids);
       const cm = curMission(), b = building(), locked = running && mode === 'focus';
@@ -1005,13 +1009,24 @@
         return el('div', { class: 'sl-post' + (tuned ? ' tuned' : '') }, el('img', { src: paint(p, 32), alt: '' }),
           el('span', { class: 'sl-row-t' }, el('b', {}, (p.post.tp ? '🏘 ' : '🗼 ') + nm(p), tuned ? ' 📡' : ''), el('small', {}, pad(p.num) + ' · ' + (p.post.tp ? 'Travelers\' Post' + (p.post.tp.fac.length ? ' · ' + p.post.tp.fac.map(f => FAC[f.k][0]).join('') : '') : 'Listening Post') + ' · ' + p.post.reports.length + ' log' + (p.post.reports.length === 1 ? '' : 's'))),
           tuned ? el('button', { type: 'button', class: 'btn', onclick: () => { S.tuned = 0; save(); draw(); } }, 'Untune') : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); draw(); } }, 'Tune'),
-          p.post.tp ? el('div', { class: 'sl-post-x' }, el('div', { class: 'sl-muted' }, '🏙 ' + tierOf(p.post.tp.pop || 0) + ' · ' + (p.post.tp.pop || 0).toLocaleString() + ' settlers' + (p.post.tp.fac.length ? ' · upgrade a facility:' : ' · add facilities with the 🗼 Build mission')),
-            p.post.tp.fac.length ? el('div', { class: 'sl-facup' }, p.post.tp.fac.map(f => { const lv = f.lv || 1, c = facCost(lv + 1), max = lv >= FAC_MAX;
-              return el('button', { type: 'button', class: 'sl-fac-b', disabled: max || S.dust < c || null, title: max ? 'Max level' : 'Upgrade to level ' + (lv + 1) + ' for ' + c + ' stardust: bigger numbers, more settlers, and fame', onclick: () => upgradeFac(p, f) },
-                FAC[f.k][0] + ' Lv ' + lv, el('small', {}, max ? 'MAX' : '✦ ' + c)); })) : null) : null);
+          p.post.tp ? el('div', { class: 'sl-post-x sl-muted' }, '🏙 ' + tierOf(p.post.tp.pop || 0) + ' · ' + (p.post.tp.pop || 0).toLocaleString() + ' settlers · ' + p.post.tp.fac.length + ' / ' + Object.keys(FAC).length + ' facilities') : null);
       })) : el('p', { class: 'sl-muted' }, 'No posts yet. Choose the 🗼 Build mission on the Voyage tab (or open a world in the Logbook).');
-      const plan = anyBuild() ? (() => { const s2 = el('select', { 'aria-label': 'What to build' }); fillBuildSel(s2); if (b) s2.value = jobKey(b);
+      const plan = Object.entries(buildOptions()).some(([g, a]) => g !== 'Facilities' && a.length) ? (() => { const s2 = el('select', { 'aria-label': 'What to build' }); fillBuildSel(s2, 'Facilities'); if (b && b.k !== 'add') s2.value = jobKey(b);
         return el('div', { class: 'sl-plan' }, 'Build: ', s2, el('button', { type: 'button', class: 'btn', disabled: locked || null, onclick: () => { setJob(s2.value); drawShip(); } }, 'Next session')); })() : null;
+      const tps = pl.filter(f => f.p.post.tp);
+      if (!tps.some(f => f.p.num === facPost)) facPost = tps.length ? tps[0].p.num : 0;
+      const facPanel = tps.length ? (() => {
+        const tp = byNum(facPost).p, sel2 = el('select', { 'aria-label': 'Travelers\' Post' }, tps.map(f => el('option', { value: f.p.num, selected: f.p.num === facPost || null }, '🏘 ' + nm(f.p) + ' (' + tierOf(f.p.post.tp.pop || 0) + ')')));
+        sel2.addEventListener('change', () => { facPost = +sel2.value; drawShip(); });
+        const rows = Object.keys(FAC).map(k => {
+          const f = tp.post.tp.fac.find(x => x.k === k), lv = f ? (f.lv || 1) : 0, c = f ? facCost(lv + 1) : 0, max = lv >= FAC_MAX, queued = b && b.k === 'add' && b.p.num === tp.num && b.fac === k;
+          return el('div', { class: 'sl-mod' + (f ? '' : ' sl-unbuilt') }, el('span', { class: 'sl-mod-i' }, FAC[k][0]),
+            el('span', { class: 'sl-row-t' }, el('b', {}, FAC[k][1] + (f ? ' · Lv ' + lv : '')), el('small', {}, FAC_DESC[k] + (f && lv > 1 ? ' Level ' + lv + ': ×' + lv + ' everything.' : ''))),
+            f ? el('button', { type: 'button', class: 'btn', disabled: max || S.dust < c || null, title: max ? 'Max level' : 'Bigger numbers, more settlers, and fame', onclick: () => upgradeFac(tp, f) }, max ? 'Max level' : 'Upgrade ✦ ' + c.toLocaleString())
+              : el('button', { type: 'button', class: 'btn', disabled: locked || queued || null, title: 'Your next study session builds it', onclick: () => { setJob('add:' + tp.num + ':' + k); drawShip(); } }, queued ? 'Building next' : 'Build next session'));
+        });
+        return group('🏘 Facilities', el('div', { class: 'sl-plan' }, 'Travelers\' Post: ', sel2), el('div', { class: 'sl-mods' }, rows));
+      })() : group('🏘 Facilities', el('p', { class: 'sl-muted' }, 'Upgrade a Listening Post to a Travelers\' Post (🗼 Build mission) to start adding facilities.'));
       const feed = [];
       posts().forEach(f => f.p.post.reports.forEach(r => feed.push({ p: f.p, r })));
       feed.sort((a, c) => c.r.at - a.r.at);
@@ -1032,7 +1047,7 @@
       if (S.rec.dayN) recRows.unshift(el('tr', {}, el('td', {}, '📅 Most sessions in a day'), el('td', {}, String(S.rec.dayN.v)), el('td', {}, new Date(S.rec.dayN.date).toLocaleDateString())));
       const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
       const SUB = { Ship: [el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
-        Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan)], Logs: [trans, evLog] };
+        Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog] };
       const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
       shipPane.replaceChildren(el('div', { class: 'sl-stabs sl-shiptabs', role: 'tablist' }, subBtns), el('div', { class: 'sl-subpane' }, SUB[shipTab]));
     }
