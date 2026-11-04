@@ -533,6 +533,8 @@
     // where the ship is right now: the last world you reached. Discover surveys it for collectibles.
     if (!S.items) S.items = {};
     if (S.at == null && S.found.length) S.at = S.found[S.found.length - 1].p.num;
+    if (!S.nextNum) S.nextNum = S.found.reduce((m, f) => Math.max(m, f.p.num), 0) + 1; // numbers keep counting up even after selling
+    if (!S.sold) S.sold = { n: 0, dust: 0, ly: 0 };
     const atP = () => { const f = S.at && byNum(S.at); return f ? f.p : null; };
     const discovering = () => S.mission === -2 && !!atP() && !(atP().outlaw && !atP().outlaw.cleared);
     // the old material × object collection becomes the same number of new items, of the same rarity
@@ -704,6 +706,36 @@
       S.kn = S.found.length * 10 + heard * 15 + itemCount() * 12 + (S.events || []).length * 15;
     }
     save();
+    // Selling a world: the survey rights go to the Cartographers' Guild for stardust, and the world leaves your Logbook.
+    // The price follows its overall condition and how much it stands out.
+    const SELL_RAR = { Common: 10, Uncommon: 25, Rare: 70, Legendary: 200 };
+    function sellParts(p) {
+      const out = [[p.rarity + ' world', SELL_RAR[p.rarity]]], hab = p.x ? p.x.hab : 0;
+      if (hab) out.push(['Habitability ' + hab + '%', Math.round(hab / 2)]);
+      if (hab >= 80) out.push(['Earth-like', 25]);
+      if (p.lifeLvl) out.push([p.life, p.lifeLvl * 8]);
+      if (p.odd) out.push(['Anomaly', 25]);
+      if (p.rings) out.push(['Rings', 8]);
+      if (p.moons) out.push([p.moons + ' moon' + (p.moons === 1 ? '' : 's'), Math.min(20, p.moons * 2)]);
+      REC.forEach(([k, , label]) => { if (S.rec[k] && S.rec[k].num === p.num) out.push(['Record: ' + label, 30]); });
+      return out.map(([l, v]) => [l, Math.round(v * INCOME)]);
+    }
+    const sellPrice = p => sellParts(p).reduce((a, x) => a + x[1], 0);
+    const isRecord = p => REC.some(([k]) => S.rec[k] && S.rec[k].num === p.num);
+    function sellBlock(p) { // why a world can't be sold, or null
+      if (p.post) return 'it has a post';
+      if (held(p)) return 'outlaws hold it';
+      if (S.at === p.num) return 'you are here';
+      if (S.mission > 0 && S.job && S.job.num === p.num) return 'you\'re building here next';
+      return null;
+    }
+    function sellWorlds(list) {
+      let got = 0;
+      list.forEach(p => { const v = sellPrice(p); got += v; S.dust += v; S.dustTotal += v; S.sold.n++; S.sold.ly += p.dist; S.found = S.found.filter(f => f.p !== p); });
+      shownList = shownList.filter(f => !list.includes(f.p));
+      S.sold.dust += got; award(5 * list.length, 0); flushXP([]);
+      save(); return got;
+    }
     // everything that happens at the end of a study session, shown together under the timer
     function sessionEnd(reps, p, ev) {
       const notes = [];
@@ -1000,7 +1032,7 @@
           hint.textContent = nm(o) + ' is free! Explore is open again. Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
           const lucky = !!S.coord && !(ev && ev.got); if (lucky) S.coord = false;
-          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky, Math.min(.2, (lvl('scanner') - 1) * .01));
+          const p = makePlanet((Math.random() * 4294967296) >>> 0, S.nextNum++, lucky, Math.min(.2, (lvl('scanner') - 1) * .01));
           const outlaws = Math.random() < OUTLAW_CHANCE && p.type !== 'Rogue';
           if (outlaws) { const pk = a => a[Math.floor(Math.random() * a.length)]; p.outlaw = { gang: 'the ' + pk(GANG_A) + ' ' + pk(GANG_B), at: Date.now() }; S.outlaw = p.num; }
           S.found.push({ at: Date.now(), p }); S.at = p.num;
@@ -1159,9 +1191,10 @@
       const tp = tunedP(), pc = posts().length;
       logHead.replaceChildren(
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
-        el('div', { class: 'sl-muted' }, ly.toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying'),
+        el('div', { class: 'sl-muted' }, (ly + S.sold.ly).toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying' + (S.sold.n ? ' · 💰 ' + S.sold.n + ' sold for ✦ ' + S.sold.dust.toLocaleString() : '')),
         el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0))),
           el('button', { type: 'button', class: 'btn sl-col-b', title: 'Your collectibles', onclick: () => openWorld('items') }, '🎒 Collection ' + itemCount() + ' / ' + ITEM_TOTAL)),
+        bulkSell(),
         el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) : ' · 📡 Satellite not tuned') : '🗼 No posts yet. Open a world and choose "Build a Listening Post here".'));
       logList.className = 'sl-list';
       if (!S.found.length) { logList.replaceChildren(el('p', { class: 'sl-empty' }, 'No worlds yet. Finish a trip on the Voyage tab to discover your first planet.')); return; }
@@ -1178,6 +1211,18 @@
           el('span', { class: 'sl-tile-pic' }, el('img', { src: paint(p, 32), alt: '' }), marks ? el('span', { class: 'sl-tile-m' }, marks) : null),
           el('b', {}, nm(p)), el('small', {}, pad(p.num) + ' · ' + p.type));
       }), ...Array.from({ length: blanks }, unknown));
+    }
+    let bulkR = 'Common';
+    function bulkSell() { // sell every world of one rarity at once (skips posts, where you are, outlaw worlds, build targets and record holders)
+      const list = S.found.map(f => f.p).filter(p => p.rarity === bulkR && !sellBlock(p) && !isRecord(p)), total = list.reduce((a, p) => a + sellPrice(p), 0);
+      const rs = el('select', { 'aria-label': 'Rarity to sell' }, ['Common', 'Uncommon', 'Rare', 'Legendary'].map(r => el('option', { value: r, selected: r === bulkR || null }, r)));
+      rs.addEventListener('change', () => { bulkR = rs.value; drawLog(); });
+      const b = el('button', { type: 'button', class: 'btn sl-sell-b', disabled: !list.length || null }, list.length ? 'Sell ' + list.length + ' for ✦ ' + total.toLocaleString() : 'Nothing to sell');
+      b.addEventListener('click', () => {
+        if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = 'Click again to sell ' + list.length + ' ' + bulkR + ' world' + (list.length === 1 ? '' : 's'); return; }
+        const got = sellWorlds(list); hint.textContent = '💰 Sold ' + list.length + ' ' + bulkR + ' world' + (list.length === 1 ? '' : 's') + ' for ✦ ' + got + '.'; drawLog(); draw();
+      });
+      return el('div', { class: 'sl-bulk', title: 'Skips worlds with posts, where you are, outlaw worlds, your next build and record holders' }, el('span', {}, '💰 Sell all '), rs, el('span', {}, ' worlds:'), b);
     }
     function drawItems() {
       const nav = el('div', { class: 'sl-wnav' }, el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'), el('b', {}, '🎒 Collection: ' + itemCount() + ' / ' + ITEM_TOTAL), el('span', { class: 'sl-muted' }, Math.round(itemCount() / ITEM_TOTAL * 100) + '%'));
@@ -1207,10 +1252,21 @@
         p.post ? (tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune')
           : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite')) : null,
         p.post ? el('button', { type: 'button', class: 'btn', title: 'Worlds with a post can be renamed', onclick: () => rename(p) }, 'Rename...') : null);
+      const why = sellBlock(p), price = sellPrice(p);
+      const sellB = el('button', { type: 'button', class: 'btn sl-sell-b', disabled: why || null, title: why ? 'Can\'t sell: ' + why : 'Sell the survey rights. The world leaves your Logbook for good.' }, '💰 Sell for ✦ ' + price.toLocaleString());
+      sellB.addEventListener('click', () => {
+        if (!sellB.classList.contains('arm')) { sellB.classList.add('arm'); sellB.textContent = 'Click again to sell ' + nm(p); setTimeout(() => { if (sellB.isConnected && sellB.classList.contains('arm')) { sellB.classList.remove('arm'); sellB.textContent = '💰 Sell for ✦ ' + price.toLocaleString(); } }, 4000); return; }
+        const near = next || prev; const got = sellWorlds([p]);
+        hint.textContent = '💰 Sold the survey rights to ' + nm(p) + ' for ✦ ' + got + '.';
+        if (near) openWorld(near.p.num); else closeWorld(); draw();
+      });
+      const sell = el('details', { class: 'sl-sell' }, el('summary', {}, '💰 Sell this world' + (why ? ' (not now: ' + why + ')' : ' · ✦ ' + price.toLocaleString())),
+        el('p', { class: 'sl-muted' }, 'The Cartographers\' Guild buys survey rights. The price follows the world\'s condition and how much it stands out. Selling removes it from your Logbook for good (records and collectibles stay).'),
+        el('table', { class: 'sl-rec' }, el('tbody', {}, sellParts(p).map(([l, v]) => el('tr', {}, el('td', {}, l), el('td', {}, '✦ ' + v))))), sellB);
       const cardEl = el('div', { class: 'sl-card sl-world' }, ...planetCard(p, 'log'));
       const sv = cardEl.querySelector('details.sl-more'); if (sv) sv.open = true;
       logList.className = 'sl-wpage';
-      logList.replaceChildren(nav, el('div', { class: 'sl-muted sl-found-on' }, (S.at === p.num ? '📍 You are here · ' : '') + 'Discovered ' + new Date(f.at).toLocaleString()), acts.childNodes.length ? acts : null, cardEl);
+      logList.replaceChildren(nav, el('div', { class: 'sl-muted sl-found-on' }, (S.at === p.num ? '📍 You are here · ' : '') + 'Discovered ' + new Date(f.at).toLocaleString()), acts.childNodes.length ? acts : null, cardEl, sell);
     }
     logPane.addEventListener('keydown', e => { if (openNum == null || e.target.closest('input, select')) return; if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); closeWorld(); } });
     function rename(p) {
