@@ -751,6 +751,7 @@
       ['🙏', 'The Stranded Pilgrims', 'A pilgrim fleet ran out of fuel halfway to a holy comet. Their engines are cold.', ['Followed the pilgrims\' prayer-song broadcast to their fleet.', 'Shared fuel ship by ship across the whole convoy.', 'Fixed a cracked fuel line on their oldest ship with tape and hope.', 'The fleet reached the holy comet just in time for the sunrise ceremony.'], 'The pilgrims passed around the collection plate for you.'],
       ['🛰', 'The Falling Station', 'An old relay station lost its thrusters and is slowly falling toward its star.', ['Plotted an intercept course before the station got too hot.', 'Matched orbit with the station. The hull was already glowing.', 'Clamped on and fired the ship\'s engines to slow its fall.', 'Pushed the station back into a safe orbit. The keepers can breathe again.'], 'The relay network paid a salvage-and-rescue bounty.'],
     ];
+    const ROMAN = n => ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][n - 1] || String(n);
     const drAvail = () => !S.dr && S.drDay !== today() && S.fcDay === today() && mode === 'focus' && S.cycle % S.set.every === 0 && !running && !(left > 0 && left < length(mode));
     function drAccept() {
       if (!drAvail()) return;
@@ -766,8 +767,8 @@
       const d = S.dr, [ic, title, , beats, thanks] = DISTRESS[d.sc]; d.n++;
       const bi = d.n >= d.need ? 3 : d.n === 1 ? 0 : d.n % 2 === 0 ? 1 : 2;
       if (d.n < d.need) {
-        reps.unshift({ ev: { battle: true, ic: '🆘', title: title + ' · leg ' + d.n + ' of ' + d.need, t: beats[bi] } });
-        return 'Leg ' + d.n + ' of the Distress Run done. ' + (d.need - d.n) + ' to go.';
+        reps.unshift({ ev: { battle: true, ic: '🆘', title: title + ' · Act ' + ROMAN(d.n), t: beats[bi] } });
+        return 'Act ' + ROMAN(d.n) + ' of the Distress Run done. ' + (d.need - d.n) + (d.need - d.n === 1 ? ' act' : ' acts') + ' to go.';
       }
       const dust = Math.round(E.distressRun.base + Math.random() * E.distressRun.random); S.dust += dust; S.dustTotal += dust;
       const bonus = [];
@@ -845,7 +846,7 @@
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
     function headline() {
-      if (S.dr && mode === 'focus') return !running ? (left > 0 && left < length(mode) ? 'Holding position' : 'Distress Run: leg ' + (S.dr.n + 1) + ' of ' + S.dr.need) : 'Answering the distress call';
+      if (S.dr && mode === 'focus') return !running ? (left > 0 && left < length(mode) ? 'Holding position' : 'Distress Run: Act ' + ROMAN(S.dr.n + 1)) : 'Answering the distress call';
       const b = building(), c = charging(), d = !b && !c && discovering() && atP(), o = !b && !c && !d && heldP();
       if (d) return !running ? (left > 0 && left < length(mode) ? 'Holding position' : 'Ready to survey') : 'Surveying ' + nm(d) + ' for collectibles';
       if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : o ? 'Outlaws ahead' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Take a breather';
@@ -901,7 +902,7 @@
         const [ic, title] = DISTRESS[S.dr.sc], ab = el('button', { type: 'button', class: 'btn', disabled: (running && mode === 'focus') || null, title: 'Give up today\'s run (no reward, and it still counts as today\'s)' }, 'Abandon');
         ab.addEventListener('click', () => { if (!ab.classList.contains('arm')) { ab.classList.add('arm'); ab.textContent = 'Click again to abandon'; return; } drAbandon(); });
         drBox.hidden = false; drBox.className = 'sl-dr on';
-        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress Run: ' + title), el('div', { class: 'sl-dr-legs' }, Array.from({ length: S.dr.need }, (_, i) => el('span', { class: i < S.dr.n ? 'done' : i === S.dr.n ? 'now' : '' }, 'Leg ' + (i + 1)))), el('div', { class: 'sl-dr-row' }, el('span', { class: 'sl-muted' }, 'Other missions are locked until the run is over.'), ab));
+        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress Run: ' + title), el('div', { class: 'sl-dr-legs' }, Array.from({ length: S.dr.need }, (_, i) => el('span', { class: i < S.dr.n ? 'done' : i === S.dr.n ? 'now' : '' }, 'Act ' + ROMAN(i + 1)))), el('div', { class: 'sl-dr-row' }, el('span', { class: 'sl-muted' }, 'Other missions are locked until the run is over.'), ab));
       } else if (drAvail()) {
         drBox.hidden = false; drBox.className = 'sl-dr offer';
         drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress call received!'), el('p', {}, 'Someone out there needs help. Answering takes this whole cycle (' + S.set.every + ' study sessions) with no other missions, and pays about ✦ ' + E.distressRun.base + '–' + (E.distressRun.base + E.distressRun.random) + ' plus a random bonus, XP and Knowledge. One run a day.'),
@@ -1269,7 +1270,7 @@
       const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
       const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. Every 10 levels earns a new title.'),
         lvMsg && Date.now() - lvMsgAt < 10000 ? el('p', { class: 'sl-lv-msg' }, lvMsg) : null, lvBar('xp', '⭐', CAPT, true), lvBar('kn', '📚', KNOW, true));
-      const drGroup = group('🆘 Distress Run', el('p', {}, S.dr ? 'In progress: ' + DISTRESS[S.dr.sc][1] + ', leg ' + (S.dr.n + 1) + ' of ' + S.dr.need + '.' : S.drDay === today() ? 'Today\'s run is used up. A new distress call comes in tomorrow.' : S.fcDay === today() ? 'Available at the start of your next cycle (right after a long break).' : 'Earn a ★ Full Cycle today (no skipping for a whole cycle) and a distress call comes in when the long break ends.'),
+      const drGroup = group('🆘 Distress Run', el('p', {}, S.dr ? 'In progress: ' + DISTRESS[S.dr.sc][1] + ', Act ' + ROMAN(S.dr.n + 1) + ' of ' + ROMAN(S.dr.need) + '.' : S.drDay === today() ? 'Today\'s run is used up. A new distress call comes in tomorrow.' : S.fcDay === today() ? 'Available at the start of your next cycle (right after a long break).' : 'Earn a ★ Full Cycle today (no skipping for a whole cycle) and a distress call comes in when the long break ends.'),
         el('p', { class: 'sl-muted' }, 'Once a day: a whole cycle of study sessions with no other missions, for about ✦ ' + E.distressRun.base + '–' + (E.distressRun.base + E.distressRun.random) + ', a random bonus, 250 XP and 120 Knowledge. ' + (S.drN || 0) + ' completed so far.'));
       const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [drGroup, bounties, records],
         Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog], Stats: statsView(group) };
