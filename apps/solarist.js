@@ -28,8 +28,8 @@
   // class: weight, temperature range (°C), palette (light -> dark), biomes, atmospheres, life chance, has a surface
   const TYPES = {
     Rocky: { w: 14, t: [-80, 60], pal: ['#d2ad85', '#a8825f', '#7f6045', '#58412e'], bio: ['Rocky plains', 'Canyon mazes', 'Cratered highlands', 'Dust basins', 'Stone arches', 'Boulder fields'], atm: ['Thin nitrogen', 'Carbon dioxide', 'Almost none', 'Argon haze'], life: .15 },
-    Ocean: { w: 12, t: [2, 34], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#77b864', '#c8b47a'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
-    Jungle: { w: 10, t: [18, 48], pal: ['#8fdc6a', '#4caf50', '#2e7d32', '#1b4f20'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
+    Ocean: { w: 9, t: [2, 34], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#77b864', '#c8b47a'], bio: ['Endless ocean', 'Island chains', 'Reef shallows', 'Storm seas', 'Kelp-like forests', 'Floating ice rafts'], atm: ['Nitrogen and oxygen', 'Humid nitrogen', 'Thick water vapor'], life: .7 },
+    Jungle: { w: 7, t: [18, 48], pal: ['#8fdc6a', '#4caf50', '#2e7d32', '#1b4f20'], bio: ['Dense jungle', 'Giant fungus forests', 'Swamp deltas', 'Vine canopies', 'Glowing moss valleys', 'Bamboo-like towers'], atm: ['Oxygen-rich', 'Humid nitrogen and oxygen', 'Spore-heavy air'], life: .92 },
     Desert: { w: 10, t: [25, 95], pal: ['#f6dc9c', '#e0b268', '#c08844', '#8e5f2c'], bio: ['Dune seas', 'Salt flats', 'Glass deserts', 'Mesa country', 'Dry riverbeds', 'Rust plains'], atm: ['Dry carbon dioxide', 'Thin nitrogen', 'Dusty nitrogen'], life: .25 },
     Ice: { w: 11, t: [-220, -25], pal: ['#ffffff', '#d8eef8', '#a8d0e8', '#76a8c8'], bio: ['Glacier fields', 'Frozen oceans', 'Ice caves', 'Snow plains', 'Cryovolcano fields', 'Blue ice cliffs'], atm: ['Thin nitrogen', 'Methane traces', 'Almost none'], life: .12 },
     Lava: { w: 7, t: [350, 1500], pal: ['#ffd04a', '#ff7a1a', '#4a2a22', '#241414'], bio: ['Lava seas', 'Volcanic chains', 'Obsidian plains', 'Ash fields', 'Magma rivers', 'Basalt towers'], atm: ['Sulfur dioxide', 'Volcanic ash and CO₂', 'Almost none'], life: .02 },
@@ -38,10 +38,10 @@
     Toxic: { w: 5, t: [60, 480], pal: ['#e4ec7a', '#bcc84a', '#8e9a32', '#5e6a20'], bio: ['Acid lakes', 'Sulfur fields', 'Yellow haze plains', 'Corroded canyons', 'Bubbling mud pits'], atm: ['Sulfuric acid clouds', 'Chlorine haze', 'Thick carbon dioxide'], life: .06 },
     Crystal: { w: 3, t: [-120, 40], pal: ['#f4dcff', '#d2a2f2', '#a46ed6', '#6e3ea8'], bio: ['Crystal spires', 'Mirror plains', 'Prism caves', 'Singing quartz forests', 'Geode valleys'], atm: ['Thin neon', 'Almost none', 'Argon and nitrogen'], life: .1 },
     'Tidally locked': { w: 5, t: [-140, 260], pal: ['#ffd9a0', '#e0a060', '#3a4a7a', '#1a2244'], bio: ['Twilight band', 'Scorched dayside', 'Frozen nightside', 'Eternal sunset strip'], atm: ['Nitrogen', 'Thin carbon dioxide', 'Wind-whipped nitrogen'], life: .3, locked: true },
-    Garden: { w: 6, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
-    Savanna: { w: 6, t: [15, 42], pal: ['#f2dc86', '#d6b652', '#a98d3a', '#6c8a3c'], bio: ['Golden grasslands', 'Lone giant trees', 'Termite-mound fields', 'Seasonal watering holes', 'Red-rock outcrops', 'Dry riverbeds'], atm: ['Nitrogen and oxygen, dry', 'Warm nitrogen and oxygen'], life: .85 },
+    Garden: { w: 3, t: [6, 28], pal: ['#7fc4ff', '#3a8be0', '#2560b0', '#173f7a'], land: ['#6cc45a', '#3e8e3a'], clouds: true, bio: ['Temperate forests', 'Rolling grasslands', 'River valleys', 'Flower meadows', 'Misty mountains', 'Calm lakes'], atm: ['Nitrogen and oxygen, breathable'], life: .97 },
+    Savanna: { w: 4, t: [15, 42], pal: ['#f2dc86', '#d6b652', '#a98d3a', '#6c8a3c'], bio: ['Golden grasslands', 'Lone giant trees', 'Termite-mound fields', 'Seasonal watering holes', 'Red-rock outcrops', 'Dry riverbeds'], atm: ['Nitrogen and oxygen, dry', 'Warm nitrogen and oxygen'], life: .85 },
     Tundra: { w: 5, t: [-40, 8], pal: ['#eef3f4', '#bcc8b4', '#8c9c82', '#5e6e5a'], bio: ['Frozen moss plains', 'Permafrost bogs', 'Rocky taiga', 'Snowy foothills', 'Frost-cracked flats', 'Ice-edged lakes'], atm: ['Cold nitrogen and oxygen', 'Thin, crisp nitrogen'], life: .45 },
-    Swamp: { w: 5, t: [12, 38], pal: ['#6c8c5c', '#4c6c42', '#36522f', '#22361e'], land: ['#7c6c3c', '#5c7c36'], bio: ['Mangrove-like mazes', 'Steaming bogs', 'Reed marshes', 'Floating plant mats', 'Muddy deltas', 'Fog-filled hollows'], atm: ['Humid, methane-scented air', 'Thick, wet nitrogen and oxygen'], life: .85 },
+    Swamp: { w: 4, t: [12, 38], pal: ['#6c8c5c', '#4c6c42', '#36522f', '#22361e'], land: ['#7c6c3c', '#5c7c36'], bio: ['Mangrove-like mazes', 'Steaming bogs', 'Reed marshes', 'Floating plant mats', 'Muddy deltas', 'Fog-filled hollows'], atm: ['Humid, methane-scented air', 'Thick, wet nitrogen and oxygen'], life: .85 },
     Fungal: { w: 3, t: [5, 30], pal: ['#f6b6e2', '#d27cc2', '#9c4c9c', '#5e2a6a'], bio: ['Giant mushroom forests', 'Spore meadows', 'Glowing mycelium caves', 'Puffball plains', 'Shelf-fungus cliffs'], atm: ['Spore-heavy nitrogen', 'Damp carbon dioxide and oxygen'], life: .95 },
     Hycean: { w: 4, t: [-10, 60], pal: ['#a2f2e2', '#4ccac2', '#2a8c9c', '#1a5a72'], clouds: true, bio: ['Warm global ocean', 'Hydrogen sky', 'Deep thermal vents', 'Glowing plankton seas'], atm: ['Thick hydrogen over a warm ocean'], life: .6 },
     Iron: { w: 3, t: [-50, 300], pal: ['#e2e6ec', '#b2b8c2', '#7e8692', '#4e545e'], bio: ['Metal plains', 'Rust canyons', 'Magnetite dunes', 'Mirror-bright craters', 'Iron spire fields'], atm: ['Almost none', 'Thin argon'], life: .05 },
@@ -130,7 +130,7 @@
 
   function makePlanet(seed, num, lucky, oddBoost) {
     const r = rng(seed);
-    const LUCK = { Garden: 4, Ocean: 2, Jungle: 2.5, Savanna: 2.5, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
+    const LUCK = { Garden: 7, Ocean: 2.5, Jungle: 3, Savanna: 3.5, Fungal: 2, Swamp: 1.5, Tundra: 1.5, Hycean: 1.5, Crystal: 1.5, Lava: .3, Toxic: .3, Rogue: .3, Shattered: .3, 'Glass storm': .3, Dwarf: .5, 'Gas giant': .5, 'Ice giant': .5 }; // a lucky trip favours livable worlds
     const type = weighted(r, Object.entries(TYPES).map(([k, v]) => [k, v.w * (lucky ? LUCK[k] || 1 : 1)])), T = TYPES[type];
     const rarity = weighted(r, lucky ? RARITY_LUCKY : RARITY); // a charged Interplanetary Coordinator steers toward better worlds
     // name: 2-3 made-up syllables + a numeral or letter; plus a survey catalog code
@@ -140,7 +140,7 @@
     const code = pick(r, CATALOG) + '-' + (100 + Math.floor(r() * 9900)) + ' ' + 'bcdefg'[Math.floor(r() * 6)];
     const star = T.rogue ? 'none (drifting alone)' : weighted(r, STARS);
     // stats lean toward friendly, Earth-like numbers (but anything can still happen)
-    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < (lucky ? .85 : .55) && l < h ? between(r, l, h) : between(r, lo, hi); };
+    const lean = (lo, hi, a, b) => { const l = Math.max(lo, a), h = Math.min(hi, b); return r() < (lucky ? .85 : .25) && l < h ? between(r, l, h) : between(r, lo, hi); };
     const temp = Math.round(lean(T.t[0], T.t[1], -10, 32));
     const tempNight = T.locked ? Math.round(between(r, -200, -60)) : null;
     const gravity = T.noGround ? +(between(r, 0.9, 3.4)).toFixed(2) : +(lean(0.15, 2.4, 0.75, 1.35)).toFixed(2);
@@ -152,7 +152,7 @@
     const b = T.bio.slice().sort(() => r() - .5);
     const atm = pick(r, T.atm);
     const mild = !T.noGround && temp > -15 && temp < 45 && type !== 'Toxic' && type !== 'Lava';
-    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .15 : 0) + (lucky ? .2 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
+    let lifeLvl = r() < Math.min(.98, T.life + (mild ? .08 : 0) + (lucky ? .25 : 0)) ? 1 + Math.floor(r() * (rarity === 'Legendary' ? 6 : rarity === 'Rare' ? 5 : 4)) : 0;
     if (type === 'Garden' && lifeLvl < 3) lifeLvl = 3;
     const life = LIFE[Math.min(6, lifeLvl)][0];
     const pool = T.noGround ? WEATHER.gas : WEATHER.any.concat( temp > 80 ? WEATHER.hot : temp < -20 ? WEATHER.cold : (type === 'Ocean' || type === 'Jungle' || type === 'Garden') ? WEATHER.wet : []);
@@ -205,7 +205,7 @@
     x.pressure = gas ? null : (a.includes('almost none') || a.includes('frozen')) ? +between(r, 0, .01).toFixed(3) : a.includes('thin') ? +between(r, .05, .6).toFixed(2) : (a.includes('thick') || a.includes('sulfuric') || a.includes('chlorine')) ? +between(r, 4, 92).toFixed(1) : +(r() < .6 ? between(r, .8, 1.3) : between(r, .5, 3)).toFixed(2);
     const W = { Ocean: [85, 99], Garden: [55, 80], Jungle: [20, 50], Desert: [0, 3], Rocky: [0, 12], Toxic: [0, 8], 'Tidally locked': [2, 25], Savanna: [5, 25], Tundra: [10, 40], Swamp: [40, 70], Fungal: [15, 40], Hycean: [96, 100], Iron: [0, 2], Carbon: [0, 5], Crystal: [0, 6] };
     x.water = gas || !W[p.type] ? 0 : Math.round(between(r, W[p.type][0], W[p.type][1]));
-    const O = { Garden: [18, 24], Jungle: [22, 33], Ocean: [10, 24], 'Tidally locked': [0, 12], Savanna: [16, 23], Tundra: [12, 21], Swamp: [14, 22], Fungal: [8, 18], Hycean: [0, 4] };
+    const O = { Garden: [18, 24], Jungle: [22, 33], Ocean: [6, 21], 'Tidally locked': [0, 12], Savanna: [16, 23], Tundra: [12, 21], Swamp: [14, 22], Fungal: [8, 18], Hycean: [0, 4] };
     x.oxygen = +(O[p.type] ? between(r, O[p.type][0], O[p.type][1]) : between(r, 0, 1.5)).toFixed(1);
     x.clouds = Math.round(gas ? between(r, 90, 100) : p.type === 'Toxic' ? between(r, 70, 100) : between(r, 0, 80));
     x.peak = gas ? null : +between(r, .5, 2 + 22 / Math.max(.3, p.gravity)).toFixed(1);
@@ -225,6 +225,8 @@
       + Math.min(1, x.oxygen / 21) * .15 + Math.min(1, x.water / 70) * .1 + (x.zone === 'habitable' ? .1 : 0) + (x.radiation === 'Low' ? .05 : x.radiation === 'Moderate' ? .025 : 0);
     if (p.type === 'Lava' || p.type === 'Toxic' || p.type === 'Shattered') h *= .3;
     if (p.tempNight != null) h *= .7;
+    h *= x.oxygen < 5 ? .55 : x.oxygen < 12 ? .8 : 1; // no breathable air: much harder to live on
+    if (x.water < 5) h *= .85; // and almost no water
     x.hab = Math.round(Math.min(1, h) * 100);
     return x;
   }
