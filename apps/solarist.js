@@ -747,13 +747,12 @@
     const lvStrip = el('div', { class: 'sl-lv', title: 'Captain Level (XP) and Knowledge Level. Details on Ship → Ship.' });
     function lvBar(k, ic, list, full) {
       const i = lvInfo(S[k]), pct = i.need ? Math.round(i.into / i.need * 100) : 100, t = titleOf(list, i.L);
-      const bar = el('span', { class: 'sl-lv-bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct, 'aria-label': (k === 'xp' ? 'Captain' : 'Knowledge') + ' level progress' }, el('i', { style: 'width:' + pct + '%' }));
+      const bar = el('span', { class: 'sl-lv-bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct, 'aria-label': (k === 'xp' ? 'Captain' : 'Knowledge') + ' level progress' },
+        el('i', { style: 'width:' + pct + '%' }), el('em', {}, i.need ? i.into + ' / ' + i.need : 'MAX'));
       if (!full) return el('span', { class: 'sl-lv-i sl-lv-' + k }, el('b', {}, ic + ' Lv ' + i.L), el('span', { class: 'sl-lv-t' }, t), bar);
-      const nextT = i.L >= LV_MAX ? null : Math.min(LV_MAX, (Math.floor(i.L / 10) + 1) * 10);
       return el('div', { class: 'sl-lv-row sl-lv-' + k },
         el('div', { class: 'sl-lv-head' }, el('b', {}, ic + ' ' + (k === 'xp' ? 'Captain' : 'Knowledge') + ' Level ' + i.L), el('span', {}, t)), bar,
-        el('small', { class: 'sl-muted' }, i.L >= LV_MAX ? 'Maxed out. ' + (S[k] || 0).toLocaleString() + ' total.' : i.into + ' / ' + i.need + (k === 'xp' ? ' XP' : ' Knowledge') + ' to Lv ' + (i.L + 1) + ' · ' + list[nextT / 10] + ' at Lv ' + nextT),
-        el('div', { class: 'sl-lv-ladder' }, list.map((n, j) => el('span', { class: i.L >= Math.max(1, j * 10) ? 'on' : '', title: 'Level ' + Math.max(1, j * 10) }, el('small', {}, Math.max(1, j * 10)), ' ' + n))));
+        el('small', { class: 'sl-muted' }, i.need ? (i.need - i.into) + (k === 'xp' ? ' XP' : ' Knowledge') + ' to Lv ' + (i.L + 1) : 'Maxed out. ' + (S[k] || 0).toLocaleString() + ' total.'));
     }
     function drawLv() { lvStrip.replaceChildren(lvBar('xp', '⭐', CAPT), lvBar('kn', '📚', KNOW)); }
     const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, card, settings);
@@ -1095,7 +1094,7 @@
       const recRows = REC.filter(([k]) => S.rec[k]).map(([k, ic, label, , f]) => { const r = S.rec[k], fw = byNum(r.num); return el('tr', {}, el('td', {}, ic + ' ' + label), el('td', {}, f(r.v)), el('td', {}, fw ? el('button', { type: 'button', class: 'sl-link', onclick: () => { tab('log'); openWorld(r.num); } }, nm(fw.p)) : '')); });
       if (S.rec.dayN) recRows.unshift(el('tr', {}, el('td', {}, '📅 Most sessions in a day'), el('td', {}, String(S.rec.dayN.v)), el('td', {}, new Date(S.rec.dayN.date).toLocaleDateString())));
       const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
-      const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. A new title every 10 levels.'),
+      const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. Every 10 levels earns a new title.'),
         lvMsg && Date.now() - lvMsgAt < 10000 ? el('p', { class: 'sl-lv-msg' }, lvMsg) : null, lvBar('xp', '⭐', CAPT, true), lvBar('kn', '📚', KNOW, true));
       const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
         Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog] };
