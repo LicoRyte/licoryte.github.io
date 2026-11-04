@@ -3151,13 +3151,14 @@ summary.rw-co-h { cursor: var(--cur-hand); }
   let solaristLoading = null;
   function loadSolarist() {
     if (solaristLoading) return solaristLoading;
-    solaristLoading = loadScript('apps/solarist.js?v=38').then(() => window.Solarist.mount($('#slRoot'), {
+    solaristLoading = loadScript('apps/solarist.js?v=39').then(() => fetch('apps/solarist-economy.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null)) // the economy file is optional; bad JSON falls back to the defaults
+      .then(econ => window.Solarist.mount($('#slRoot'), {
       tada: () => { if (sndOn) playSfx('granted').then(ok => { if (!ok) synthChime(); }); },
       ding: () => { if (sndOn) playSfx('notify').then(ok => { if (!ok) synthChime(); }); },
       show: () => openApp('solarist'),
       // the countdown shows on the title bar and taskbar button while it runs
       title: t => { if (t !== 'Solarist') { resetIdle(); saver.bump(); } /* no screensaver (or idle chatter) over a running timer */ const w = APPS.solarist; if (!w || w.dataset.title === t) return; w.dataset.title = t; const sp = w.querySelector('.tbar .name span'); if (sp) sp.textContent = t; renderTasks(); },
-    })).catch(() => { $('#slRoot').textContent = "Couldn't load Solarist. Check your connection and open it again."; solaristLoading = null; });
+    }, econ)).catch(() => { $('#slRoot').textContent = "Couldn't load Solarist. Check your connection and open it again."; solaristLoading = null; });
     return solaristLoading;
   }
   // a timer that was running when the page closed keeps going in the background (the window stays closed until it ends)

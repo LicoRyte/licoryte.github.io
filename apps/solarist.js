@@ -465,7 +465,22 @@
 
 
   /* ===================================================================== the app ===================================================================== */
-  function mount(root, hooks) {
+  // economy defaults; apps/solarist-economy.json (loaded by the page) overrides any of these
+  const ECON = {
+    incomeMultiplier: 1.3, session: { perStudyMinute: .8, minimum: 6, eventBonus: 20, rarityBonus: { Common: 0, Uncommon: 10, Rare: 30, Legendary: 80 } },
+    engineBonusPerLevel: .03, fight: { min: 40, max: 80 }, fullCycle: { base: 50, perHullLevel: 15 }, bountyMultiplier: 1.5,
+    encounters: { chance: .1, scale: 1, rareWorldMultiplier: 1.5 }, trade: { perFacilityLevel: 1, cap: 60 },
+    sell: { rarity: { Common: 10, Uncommon: 25, Rare: 70, Legendary: 200 }, perHabitabilityPercent: .5, earthLike: 25, earthLikeAt: 80, perLifeLevel: 8, anomaly: 25, rings: 8, perMoon: 2, moonCap: 20, perRecord: 30 },
+    distressRun: { base: 500, random: 200, bonusMin: 100, bonusMax: 250 }, moduleCost: { base: 50, growth: 1.25 }, facilityCost: { base: 64, growth: 1.6, maxLevel: 10 },
+  };
+  function mergeEcon(d, o) { // copy numbers from the JSON over the defaults, ignoring notes and anything that isn't the right type
+    if (!o || typeof o !== 'object') return d;
+    const out = Array.isArray(d) ? d.slice() : Object.assign({}, d);
+    Object.keys(d).forEach(k => { const v = o[k]; if (v == null) return; if (typeof d[k] === 'number') { if (typeof v === 'number' && isFinite(v) && v >= 0) out[k] = v; } else if (typeof d[k] === 'object') out[k] = mergeEcon(d[k], v); });
+    return out;
+  }
+  function mount(root, hooks, econ) {
+    const E = mergeEcon(ECON, econ);
     hooks = hooks || {};
     const el = (tag, attrs, ...kids) => {
       const e = document.createElement(tag);
@@ -570,7 +585,7 @@
     const GANG_A = ['Rust', 'Void', 'Red Comet', 'Dust', 'Iron', 'Grinning', 'Black Sun', 'Scrap', 'Howling', 'Neon'], GANG_B = ['Jackals', 'Raiders', 'Vultures', 'Syndicate', 'Rats', 'Wolves', 'Pirates', 'Crows', 'Gang', 'Marauders'];
     const FIGHT = ['{G} put up a fight, but the crew drove them off the {b}.', 'A long standoff over the {b}. {G} blinked first and fled.', '{G} tried an ambush in the {b}. It did not go well for them.', 'After a tense chase through the {b}, {g} gave up and jumped away.', '{G} surrendered once the ship\'s floodlights hit their camp in the {b}.'];
     // Arrival encounters: about 1 trip in 10, something near the new world pays out a little stardust. {p} = the world's name.
-    const ENC_CHANCE = 1 / 10;
+    const ENC_CHANCE = E.encounters.chance;
     const ENCOUNTERS = [
       ['🔬', 'Intergalactic Research Station Nearby!', 'You settled near an Intergalactic Research Station, reported your findings on {p} and traded a few spare parts.', 40, 90],
       ['🐫', 'Trading Caravan Passing By!', 'A long caravan of cargo haulers drifted past {p}. You swapped star charts for a sack of stardust.', 30, 70],
@@ -618,16 +633,16 @@
     const lvl = k => S.mods[k] || 1;
     const evChance = l => Math.min(.2, 1 / 15 + (l - 1) * .005);
     const MODS = {
-      engine: ['🚀', 'Engine', l => '+' + (l - 1) * 3 + '%', 'stardust from every session'],
+      engine: ['🚀', 'Engine', l => '+' + Math.round((l - 1) * E.engineBonusPerLevel * 100) + '%', 'stardust from every session'],
       scanner: ['📡', 'Scanner', l => '+' + Math.min(20, l - 1) + '%', 'chance of an anomaly on new worlds'],
       lab: ['🧪', 'Lab', l => Math.min(50, (l - 1) * 4) + '%', 'chance of a bonus transmission from the tuned post'],
       comms: ['📻', 'Comms', l => '1 in ' + Math.round(1 / evChance(l)), 'sessions has a deep-space event'],
-      hull: ['🛡', 'Hull', l => '+' + (25 + (l - 1) * 8) + ' ✦', 'for every Full Cycle'],
+      hull: ['🛡', 'Hull', l => '+' + Math.round((E.fullCycle.base + (l - 1) * E.fullCycle.perHullLevel) * E.incomeMultiplier) + ' ✦', 'for every Full Cycle'],
     };
-    const modCost = k => Math.round(50 * Math.pow(1.25, lvl(k) - 1));
-    const facCost = lv => Math.round(64 * Math.pow(1.6, lv - 2)); // lv = the level you're upgrading to
-    const FAC_MAX = 10;
-    const INCOME = 1.3; // every stardust payout is multiplied by this
+    const modCost = k => Math.round(E.moduleCost.base * Math.pow(E.moduleCost.growth, lvl(k) - 1));
+    const facCost = lv => Math.round(E.facilityCost.base * Math.pow(E.facilityCost.growth, lv - 2)); // lv = the level you're upgrading to
+    const FAC_MAX = Math.max(1, Math.round(E.facilityCost.maxLevel));
+    const INCOME = E.incomeMultiplier; // every stardust payout is multiplied by this (apps/solarist-economy.json)
     function addDust(n) { n = Math.max(0, Math.round(n * INCOME)); S.dust += n; S.dustTotal += n; return n; }
     // Captain Level (XP: everything that moves the game forward) and Knowledge Level (what you learn). 1-100, a new title every 10.
     const LV_MAX = 100, lvNeed = L => 40 + L * 6;
@@ -650,12 +665,12 @@
       return out;
     }
     const KN_REP = { core: 25, species: 25, odd: 25, secret: 18, log: 10, fac: 8 };
-    const RAR_BONUS = { Common: 0, Uncommon: 10, Rare: 30, Legendary: 80 }, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
+    const RAR_BONUS = E.session.rarityBonus, RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
     // settlements: Travelers' Posts grow a population every study session (faster with more and better facilities)
     const TIERS = [[0, 'Outpost'], [100, 'Village'], [1000, 'Town'], [10000, 'City'], [100000, 'Metropolis'], [1000000, 'Megacity']];
     const tierOf = n => TIERS.filter(t => n >= t[0]).pop()[1];
     // Travelers' Posts pay a little trade every study session: 1 per facility level, at most 60
-    const tradeIncome = () => Math.min(60, posts().reduce((n, { p }) => n + (p.post.tp ? p.post.tp.fac.reduce((a, f) => a + (f.lv || 1), 0) : 0), 0));
+    const tradeIncome = () => Math.min(E.trade.cap, Math.round(E.trade.perFacilityLevel * posts().reduce((n, { p }) => n + (p.post.tp ? p.post.tp.fac.reduce((a, f) => a + (f.lv || 1), 0) : 0), 0)));
     function growPosts(notes) {
       posts().forEach(({ p }) => {
         const t = p.post.tp; if (!t) return;
@@ -679,7 +694,7 @@
         else if (k === 'sessions') { const v = 2 + Math.floor(Math.random() * 4); b = { v, t: 'Finish ' + v + ' study sessions', reward: 15 * v, prog: 0 }; }
         else if (k === 'cycle') b = { t: 'Finish a Full Cycle (nothing skipped)', reward: 60 };
         else { const v = pk(['hot', 'cold']); b = { v, t: v === 'hot' ? 'Find a world hotter than 500 °C' : 'Find a world colder than −150 °C', reward: 35 }; }
-        b.k = k; b.id = Date.now() + '' + Math.random(); b.reward = Math.round(b.reward * 1.5);
+        b.k = k; b.id = Date.now() + '' + Math.random(); b.reward = Math.round(b.reward * E.bountyMultiplier);
         if (!S.bounties.some(x => x.t === b.t)) return b;
       }
       return { k: 'sessions', v: 3, t: 'Finish 3 study sessions', reward: 70, prog: 0, id: Date.now() + '' + Math.random() };
@@ -748,10 +763,10 @@
         reps.unshift({ ev: { battle: true, ic: '🆘', title: title + ' · leg ' + d.n + ' of ' + d.need, t: beats[bi] } });
         return 'Leg ' + d.n + ' of the Distress Run done. ' + (d.need - d.n) + ' to go.';
       }
-      const dust = 500 + Math.round(Math.random() * 200); S.dust += dust; S.dustTotal += dust;
+      const dust = Math.round(E.distressRun.base + Math.random() * E.distressRun.random); S.dust += dust; S.dustTotal += dust;
       const bonus = [];
       const opts = ['dust', 'item', 'event'].concat(S.coord ? [] : ['coord']), pick = opts[Math.floor(Math.random() * opts.length)];
-      if (pick === 'dust') { const b = 100 + Math.round(Math.random() * 150); S.dust += b; S.dustTotal += b; bonus.push('a bonus of ✦ ' + b + ' from a grateful passenger'); }
+      if (pick === 'dust') { const b = Math.round(E.distressRun.bonusMin + Math.random() * Math.max(0, E.distressRun.bonusMax - E.distressRun.bonusMin)); S.dust += b; S.dustTotal += b; bonus.push('a bonus of ✦ ' + b + ' from a grateful passenger'); }
       else if (pick === 'item') { const it = rollItem(atP(), true), nw = gainItem(it, atP()); bonus.push('a keepsake: ' + it.name + ' (' + it.rar + (nw ? ', new!' : '') + ')'); if (nw) award(0, 12); }
       else if (pick === 'event') { S.eventNext = true; bonus.push('a tip about something strange out there (your next trip has an event)'); }
       else { S.coord = true; bonus.push('a full charge for the Interplanetary Coordinator'); }
@@ -763,17 +778,17 @@
     }
     // Selling a world: the survey rights go to the Cartographers' Guild for stardust, and the world leaves your Logbook.
     // The price follows its overall condition and how much it stands out.
-    const SELL_RAR = { Common: 10, Uncommon: 25, Rare: 70, Legendary: 200 };
+    const SL = E.sell, SELL_RAR = SL.rarity;
     function sellParts(p) {
       const out = [[p.rarity + ' world', SELL_RAR[p.rarity]]], hab = p.x ? p.x.hab : 0;
-      if (hab) out.push(['Habitability ' + hab + '%', Math.round(hab / 2)]);
-      if (hab >= 80) out.push(['Earth-like', 25]);
-      if (p.lifeLvl) out.push([p.life, p.lifeLvl * 8]);
-      if (p.odd) out.push(['Anomaly', 25]);
-      if (p.rings) out.push(['Rings', 8]);
-      if (p.moons) out.push([p.moons + ' moon' + (p.moons === 1 ? '' : 's'), Math.min(20, p.moons * 2)]);
-      REC.forEach(([k, , label]) => { if (S.rec[k] && S.rec[k].num === p.num) out.push(['Record: ' + label, 30]); });
-      return out.map(([l, v]) => [l, Math.round(v * INCOME)]);
+      if (hab) out.push(['Habitability ' + hab + '%', Math.round(hab * SL.perHabitabilityPercent)]);
+      if (hab >= SL.earthLikeAt) out.push(['Earth-like', SL.earthLike]);
+      if (p.lifeLvl) out.push([p.life, p.lifeLvl * SL.perLifeLevel]);
+      if (p.odd) out.push(['Anomaly', SL.anomaly]);
+      if (p.rings) out.push(['Rings', SL.rings]);
+      if (p.moons) out.push([p.moons + ' moon' + (p.moons === 1 ? '' : 's'), Math.min(SL.moonCap, p.moons * SL.perMoon)]);
+      REC.forEach(([k, , label]) => { if (S.rec[k] && S.rec[k].num === p.num) out.push(['Record: ' + label, SL.perRecord]); });
+      return out.filter(x => x[1] > 0).map(([l, v]) => [l, Math.round(v * INCOME)]);
     }
     const sellPrice = p => sellParts(p).reduce((a, x) => a + x[1], 0);
     const isRecord = p => REC.some(([k]) => S.rec[k] && S.rec[k].num === p.num);
@@ -794,8 +809,8 @@
     // everything that happens at the end of a study session, shown together under the timer
     function sessionEnd(reps, p, ev) {
       const notes = [];
-      let earned = Math.max(6, Math.round(S.set.focus * .8)) + (p ? RAR_BONUS[p.rarity] : 0) + (ev ? 20 : 0);
-      earned *= 1 + (lvl('engine') - 1) * .03;
+      let earned = Math.max(E.session.minimum, Math.round(S.set.focus * E.session.perStudyMinute)) + (p ? RAR_BONUS[p.rarity] || 0 : 0) + (ev ? E.session.eventBonus : 0);
+      earned *= 1 + (lvl('engine') - 1) * E.engineBonusPerLevel;
       notes.push('✦ +' + addDust(earned) + ' stardust');
       if (encGot) { notes.push(encGot.ic + ' +' + encGot.dust + ' stardust (' + encGot.title.replace(/!$/, '') + ')'); encGot = null; }
       const trade = tradeIncome(); if (trade) notes.push('🏘 +' + addDust(trade) + ' stardust in trade from your Travelers\' Posts');
@@ -883,7 +898,7 @@
         drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress Run: ' + title), el('div', { class: 'sl-dr-legs' }, Array.from({ length: S.dr.need }, (_, i) => el('span', { class: i < S.dr.n ? 'done' : i === S.dr.n ? 'now' : '' }, 'Leg ' + (i + 1)))), el('div', { class: 'sl-dr-row' }, el('span', { class: 'sl-muted' }, 'Other missions are locked until the run is over.'), ab));
       } else if (drAvail()) {
         drBox.hidden = false; drBox.className = 'sl-dr offer';
-        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress call received!'), el('p', {}, 'Someone out there needs help. Answering takes this whole cycle (' + S.set.every + ' study sessions) with no other missions, and pays about ✦ 500–700 plus a random bonus, XP and Knowledge. One run a day.'),
+        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress call received!'), el('p', {}, 'Someone out there needs help. Answering takes this whole cycle (' + S.set.every + ' study sessions) with no other missions, and pays about ✦ ' + E.distressRun.base + '–' + (E.distressRun.base + E.distressRun.random) + ' plus a random bonus, XP and Knowledge. One run a day.'),
           el('div', { class: 'sl-dr-row' }, el('button', { type: 'button', class: 'btn sl-go', onclick: drAccept }, 'Accept Distress Run')));
       } else { drBox.hidden = true; drBox.replaceChildren(); }
     }
@@ -1099,7 +1114,7 @@
         } else if (heldP()) {
           const o = heldP(), pk = a => a[Math.floor(Math.random() * a.length)];
           o.outlaw.cleared = Date.now(); S.outlaw = 0; S.fights = (S.fights || 0) + 1;
-          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(40 + Math.random() * 40), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
+          const lootIt = rollItem(o, true), isNew = gainItem(lootIt, o), extra = addDust(E.fight.min + Math.random() * Math.max(0, E.fight.max - E.fight.min)), loot = 'their hoard: ' + lootIt.name + ' (' + lootIt.rar + (isNew ? ', new to your collection!' : '') + ')';
           S.at = o.num; award(35, isNew ? 12 : 0);
           const story = pk(FIGHT).replace('{G}', o.outlaw.gang.replace(/^the/, 'The')).replace('{g}', o.outlaw.gang).replace('{b}', o.biomes[0].toLowerCase());
           S.events.push({ ic: '⚔', title: 'Outlaws driven out of ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦', at: Date.now() });
@@ -1118,7 +1133,7 @@
           award(20 + ({ Uncommon: 10, Rare: 25, Legendary: 60 }[p.rarity] || 0), 0);
           if (!outlaws && Math.random() < ENC_CHANCE) {
             const [ic, title, tpl, lo, hi] = ENCOUNTERS[Math.floor(Math.random() * ENCOUNTERS.length)];
-            const dust = addDust((lo + Math.random() * (hi - lo)) * (RANK[p.rarity] >= 2 ? 1.5 : 1)), t = tpl.split('{p}').join(nm(p));
+            const dust = addDust((lo + Math.random() * (hi - lo)) * E.encounters.scale * (RANK[p.rarity] >= 2 ? E.encounters.rareWorldMultiplier : 1)), t = tpl.split('{p}').join(nm(p));
             p.enc = { ic, title, t, dust }; encGot = p.enc; award(10, 5); S.cnt.enc++;
             S.events.push({ ic, title, t, got: '+' + dust + ' ✦', at: Date.now() });
           }
@@ -1141,7 +1156,7 @@
             S.fcDay = today(); S.cnt.fc++;
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
-            const notes = ['✦ +' + addDust(50 + (lvl('hull') - 1) * 15) + ' stardust (Full Cycle)'];
+            const notes = ['✦ +' + addDust(E.fullCycle.base + (lvl('hull') - 1) * E.fullCycle.perHullLevel) + ' stardust (Full Cycle)'];
             checkBounties({ cycle: true }, notes);
             award(40, 0); flushXP(notes);
             showTrans([{ notes }]);
@@ -1236,7 +1251,7 @@
       const evs = S.events.slice().reverse();
       const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? renderFeed(evs.map(e => ({ at: e.at, k: 'ev', icon: e.ic, title: e.title, t: e.t, extra: e.got })), 'events', false, drawShip)
         : el('p', { class: 'sl-muted' }, 'No deep-space events yet. About one study session in 15 runs into something.'));
-      const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session, plus extra for rarer worlds, events, arrival encounters, fights, Full Cycles, bounties and trade from your Travelers\' Posts (' + Math.round(tradeIncome() * INCOME) + ' per session now, up to ' + Math.round(60 * INCOME) + '). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
+      const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session, plus extra for rarer worlds, events, arrival encounters, fights, Full Cycles, bounties and trade from your Travelers\' Posts (' + Math.round(tradeIncome() * INCOME) + ' per session now, up to ' + Math.round(E.trade.cap * INCOME) + '). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
         el('div', { class: 'sl-mods' }, Object.entries(MODS).map(([k, [ic, name, eff, what]]) => { const l = lvl(k), c = modCost(k);
           return el('div', { class: 'sl-mod' }, el('span', { class: 'sl-mod-i' }, ic), el('span', { class: 'sl-row-t' }, el('b', {}, name + ' · Lv ' + l), el('small', {}, eff(l) + ' ' + what + ' (next: ' + eff(l + 1) + ')')),
             el('button', { type: 'button', class: 'btn', disabled: S.dust < c || null, onclick: () => upgradeMod(k) }, 'Upgrade ✦ ' + c.toLocaleString())); })));
@@ -1249,7 +1264,7 @@
       const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. Every 10 levels earns a new title.'),
         lvMsg && Date.now() - lvMsgAt < 10000 ? el('p', { class: 'sl-lv-msg' }, lvMsg) : null, lvBar('xp', '⭐', CAPT, true), lvBar('kn', '📚', KNOW, true));
       const drGroup = group('🆘 Distress Run', el('p', {}, S.dr ? 'In progress: ' + DISTRESS[S.dr.sc][1] + ', leg ' + (S.dr.n + 1) + ' of ' + S.dr.need + '.' : S.drDay === today() ? 'Today\'s run is used up. A new distress call comes in tomorrow.' : S.fcDay === today() ? 'Available at the start of your next cycle (right after a long break).' : 'Earn a ★ Full Cycle today (no skipping for a whole cycle) and a distress call comes in when the long break ends.'),
-        el('p', { class: 'sl-muted' }, 'Once a day: a whole cycle of study sessions with no other missions, for about ✦ 500–700, a random bonus, 250 XP and 120 Knowledge. ' + (S.drN || 0) + ' completed so far.'));
+        el('p', { class: 'sl-muted' }, 'Once a day: a whole cycle of study sessions with no other missions, for about ✦ ' + E.distressRun.base + '–' + (E.distressRun.base + E.distressRun.random) + ', a random bonus, 250 XP and 120 Knowledge. ' + (S.drN || 0) + ' completed so far.'));
       const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [drGroup, bounties, records],
         Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog], Stats: statsView(group) };
       const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
