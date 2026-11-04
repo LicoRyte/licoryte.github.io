@@ -543,6 +543,12 @@
     if (S.at == null && S.found.length) S.at = S.found[S.found.length - 1].p.num;
     if (!S.nextNum) S.nextNum = S.found.reduce((m, f) => Math.max(m, f.p.num), 0) + 1; // numbers keep counting up even after selling
     if (!S.sold) S.sold = { n: 0, dust: 0, ly: 0 };
+    if (!S.cnt) { // lifetime counters for the Stats page, seeded from what's already in the save
+      const key = t => { const x = new Date(t); return x.getFullYear() + '-' + x.getMonth() + '-' + x.getDate(); };
+      S.cnt = { rar: {}, lucky: 0, outlaws: 0, enc: 0, ev: (S.events || []).filter(e => e.ic !== '⚔').length, fc: 0, charge: 0, days: new Set(S.found.map(f => key(f.at))).size || (S.total ? 1 : 0), hiDist: 0 };
+      if (S.found.some(f => key(f.at) === key(Date.now()))) S.cnt.lastDay = today();
+      S.found.forEach(({ p }) => { S.cnt.rar[p.rarity] = (S.cnt.rar[p.rarity] || 0) + 1; if (p.lucky) S.cnt.lucky++; if (p.outlaw) S.cnt.outlaws++; if (p.enc) S.cnt.enc++; });
+    }
     const atP = () => { const f = S.at && byNum(S.at); return f ? f.p : null; };
     const discovering = () => S.mission === -2 && !!atP() && !(atP().outlaw && !atP().outlaw.cleared);
     // the old material × object collection becomes the same number of new items, of the same rarity
@@ -602,7 +608,7 @@
       let got = null;
       if (reward === 'charge') { if (!S.coord) { S.coord = true; got = '🧭 The Interplanetary Coordinator is charged!'; } else t += ' (The Coordinator was already full.)'; }
       const ev = { ic, title, t, got, at: Date.now() };
-      S.events.push(ev); if (S.events.length > 200) S.events.shift();
+      S.events.push(ev); if (S.events.length > 200) S.events.shift(); S.cnt.ev++;
       return ev;
     }
     /* ---------- Progression: Stardust (earned every study session), ship modules and facility levels to spend it on,
@@ -1039,7 +1045,7 @@
     function finish(quiet) {
       clearInterval(tickT); running = false; left = 0;
       if (mode === 'focus') {
-        rollDay();
+        rollDay(); if (S.cnt.lastDay !== today()) { S.cnt.lastDay = today(); S.cnt.days++; }
         S.total++; S.todayN++; S.cycle++; S.minutes += S.set.focus; S.fc.n++;
         const target = building();
         // the tuned post reports in every study session (also while building somewhere else)
@@ -1054,7 +1060,7 @@
           toBreak();
           hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
         } else if (charging()) {
-          S.coord = true; S.mission = 0; award(15, 0);
+          S.coord = true; S.mission = 0; award(15, 0); S.cnt.charge++;
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
           toBreak();
@@ -1108,11 +1114,12 @@
           const outlaws = Math.random() < OUTLAW_CHANCE && p.type !== 'Rogue';
           if (outlaws) { const pk = a => a[Math.floor(Math.random() * a.length)]; p.outlaw = { gang: 'the ' + pk(GANG_A) + ' ' + pk(GANG_B), at: Date.now() }; S.outlaw = p.num; }
           S.found.push({ at: Date.now(), p }); S.at = p.num;
+          S.cnt.rar[p.rarity] = (S.cnt.rar[p.rarity] || 0) + 1; if (lucky) S.cnt.lucky++; if (outlaws) S.cnt.outlaws++;
           award(20 + ({ Uncommon: 10, Rare: 25, Legendary: 60 }[p.rarity] || 0), 0);
           if (!outlaws && Math.random() < ENC_CHANCE) {
             const [ic, title, tpl, lo, hi] = ENCOUNTERS[Math.floor(Math.random() * ENCOUNTERS.length)];
             const dust = addDust((lo + Math.random() * (hi - lo)) * (RANK[p.rarity] >= 2 ? 1.5 : 1)), t = tpl.split('{p}').join(nm(p));
-            p.enc = { ic, title, t, dust }; encGot = p.enc; award(10, 5);
+            p.enc = { ic, title, t, dust }; encGot = p.enc; award(10, 5); S.cnt.enc++;
             S.events.push({ ic, title, t, got: '+' + dust + ' ✦', at: Date.now() });
           }
           if (!quiet && hooks.tada) hooks.tada();
@@ -1131,7 +1138,7 @@
         hint.textContent = 'Equipment ready. Pick a mission and press Start.';
         if (wasLong) { // Full Cycle: every session and break of the cycle finished, nothing skipped
           if (!S.fc.broken && S.fc.n >= S.set.every) {
-            S.fcDay = today();
+            S.fcDay = today(); S.cnt.fc++;
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
             const notes = ['✦ +' + addDust(50 + (lvl('hull') - 1) * 15) + ' stardust (Full Cycle)'];
@@ -1244,9 +1251,29 @@
       const drGroup = group('🆘 Distress Run', el('p', {}, S.dr ? 'In progress: ' + DISTRESS[S.dr.sc][1] + ', leg ' + (S.dr.n + 1) + ' of ' + S.dr.need + '.' : S.drDay === today() ? 'Today\'s run is used up. A new distress call comes in tomorrow.' : S.fcDay === today() ? 'Available at the start of your next cycle (right after a long break).' : 'Earn a ★ Full Cycle today (no skipping for a whole cycle) and a distress call comes in when the long break ends.'),
         el('p', { class: 'sl-muted' }, 'Once a day: a whole cycle of study sessions with no other missions, for about ✦ 500–700, a random bonus, 250 XP and 120 Knowledge. ' + (S.drN || 0) + ' completed so far.'));
       const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [drGroup, bounties, records],
-        Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog] };
+        Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog], Stats: statsView(group) };
       const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
       shipPane.replaceChildren(el('div', { class: 'sl-stabs sl-shiptabs', role: 'tablist' }, subBtns), el('div', { class: 'sl-subpane' }, SUB[shipTab]));
+    }
+
+    function statsView(group) { // everything you've done, for bragging rights
+      const fmtN = n => (n || 0).toLocaleString(), allP = S.found.map(f => f.p), pl = posts().map(f => f.p), tps = pl.filter(p => p.post.tp);
+      const facs = tps.reduce((a, p) => a.concat(p.post.tp.fac), []), facLv = facs.reduce((a, f) => a + (f.lv || 1), 0), maxed = facs.filter(f => (f.lv || 1) >= FAC_MAX).length;
+      const settlers = tps.reduce((a, p) => a + (p.post.tp.pop || 0), 0), heard = pl.reduce((a, p) => a + p.post.reports.length, 0);
+      const itemsGot = Object.values(S.items).reduce((a, it) => a + it.n, 0), byR = r => ITEMS[r].filter((_, i) => S.items[r + ':' + i]).length;
+      const charted = Object.values(S.cnt.rar).reduce((a, n) => a + n, 0), ly = allP.reduce((a, p) => a + p.dist, 0) + S.sold.ly;
+      const modLv = Object.keys(MODS).reduce((a, k) => a + lvl(k), 0), hrs = S.minutes / 60;
+      const cx = lvInfo(S.xp), ck = lvInfo(S.kn);
+      const T = (title, rows) => group(title, el('table', { class: 'sl-rec sl-stats' }, el('tbody', {}, rows.filter(Boolean).map(([l, v]) => el('tr', {}, el('td', {}, l), el('td', {}, String(v)))))));
+      return [
+        T('⭐ Captain', [['⭐ Captain Level', cx.L + ' · ' + titleOf(CAPT, cx.L)], ['📚 Knowledge Level', ck.L + ' · ' + titleOf(KNOW, ck.L)], ['Total XP', fmtN(S.xp)], ['Total Knowledge', fmtN(S.kn)]]),
+        T('🚀 Voyage', [['Study sessions finished', fmtN(S.total)], ['Hours studied', Math.round(hrs * 10) / 10], ['Days you studied', fmtN(S.cnt.days)], ['Most sessions in a day', S.rec.dayN ? S.rec.dayN.v : 0], ['★ Full Cycles earned', fmtN(S.cnt.fc)], ['🆘 Distress Runs completed', fmtN(S.drN)], ['Light-years traveled', fmtN(ly)]]),
+        T('🪐 Worlds', [['Worlds discovered', fmtN(charted)], ...RARITY.map(([k]) => ['· ' + k, fmtN(S.cnt.rar[k])]), ['🧭 Lucky trips', fmtN(S.cnt.lucky)], ['🧭 Coordinator charges', fmtN(S.cnt.charge)], ['In your Logbook now', fmtN(S.found.length)], ['💰 Worlds sold', fmtN(S.sold.n) + ' for ✦ ' + fmtN(S.sold.dust)], ['🏆 Records held', REC.filter(([k]) => S.rec[k]).length]]),
+        T('⚠ Adventures', [['Deep-space events', fmtN(S.cnt.ev)], ['Arrival encounters', fmtN(S.cnt.enc)], ['🏴 Outlaw gangs met', fmtN(S.cnt.outlaws)], ['⚔ Outlaw gangs beaten', fmtN(S.fights)], ['🎯 Bounties completed', fmtN(S.bDone)], ['🔍 Surveys', fmtN(S.surveys)]]),
+        T('🎒 Collection', [['Unique collectibles', itemCount() + ' / ' + ITEM_TOTAL + ' (' + Math.round(itemCount() / ITEM_TOTAL * 100) + '%)'], ['Collectibles received (with duplicates)', fmtN(itemsGot)], ...ITEM_RARS.map(r => ['· ' + r, byR(r) + ' / ' + ITEMS[r].length])]),
+        T('🏘 Posts', [['🗼 Listening Posts', fmtN(pl.length)], ['🏘 Travelers\' Posts', fmtN(tps.length)], ['Facilities built', fmtN(facs.length)], ['Facility levels (total)', fmtN(facLv)], ['Facilities at level ' + FAC_MAX, fmtN(maxed)], ['Settlers', fmtN(settlers)], ['📡 Transmissions heard', fmtN(heard)]]),
+        T('✦ Economy', [['Stardust now', fmtN(S.dust)], ['Stardust earned (all time)', fmtN(S.dustTotal)], ['Stardust spent', fmtN(S.dustTotal - S.dust)], ['Ship module levels (total)', fmtN(modLv)], ['Trade per session', fmtN(Math.round(tradeIncome() * INCOME))]]),
+      ];
     }
 
     /* ---------- logbook ---------- */
