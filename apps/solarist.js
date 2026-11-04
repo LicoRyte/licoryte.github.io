@@ -356,7 +356,12 @@
       'Song of the Space Whales', 'Key to an Unknown Door', 'Map of the Whole Galaxy', 'An Egg That Is Still Warm', 'Mirror of Another Universe', 'Dave\'s Lost Coffee Mug'],
   };
   const ITEM_RARS = ['Common', 'Uncommon', 'Rare', 'Legendary'];
-  const ITEM_TOTAL = ITEM_RARS.reduce((a, r) => a + ITEMS[r].length, 0);
+  let ITEM_TOTAL = ITEM_RARS.reduce((a, r) => a + ITEMS[r].length, 0);
+  function applyItems(j) { // apps/solarist-items.json replaces the built-in lists (only lists of text count; anything else is ignored)
+    if (!j || typeof j !== 'object') return;
+    ITEM_RARS.forEach(r => { const l = j[r]; if (Array.isArray(l)) { const ok = l.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()); if (ok.length) ITEMS[r] = ok; } });
+    ITEM_TOTAL = ITEM_RARS.reduce((a, r) => a + ITEMS[r].length, 0);
+  }
   const ITEM_W = { normal: { Common: 55, Uncommon: 28, Rare: 13, Legendary: 4 }, better: { Common: 30, Uncommon: 38, Rare: 24, Legendary: 8 } };
   const itemName = id => { const [r, i] = id.split(':'); return (ITEMS[r] || [])[+i] || '???'; };
   function rollItem(p, better) { // pick a rarity, then any item of that rarity
@@ -479,7 +484,8 @@
     Object.keys(d).forEach(k => { const v = o[k]; if (v == null) return; if (typeof d[k] === 'number') { if (typeof v === 'number' && isFinite(v) && v >= 0) out[k] = v; } else if (typeof d[k] === 'object') out[k] = mergeEcon(d[k], v); });
     return out;
   }
-  function mount(root, hooks, econ) {
+  function mount(root, hooks, econ, items) {
+    applyItems(items);
     const E = mergeEcon(ECON, econ);
     hooks = hooks || {};
     const el = (tag, attrs, ...kids) => {
@@ -1350,7 +1356,7 @@
             el('li', { class: 'sl-col-i sl-ci-' + r.toLowerCase(), title: 'First found ' + new Date(it.at).toLocaleDateString() + (it.from && byNum(it.from) ? ' on ' + nm(byNum(it.from).p) : '') }, name, it.n > 1 ? el('small', {}, ' ×' + it.n) : null))) : null,
           have < list.length ? el('div', { class: 'sl-col-more' }, '??? ' + (list.length - have) + ' more ' + r.toLowerCase() + ' item' + (list.length - have === 1 ? '' : 's') + ' still out there') : el('div', { class: 'sl-col-more done' }, '★ All ' + r.toLowerCase() + ' items found!'));
       });
-      itemsPane.replaceChildren(el('div', { class: 'sl-wpage' }, nav, el('p', { class: 'sl-muted' }, '96 one-of-a-kind items are scattered across the universe. 🔍 Discover (surveying the world you\'re at) turns up one or two, and beating outlaws hands over their hoard, which leans toward the rarer ones.'), ...groups));
+      itemsPane.replaceChildren(el('div', { class: 'sl-wpage' }, nav, el('p', { class: 'sl-muted' }, ITEM_TOTAL + ' one-of-a-kind items are scattered across the universe. 🔍 Discover (surveying the world you\'re at) turns up one or two, and beating outlaws hands over their hoard, which leans toward the rarer ones.'), ...groups));
     }
     function drawWorld(f) {
       const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';
