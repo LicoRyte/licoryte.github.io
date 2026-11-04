@@ -865,7 +865,7 @@
     const settings = el('details', { class: 'sl-set' }, el('summary', {}, 'Settings'),
       el('div', { class: 'sl-set-row' },
         el('label', {}, 'Study ', sel('focus', [1, 10, 15, 20, 25, 30, 40, 45, 50, 60]), ' min'),
-        el('label', {}, 'Short break ', sel('short', [3, 5, 10]), ' min'),
+        el('label', {}, 'Short break ', sel('short', [3, 5, 7, 8, 10]), ' min'),
         el('label', {}, 'Long break ', sel('long', [10, 15, 20, 30]), ' min'),
         el('label', {}, 'Long break every ', sel('every', [2, 3, 4, 5, 6]), ' study sessions')));
     // what the next study session is for: travel to a new world, or build a Listening Post on one you've found
