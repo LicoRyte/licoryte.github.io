@@ -827,14 +827,17 @@
     const logList = el('div', { class: 'sl-list' });
     const logPane = el('div', { class: 'sl-pane', hidden: true }, logHead, el('div', { class: 'sl-tools' }, typeSel, rarSel, find), logList);
     const shipPane = el('div', { class: 'sl-pane', hidden: true });
+    const itemsPane = el('div', { class: 'sl-pane', hidden: true });
+    const tabItems = el('button', { type: 'button', role: 'tab', 'aria-selected': 'false', onclick: () => tab('items') }, '🎒 Collection');
 
     const status = el('span', {}), status2 = el('span', {});
-    root.replaceChildren(el('div', { class: 'sl-tabs', role: 'tablist' }, tabTimer, tabLog, tabShip), el('div', { class: 'sl-body sunken' }, timerPane, logPane, shipPane), el('div', { class: 'statusbar' }, status, status2));
+    root.replaceChildren(el('div', { class: 'sl-tabs', role: 'tablist' }, tabTimer, tabLog, tabShip, tabItems), el('div', { class: 'sl-body sunken' }, timerPane, logPane, shipPane, itemsPane), el('div', { class: 'statusbar' }, status, status2));
     function tab(t) {
       if (t === 'log' && !logPane.hidden) openNum = null; // clicking Logbook again goes back to the grid
-      tabTimer.setAttribute('aria-selected', String(t === 'timer')); tabLog.setAttribute('aria-selected', String(t === 'log')); tabShip.setAttribute('aria-selected', String(t === 'ship'));
-      timerPane.hidden = t !== 'timer'; logPane.hidden = t !== 'log'; shipPane.hidden = t !== 'ship';
+      tabTimer.setAttribute('aria-selected', String(t === 'timer')); tabLog.setAttribute('aria-selected', String(t === 'log')); tabShip.setAttribute('aria-selected', String(t === 'ship')); tabItems.setAttribute('aria-selected', String(t === 'items'));
+      timerPane.hidden = t !== 'timer'; logPane.hidden = t !== 'log'; shipPane.hidden = t !== 'ship'; itemsPane.hidden = t !== 'items';
       if (t === 'ship') drawShip();
+      if (t === 'items') drawItems();
       if (t === 'log') drawLog();
     }
 
@@ -1181,7 +1184,7 @@
     function closeWorld() { openNum = null; drawLog(); body().scrollTop = gridScroll; }
     function drawLog() {
       const tools = logPane.querySelector('.sl-tools');
-      if (openNum === 'items') { logHead.hidden = tools.hidden = true; drawItems(); return; }
+      if (openNum === 'items') openNum = null;
       const f0 = openNum != null && byNum(openNum);
       logHead.hidden = tools.hidden = !!f0;
       if (f0) { drawWorld(f0); return; }
@@ -1192,8 +1195,7 @@
       logHead.replaceChildren(
         el('div', {}, el('b', {}, S.found.length + ' world' + (S.found.length === 1 ? '' : 's') + ' charted')),
         el('div', { class: 'sl-muted' }, (ly + S.sold.ly).toLocaleString() + ' light-years of travel · ' + Math.round(S.minutes / 60 * 10) / 10 + ' hours studying' + (S.sold.n ? ' · 💰 ' + S.sold.n + ' sold for ✦ ' + S.sold.dust.toLocaleString() : '')),
-        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0))),
-          el('button', { type: 'button', class: 'btn sl-col-b', title: 'Your collectibles', onclick: () => openWorld('items') }, '🎒 Collection ' + itemCount() + ' / ' + ITEM_TOTAL)),
+        el('div', { class: 'sl-rarcount' }, RARITY.map(([k]) => el('span', { class: 'sl-rar sl-r-' + k.toLowerCase() }, k + ' ' + (counts[k] || 0)))),
         bulkSell(),
         el('div', { class: 'sl-muted' }, pc ? '🗼 ' + pc + ' post' + (pc === 1 ? '' : 's') + (tp ? ' · 📡 Satellite tuned to ' + nm(tp) : ' · 📡 Satellite not tuned') : '🗼 No posts yet. Open a world and choose "Build a Listening Post here".'));
       logList.className = 'sl-list';
@@ -1225,7 +1227,7 @@
       return el('div', { class: 'sl-bulk', title: 'Skips worlds with posts, where you are, outlaw worlds, your next build and record holders' }, el('span', {}, '💰 Sell all '), rs, el('span', {}, ' worlds:'), b);
     }
     function drawItems() {
-      const nav = el('div', { class: 'sl-wnav' }, el('button', { type: 'button', class: 'btn', onclick: closeWorld }, '◂ Logbook'), el('b', {}, '🎒 Collection: ' + itemCount() + ' / ' + ITEM_TOTAL), el('span', { class: 'sl-muted' }, Math.round(itemCount() / ITEM_TOTAL * 100) + '%'));
+      const nav = el('div', { class: 'sl-wnav' }, el('b', {}, '🎒 Collection: ' + itemCount() + ' / ' + ITEM_TOTAL), el('span', { class: 'sl-muted' }, Math.round(itemCount() / ITEM_TOTAL * 100) + '% found'));
       const groups = ITEM_RARS.map(r => {
         const list = ITEMS[r], have = list.filter((_, i) => S.items[r + ':' + i]).length;
         return el('div', { class: 'sl-col-g' }, el('div', { class: 'sl-col-h' }, el('span', { class: 'sl-rar sl-r-' + r.toLowerCase() }, r), el('span', { class: 'sl-muted' }, have + ' / ' + list.length)),
@@ -1233,8 +1235,7 @@
             el('li', { class: 'sl-col-i sl-ci-' + r.toLowerCase(), title: 'First found ' + new Date(it.at).toLocaleDateString() + (it.from && byNum(it.from) ? ' on ' + nm(byNum(it.from).p) : '') }, name, it.n > 1 ? el('small', {}, ' ×' + it.n) : null))) : null,
           have < list.length ? el('div', { class: 'sl-col-more' }, '??? ' + (list.length - have) + ' more ' + r.toLowerCase() + ' item' + (list.length - have === 1 ? '' : 's') + ' still out there') : el('div', { class: 'sl-col-more done' }, '★ All ' + r.toLowerCase() + ' items found!'));
       });
-      logList.className = 'sl-wpage';
-      logList.replaceChildren(nav, el('p', { class: 'sl-muted' }, '96 one-of-a-kind items are scattered across the universe. 🔍 Discover (surveying the world you\'re at) turns up one or two, and beating outlaws hands over their hoard, which leans toward the rarer ones.'), ...groups);
+      itemsPane.replaceChildren(el('div', { class: 'sl-wpage' }, nav, el('p', { class: 'sl-muted' }, '96 one-of-a-kind items are scattered across the universe. 🔍 Discover (surveying the world you\'re at) turns up one or two, and beating outlaws hands over their hoard, which leans toward the rarer ones.'), ...groups));
     }
     function drawWorld(f) {
       const p = f.p, tuned = S.tuned === p.num && !!p.post, busy = running && mode === 'focus';
