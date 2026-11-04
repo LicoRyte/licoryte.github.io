@@ -690,11 +690,37 @@
       show(surveyTab);
       return el('div', { class: 'sl-survey' }, el('div', { class: 'sl-stabs', role: 'tablist' }, tabs), panel);
     }
+    /* ---------- log feeds: grouped by day, one tidy row per message, 20 at a time ---------- */
+    const KIND = { core: ['🔬', 'sci'], species: ['🔬', 'sci'], odd: ['🔬', 'sci'], secret: ['🤫', 'sec'], log: ['📜', 'log'], fac: ['🏘', 'fac'], ev: ['⚠', 'ev'] };
+    const dayLabel = t => { const d = new Date(t), a = new Date(); a.setHours(0, 0, 0, 0); const diff = Math.round((a - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+      return diff === 0 ? 'Today' : diff === 1 ? 'Yesterday' : d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: d.getFullYear() === a.getFullYear() ? undefined : 'numeric' }); };
+    const hhmm = t => new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const feedLimit = {};
+    // items: [{ at, p (world, optional), k (kind), icon (optional), title (optional), t (text), extra (optional) }], newest first
+    function renderFeed(items, key, showWorld, redraw) {
+      const lim = feedLimit[key] || 20, out = [];
+      let day = null;
+      items.slice(0, lim).forEach(it => {
+        const d = dayLabel(it.at); if (d !== day) { day = d; out.push(el('div', { class: 'sl-day' }, d)); }
+        const [ic, cls] = KIND[it.k] || ['•', 'log'];
+        let text = it.t; if (it.k === 'fac' && it.icon) text = text.replace(it.icon + ' ', '');
+        out.push(el('div', { class: 'sl-msg sl-m-' + cls },
+          showWorld && it.p ? el('img', { class: 'sl-msg-pic', src: paint(it.p, 32), alt: '' }) : el('span', { class: 'sl-msg-ic' }, it.icon || ic),
+          el('div', { class: 'sl-msg-b' },
+            el('div', { class: 'sl-msg-h' }, showWorld && it.p ? el('b', {}, nm(it.p)) : it.title ? el('b', {}, it.title) : null, showWorld && it.p ? el('span', { class: 'sl-msg-k' }, it.icon || ic) : null,
+              it.day ? el('span', { class: 'sl-muted' }, 'Day ' + it.day) : null, el('span', { class: 'sl-msg-t' }, hhmm(it.at))),
+            el('div', { class: 'sl-msg-x' }, text, it.extra ? el('b', {}, ' ' + it.extra) : null))));
+      });
+      if (items.length > lim) out.push(el('button', { type: 'button', class: 'btn sl-older', onclick: () => { feedLimit[key] = lim + 20; redraw(); } }, 'Show older (' + (items.length - lim) + ' more)'));
+      return el('div', { class: 'sl-feedbox' }, out);
+    }
+    const repItem = (p, r) => ({ at: r.at, p, k: r.k, icon: r.k === 'fac' && r.f && FAC[r.f] ? FAC[r.f][0] : null, t: r.t, day: r.day });
     function postLog(p) {
       const reps = p.post.reports.slice().reverse();
-      return el('details', { class: 'sl-more sl-postlog' }, el('summary', {}, '🗼 Listening Post log (' + reps.length + ')'),
-        reps.length ? el('ol', { class: 'sl-reports', reversed: true }, reps.map(r => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, 'Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), ' ', r.t)))
-          : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.'));
+      const box = el('details', { class: 'sl-more sl-postlog' }, el('summary', {}, (p.post.tp ? '🏘 Travelers\' Post log (' : '🗼 Listening Post log (') + reps.length + ')'));
+      const fill = () => { box.replaceChildren(box.firstChild, reps.length ? renderFeed(reps.map(r => repItem(p, r)), 'post' + p.num, false, () => { const o = box.open; fill(); box.open = o; }) : el('p', { class: 'sl-muted' }, 'No transmissions yet. Tune the satellite here and study.')); };
+      fill();
+      return box;
     }
     const HEAD = { new: '★ New world discovered · ', log: 'World ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ' };
     function planetCard(p, kind) {
@@ -893,10 +919,10 @@
       posts().forEach(f => f.p.post.reports.forEach(r => feed.push({ p: f.p, r })));
       feed.sort((a, c) => c.r.at - a.r.at);
       const trans = group('📡 Transmissions' + (feed.length ? ' (' + feed.length + ')' : ''),
-        feed.length ? el('ol', { class: 'sl-reports sl-feed' }, feed.slice(0, 60).map(({ p, r }) => el('li', { class: 'sl-rep-' + r.k }, el('small', {}, nm(p) + ' · Day ' + r.day + ' · ' + new Date(r.at).toLocaleDateString()), el('br', {}), r.t)))
+        feed.length ? renderFeed(feed.map(({ p, r }) => repItem(p, r)), 'trans', true, drawShip)
           : el('p', { class: 'sl-muted' }, 'Nothing yet. A tuned post sends one transmission every study session.'));
       const evs = S.events.slice().reverse();
-      const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? el('ol', { class: 'sl-reports sl-feed' }, evs.slice(0, 60).map(e => el('li', { class: 'sl-rep-ev' }, el('small', {}, e.ic + ' ' + e.title + ' · ' + new Date(e.at).toLocaleDateString()), el('br', {}), e.t, e.got ? el('b', {}, ' ' + e.got) : null)))
+      const evLog = group('📜 Ship\'s log' + (evs.length ? ' (' + evs.length + ')' : ''), evs.length ? renderFeed(evs.map(e => ({ at: e.at, k: 'ev', icon: e.ic, title: e.title, t: e.t, extra: e.got })), 'events', false, drawShip)
         : el('p', { class: 'sl-muted' }, 'No deep-space events yet. About one study session in 15 runs into something.'));
       const mods = group('✦ Stardust: ' + S.dust.toLocaleString(), el('p', { class: 'sl-muted' }, 'Earned by every study session (more for rarer worlds, events, Full Cycles and bounties). ' + S.dustTotal.toLocaleString() + ' earned in total. Spend it on ship modules here and on facility upgrades under Posts.'),
         el('div', { class: 'sl-mods' }, Object.entries(MODS).map(([k, [ic, name, eff, what]]) => { const l = lvl(k), c = modCost(k);
