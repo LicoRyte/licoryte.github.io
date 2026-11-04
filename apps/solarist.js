@@ -468,6 +468,7 @@
     function buildOptions() { // every job you could do next, grouped
       const out = { Facilities: [], Upgrades: [], 'New Listening Posts': [] };
       S.found.slice().reverse().forEach(({ p }) => {
+        if (held(p)) return;
         if (!p.post) out['New Listening Posts'].push({ k: 'post', num: p.num, label: '🗼 Listening Post on ' + nm(p) + ' (' + pad(p.num) + ')' });
         else if (!p.post.tp) out.Upgrades.push({ k: 'upgrade', num: p.num, label: '🏘 Upgrade ' + nm(p) + ' to a Travelers\' Post' });
         else Object.keys(FAC).filter(k => !hasFac(p, k)).forEach(k => out.Facilities.push({ k: 'add', num: p.num, fac: k, label: FAC[k][0] + ' ' + FAC[k][1] + ' at ' + nm(p) }));
@@ -483,6 +484,13 @@
     // Interplanetary Coordinator: spend one study session charging it, and your next trip is a lucky one (one charge, no stacking)
     const charging = () => S.mission === -1 && !S.coord;
     const posts = () => S.found.filter(f => f.p.post);
+    // Outlaws: some new worlds are held by a gang. While one is, Explore turns into Fight: one study session drives them out.
+    const OUTLAW_CHANCE = 1 / 8;
+    const GANG_A = ['Rust', 'Void', 'Red Comet', 'Dust', 'Iron', 'Grinning', 'Black Sun', 'Scrap', 'Howling', 'Neon'], GANG_B = ['Jackals', 'Raiders', 'Vultures', 'Syndicate', 'Rats', 'Wolves', 'Pirates', 'Crows', 'Gang', 'Marauders'];
+    const FIGHT = ['{G} put up a fight, but the crew drove them off the {b}.', 'A long standoff over the {b}. {G} blinked first and fled.', '{G} tried an ambush in the {b}. It did not go well for them.', 'After a tense chase through the {b}, {g} gave up and jumped away.', '{G} surrendered once the ship\'s floodlights hit their camp in the {b}.'];
+    const LOOT = ['their stash of stardust', 'a crate of stolen Coordinator cells', 'a map with a few new star routes', 'a very nice hat'];
+    const heldP = () => { const f = S.outlaw && byNum(S.outlaw); return f && f.p.outlaw && !f.p.outlaw.cleared ? f.p : null; };
+    const held = p => !!(p.outlaw && !p.outlaw.cleared);
     if (!S.events) S.events = []; if (!S.fc) S.fc = { n: 0, broken: false };
     function rollEvent(force) {
       if (!force && Math.random() >= evChance(lvl('comms'))) return null;
@@ -572,7 +580,7 @@
       REC.forEach(([k, , label, get, f, dir]) => {
         const v = get(p); if (v == null) return;
         const cur = S.rec[k];
-        if (!cur || (dir > 0 ? v > cur.v : v < cur.v)) { if (cur && notes) notes.push('🏆 New record! ' + label + ': ' + nm(p) + ' (' + f(v) + ')'); S.rec[k] = { v, num: p.num }; }
+        if (!cur || (dir > 0 ? v > cur.v : v < cur.v)) { if (cur && notes && S.found.length > 10) notes.push('🏆 New record! ' + label + ': ' + nm(p) + ' (' + f(v) + ')'); S.rec[k] = { v, num: p.num }; }
       });
     }
     S.found.forEach(({ p }) => checkRecords(p, null)); // fill records from worlds found before this existed
@@ -602,9 +610,9 @@
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
     function headline() {
-      const b = building(), c = charging();
-      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Take a breather';
-      return mode === 'focus' ? (b ? jobText(b) : c ? 'Recharging Interplanetary Coordinator' : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Preparing equipment for the next mission';
+      const b = building(), c = charging(), o = !b && !c && heldP();
+      if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : o ? 'Outlaws ahead' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Take a breather';
+      return mode === 'focus' ? (b ? jobText(b) : c ? 'Recharging Interplanetary Coordinator' : o ? 'Fighting ' + o.outlaw.gang + ' on ' + nm(o) : S.coord ? 'Following the Coordinator to a promising world' : 'Traveling to an uncharted world') : 'Preparing equipment for the next mission';
     }
     function drawDots() { const n = running ? dotN % 4 : 0; dots.replaceChildren(...[0, 1, 2].map(i => el('i', { class: i < n ? '' : 'off' }, '.'))); }
     const barFill = el('div', { class: 'sl-fill' });
@@ -722,7 +730,7 @@
       fill();
       return box;
     }
-    const HEAD = { new: '★ New world discovered · ', log: 'World ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ' };
+    const HEAD = { outlaw: '🏴 Outlaw-held world · ', freed: '⚔ World liberated · ', new: '★ New world discovered · ', log: 'World ', lucky: '🧭 Coordinator-guided discovery · ', built: '🗼 Listening Post built · ', upgraded: '🏘 Travelers\' Post opened · ', opened: '🏗 New facility · ', last: 'Last discovery · ' };
     function planetCard(p, kind) {
       const tuned = S.tuned === p.num && !!p.post;
       const pic = el('div', { class: 'sl-picwrap' }, el('img', { class: 'sl-pic', src: paint(p, 64), alt: 'Pixel portrait of ' + nm(p), width: 128, height: 128 }),
@@ -731,7 +739,7 @@
       return [
         el('div', { class: 'sl-card-h' }, el('span', {}, (HEAD[kind] || '') + pad(p.num)), el('span', { class: 'sl-rar sl-r-' + p.rarity.toLowerCase() }, p.rarity)),
         el('div', { class: 'sl-pl' }, pic,
-          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, p.post.tp ? '🏘 Travelers\' Post' : '🗼 Post') : null),
+          el('div', { class: 'sl-pl-t' }, el('b', { class: 'sl-name' }, nm(p), held(p) ? el('span', { class: 'sl-tag sl-tag-bad', title: 'Held by ' + p.outlaw.gang }, '🏴 Outlaws') : null, p.outlaw && p.outlaw.cleared ? el('span', { class: 'sl-tag', title: 'You drove out ' + p.outlaw.gang }, '⚔ Liberated') : null, tuned ? el('span', { class: 'sl-tag' }, '📡 Tuned') : p.post ? el('span', { class: 'sl-tag off' }, p.post.tp ? '🏘 Travelers\' Post' : '🗼 Post') : null),
             el('div', { class: 'sl-code' }, p.code + ' · ' + p.type + ' · ' + (p.x || (p.x = makeExtra(p))).hab + '% habitable'), el('p', {}, logText(p)))),
         el('details', { class: 'sl-more' }, el('summary', {}, 'Survey data'), facts(p)),
         p.post && p.post.tp ? el('div', { class: 'sl-facs', title: 'Facilities at this Travelers\' Post' }, [el('span', { class: 'sl-fac sl-popl' }, '🏙 ' + tierOf(p.post.tp.pop || 0) + ' · ' + (p.post.tp.pop || 0).toLocaleString() + ' settlers'), ...p.post.tp.fac.map(f => el('span', { class: 'sl-fac' }, FAC[f.k][0] + ' ' + FAC[f.k][1] + ((f.lv || 1) > 1 ? ' ' + '★'.repeat(Math.min(5, f.lv - 1)) + (f.lv > 6 ? '+' : '') : '')))]) : null,
@@ -740,7 +748,7 @@
     }
     function showCard(p, kind) {
       if (!p) { card.hidden = true; card.replaceChildren(); return; }
-      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' || kind === 'upgraded' || kind === 'opened' ? ' new' : '');
+      card.hidden = false; card.className = 'sl-card' + (kind === 'new' || kind === 'built' || kind === 'lucky' || kind === 'upgraded' || kind === 'opened' || kind === 'freed' ? ' new' : kind === 'outlaw' ? ' new sl-held' : '');
       card.replaceChildren(...planetCard(p, kind));
     }
     function facReport(p) { // a log from one of a Travelers' Post's facilities
@@ -764,7 +772,7 @@
       if (!list || !list.length) { trans.hidden = true; trans.replaceChildren(); return; }
       trans.hidden = false;
       trans.replaceChildren(...list.map(({ p, rep, passive, ev, notes }) => notes ? el('div', { class: 'sl-trans-i sl-notes' }, notes.map(t => el('p', {}, t))) : ev ? el('div', { class: 'sl-trans-i sl-event' },
-          el('div', { class: 'sl-trans-h' }, el('span', { class: 'sl-ev-i' }, ev.ic), ' Deep-space event: ' + ev.title), el('p', {}, ev.t), ev.got ? el('p', { class: 'sl-ev-got' }, ev.got) : null)
+          el('div', { class: 'sl-trans-h' }, el('span', { class: 'sl-ev-i' }, ev.ic), (ev.battle ? ' ' : ' Deep-space event: ') + ev.title), el('p', {}, ev.t), ev.got ? el('p', { class: 'sl-ev-got' }, ev.got) : null)
         : el('div', { class: 'sl-trans-i' },
         el('div', { class: 'sl-trans-h' }, el('img', { src: satSprite(), alt: '' }), (passive ? ' Overheard from ' : ' Transmission from ') + nm(p) + ' · Day ' + rep.day), el('p', {}, rep.t))));
     }
@@ -823,15 +831,30 @@
           showCard(tp2, target.k === 'post' ? 'built' : target.k === 'upgrade' ? 'upgraded' : 'opened');
           toBreak();
           hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
+        } else if (heldP()) {
+          const o = heldP(), pk = a => a[Math.floor(Math.random() * a.length)];
+          o.outlaw.cleared = Date.now(); S.outlaw = 0; S.fights = (S.fights || 0) + 1;
+          let loot = pk(LOOT), extra = addDust(20 + Math.random() * 30);
+          if (loot.includes('Coordinator')) { if (!S.coord) S.coord = true; else loot = 'a crate of Coordinator cells (yours was already full)'; }
+          const story = pk(FIGHT).replace('{G}', o.outlaw.gang.replace(/^the/, 'The')).replace('{g}', o.outlaw.gang).replace('{b}', o.biomes[0].toLowerCase());
+          S.events.push({ ic: '⚔', title: 'Outlaws driven out of ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦', at: Date.now() });
+          if (!quiet && hooks.tada) hooks.tada();
+          if (hooks.show) hooks.show();
+          showCard(o, 'freed'); reps.unshift({ ev: { battle: true, ic: '⚔', title: 'Victory on ' + nm(o), t: story + ' Found ' + loot + '.', got: '+' + extra + ' ✦ bounty from the outlaws' } });
+          toBreak();
+          hint.textContent = nm(o) + ' is free! Explore is open again. Now a ' + MODES[mode].toLowerCase() + '.';
         } else {
           const lucky = !!S.coord && !(ev && ev.got); if (lucky) S.coord = false;
           const p = makePlanet((Math.random() * 4294967296) >>> 0, S.found.length + 1, lucky, Math.min(.2, (lvl('scanner') - 1) * .01));
+          const outlaws = Math.random() < OUTLAW_CHANCE && p.type !== 'Rogue';
+          if (outlaws) { const pk = a => a[Math.floor(Math.random() * a.length)]; p.outlaw = { gang: 'the ' + pk(GANG_A) + ' ' + pk(GANG_B), at: Date.now() }; S.outlaw = p.num; }
           S.found.push({ at: Date.now(), p });
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
-          showCard(p, lucky ? 'lucky' : 'new'); foundP = p;
+          showCard(p, outlaws ? 'outlaw' : lucky ? 'lucky' : 'new'); foundP = p;
           toBreak();
-          hint.textContent = 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
+          hint.textContent = outlaws ? '🏴 Arrived, but ' + p.outlaw.gang + ' control this world! Explore is blocked until you fight them off (one study session). Building and charging still work.'
+            : 'Arrived! ' + (lucky ? 'The Coordinator\'s charge is spent. ' : '') + 'Time for a ' + MODES[mode].toLowerCase() + ': stand up, stretch, drink some water.';
         }
         sessionEnd(reps, foundP, ev);
       } else {
@@ -861,14 +884,14 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : 'Traveling') : 'Preparing') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : heldP() ? 'Fighting' : 'Traveling') : 'Preparing') : 'Solarist');
     }
     function draw() {
       drawClock();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : 'Launch') : 'Start break');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Break time. The crew is getting the gear ready for the next mission.';
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : heldP() ? 'Fight' : 'Launch') : 'Start break');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : heldP() ? '🏴 ' + heldP().outlaw.gang.replace(/^the/, 'The') + ' hold ' + nm(heldP()) + '. Finish this study session to drive them out. (Build and Charge still work.)' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Break time. The crew is getting the gear ready for the next mission.';
       if (S.mission > 0 && !building()) { S.mission = 0; S.job = null; }
       if (S.mission === -1 && S.coord) S.mission = 0;
       const cm = curMission(), locked = running && mode === 'focus', canBuild = anyBuild();
@@ -877,7 +900,7 @@
         const k = b.dataset.m, on = k === cm;
         b.setAttribute('aria-checked', String(on)); b.classList.toggle('on', on);
         b.disabled = (locked && !on) || (k === 'build' && !canBuild) || (k === 'charge' && !!S.coord && !on);
-        if (k === 'explore') b.lastChild.textContent = S.coord ? 'Explore 🧭' : 'Explore';
+        if (k === 'explore') { const o = heldP(); b.firstChild.textContent = o ? '⚔' : '🚀'; b.lastChild.textContent = o ? 'Fight' : S.coord ? 'Explore 🧭' : 'Explore'; b.title = o ? 'Outlaws hold ' + nm(o) + ': fight them off with one study session before you can travel again' : MISSIONS[0][3]; b.classList.toggle('sl-fight', !!o); }
         if (k === 'charge') b.title = S.coord ? 'Already charged: your next Explore is a lucky one' : MISSIONS[2][3];
         if (k === 'build') b.title = canBuild ? MISSIONS[1][3] : 'Nothing left to build';
       });
@@ -898,7 +921,7 @@
     function drawShip() {
       const group = (title, ...kids) => el('fieldset', { class: 'sl-group' }, el('legend', {}, title), ...kids);
       const cm = curMission(), b = building(), locked = running && mode === 'focus';
-      const next = cm === 'build' && b ? (b.k === 'upgrade' ? '🏘 ' : b.k === 'add' ? FAC[b.fac][0] + ' ' : '🗼 ') + jobText(b) : cm === 'charge' ? '🧭 Charge the Interplanetary Coordinator' : S.coord ? '🚀 Explore (lucky, Coordinator charged)' : '🚀 Explore a new world';
+      const next = cm === 'build' && b ? (b.k === 'upgrade' ? '🏘 ' : b.k === 'add' ? FAC[b.fac][0] + ' ' : '🗼 ') + jobText(b) : cm === 'explore' && heldP() ? '⚔ Fight ' + heldP().outlaw.gang + ' on ' + nm(heldP()) : cm === 'charge' ? '🧭 Charge the Interplanetary Coordinator' : S.coord ? '🚀 Explore (lucky, Coordinator charged)' : '🚀 Explore a new world';
       const coord = group('🧭 Interplanetary Coordinator',
         el('p', {}, S.coord ? el('b', {}, 'Charged. ') : el('b', {}, 'Empty. '), S.coord ? 'Your next Explore session heads somewhere promising: better odds of Rare and Legendary, livable worlds.' : 'Spend one study session charging it, and your next Explore is a lucky one. It holds one charge.'),
         S.coord ? null : el('button', { type: 'button', class: 'btn', disabled: locked || cm === 'charge' || null, onclick: () => { setMission('charge'); drawShip(); } }, cm === 'charge' ? 'Charging next session' : 'Charge it next session'));
@@ -970,7 +993,7 @@
       const unknown = () => el('span', { class: 'sl-tile sl-unknown', title: 'Still out there. Finish a study session to find it.' }, el('span', { class: 'sl-tile-pic' }, '???'), el('b', {}, '???'), el('small', {}, 'uncharted'));
       logList.replaceChildren(...shownList.slice(0, 400).map(f => {
         const p = f.p, tuned = S.tuned === p.num && !!p.post;
-        const marks = (p.lucky ? '🧭' : '') + (p.post ? (p.post.tp ? '🏘' : '🗼') : '') + (tuned ? '📡' : '');
+        const marks = (held(p) ? '🏴' : '') + (p.lucky ? '🧭' : '') + (p.post ? (p.post.tp ? '🏘' : '🗼') : '') + (tuned ? '📡' : '');
         return el('button', { type: 'button', class: 'sl-tile sl-t-' + p.rarity.toLowerCase(), title: nm(p) + ' · ' + p.type + ' · ' + p.rarity, onclick: () => openWorld(p.num) },
           el('span', { class: 'sl-tile-pic' }, el('img', { src: paint(p, 32), alt: '' }), marks ? el('span', { class: 'sl-tile-m' }, marks) : null),
           el('b', {}, nm(p)), el('small', {}, pad(p.num) + ' · ' + p.type));
@@ -987,7 +1010,7 @@
           el('button', { type: 'button', class: 'btn', title: prev ? 'Previous: ' + nm(prev.p) : '', disabled: !prev || null, onclick: () => prev && openWorld(prev.p.num) }, '◂'),
           el('button', { type: 'button', class: 'btn', title: next ? 'Next: ' + nm(next.p) : '', disabled: !next || null, onclick: () => next && openWorld(next.p.num) }, '▸')));
       const acts = el('div', { class: 'sl-acts' },
-        !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { setJob('post:' + p.num + ':'); tab('timer'); } }, S.mission > 0 && S.job && S.job.k === 'post' && S.job.num === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
+        held(p) ? el('span', { class: 'sl-muted' }, '🏴 Held by ' + p.outlaw.gang + '. Drive them out (⚔ Fight on the Voyage tab) before building here.') : !p.post ? el('button', { type: 'button', class: 'btn', title: 'Your next study session builds a Listening Post here', disabled: busy || null, onclick: () => { setJob('post:' + p.num + ':'); tab('timer'); } }, S.mission > 0 && S.job && S.job.k === 'post' && S.job.num === p.num ? '🗼 Building here next' : '🗼 Build a Listening Post here')
           : !p.post.tp ? el('button', { type: 'button', class: 'btn', title: 'Your next study session upgrades this post', disabled: busy || null, onclick: () => { setJob('upgrade:' + p.num + ':'); tab('timer'); } }, '🏘 Upgrade to Travelers\' Post') : null,
         p.post ? (tuned ? el('button', { type: 'button', class: 'btn', title: 'Stop listening to this post', onclick: () => { S.tuned = 0; save(); drawLog(); draw(); } }, '📡 Untune')
           : el('button', { type: 'button', class: 'btn', title: 'Only one post can be tuned at a time', onclick: () => { S.tuned = p.num; save(); drawLog(); draw(); } }, '📡 Tune satellite')) : null,
