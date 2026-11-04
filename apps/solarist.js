@@ -706,6 +706,47 @@
       S.kn = S.found.length * 10 + heard * 15 + itemCount() * 12 + (S.events || []).length * 15;
     }
     save();
+    // Distress Run: once a day, right after you earn a Full Cycle, you can answer a distress call.
+    // It takes one whole cycle of study sessions, and nothing else can be done until it's over.
+    const DISTRESS = [
+      ['🚢', 'The Adrift Freighter', 'The freighter Moth of Kessa lost its reactor and is drifting toward an asteroid field.', ['Locked onto the freighter\'s beacon and burned hard to close the distance.', 'Threaded the edge of the asteroid field without losing the signal.', 'Docked with the freighter and patched the reactor with spare parts.', 'Towed the Moth of Kessa clear of the rocks. Its crew cheered over the radio.'], 'The freighter\'s captain paid you out of the cargo hold.'],
+      ['⛏', 'The Mining Colony Blackout', 'A mining colony on a dark asteroid lost power. Life support has a few hours of battery left.', ['Plotted the fastest route to the colony and pushed the engines.', 'Arrived to a dead station. Not a single light on.', 'Ran a power line from the ship and got the air scrubbers turning again.', 'The colony\'s lights came back on, one tunnel at a time.'], 'The miners chipped in from their latest haul.'],
+      ['🔬', 'The Lost Science Vessel', 'A research ship went silent inside a nebula three days ago. Its last message was cut off mid-sentence.', ['Picked up a faint echo of the science ship\'s transponder.', 'Flew into the nebula on instruments alone. Sensors full of static.', 'Found the ship stuck in an ion storm and shielded it with your hull.', 'Guided the scientists out of the nebula. They kept every sample.'], 'The research institute sent a generous thank-you grant.'],
+      ['☄', 'The Comet-Struck Liner', 'A passenger liner was clipped by a comet fragment. Hundreds of tourists are aboard and very upset.', ['Answered the liner\'s mayday and set course at full burn.', 'Matched the liner\'s spin so the crew could get close.', 'Sealed the hull breach and calmed down a lot of tourists.', 'Escorted the liner to the nearest port. Somebody asked for an autograph.'], 'The cruise company paid a rescue fee (and sent free buffet coupons).'],
+      ['🙏', 'The Stranded Pilgrims', 'A pilgrim fleet ran out of fuel halfway to a holy comet. Their engines are cold.', ['Followed the pilgrims\' prayer-song broadcast to their fleet.', 'Shared fuel ship by ship across the whole convoy.', 'Fixed a cracked fuel line on their oldest ship with tape and hope.', 'The fleet reached the holy comet just in time for the sunrise ceremony.'], 'The pilgrims passed around the collection plate for you.'],
+      ['🛰', 'The Falling Station', 'An old relay station lost its thrusters and is slowly falling toward its star.', ['Plotted an intercept course before the station got too hot.', 'Matched orbit with the station. The hull was already glowing.', 'Clamped on and fired the ship\'s engines to slow its fall.', 'Pushed the station back into a safe orbit. The keepers can breathe again.'], 'The relay network paid a salvage-and-rescue bounty.'],
+    ];
+    const drAvail = () => !S.dr && S.drDay !== today() && S.fcDay === today() && mode === 'focus' && S.cycle % S.set.every === 0 && !running && !(left > 0 && left < length(mode));
+    function drAccept() {
+      if (!drAvail()) return;
+      const sc = Math.floor(Math.random() * DISTRESS.length);
+      S.dr = { sc, n: 0, need: S.set.every, at: Date.now() }; S.drDay = today();
+      const [ic, title, intro] = DISTRESS[sc];
+      S.events.push({ ic: '🆘', title: 'Distress Run accepted: ' + title, t: intro, at: Date.now() });
+      hint.textContent = '🆘 ' + intro + ' ' + S.dr.need + ' study sessions to get there and back. No other missions until it\'s done.';
+      save(); draw();
+    }
+    function drAbandon() { const sc = DISTRESS[S.dr.sc]; S.events.push({ ic: '🆘', title: 'Distress Run abandoned: ' + sc[1], t: 'The ship turned back. Someone else will have to answer this one.', at: Date.now() }); S.dr = null; hint.textContent = 'Distress Run abandoned. You can try again tomorrow.'; save(); draw(); }
+    function drLeg(reps) { // one study session of the run; the last one pays out
+      const d = S.dr, [ic, title, , beats, thanks] = DISTRESS[d.sc]; d.n++;
+      const bi = d.n >= d.need ? 3 : d.n === 1 ? 0 : d.n % 2 === 0 ? 1 : 2;
+      if (d.n < d.need) {
+        reps.unshift({ ev: { battle: true, ic: '🆘', title: title + ' · leg ' + d.n + ' of ' + d.need, t: beats[bi] } });
+        return 'Leg ' + d.n + ' of the Distress Run done. ' + (d.need - d.n) + ' to go.';
+      }
+      const dust = 500 + Math.round(Math.random() * 200); S.dust += dust; S.dustTotal += dust;
+      const bonus = [];
+      const opts = ['dust', 'item', 'event'].concat(S.coord ? [] : ['coord']), pick = opts[Math.floor(Math.random() * opts.length)];
+      if (pick === 'dust') { const b = 100 + Math.round(Math.random() * 150); S.dust += b; S.dustTotal += b; bonus.push('a bonus of ✦ ' + b + ' from a grateful passenger'); }
+      else if (pick === 'item') { const it = rollItem(atP(), true), nw = gainItem(it, atP()); bonus.push('a keepsake: ' + it.name + ' (' + it.rar + (nw ? ', new!' : '') + ')'); if (nw) award(0, 12); }
+      else if (pick === 'event') { S.eventNext = true; bonus.push('a tip about something strange out there (your next trip has an event)'); }
+      else { S.coord = true; bonus.push('a full charge for the Interplanetary Coordinator'); }
+      award(250, 120); S.drN = (S.drN || 0) + 1; S.dr = null;
+      const got = '+' + dust + ' ✦ · ' + bonus[0].replace(/^./, c => c.toUpperCase());
+      reps.unshift({ ev: { battle: true, ic: '🆘', title: 'Distress Run complete: ' + title, t: beats[3] + ' ' + thanks, got } });
+      S.events.push({ ic: '🆘', title: 'Distress Run complete: ' + title, t: beats[3] + ' ' + thanks, got, at: Date.now() });
+      return '🆘 Distress Run complete! ✦ ' + dust + ' plus ' + bonus[0] + '.';
+    }
     // Selling a world: the survey rights go to the Cartographers' Guild for stardust, and the world leaves your Logbook.
     // The price follows its overall condition and how much it stands out.
     const SELL_RAR = { Common: 10, Uncommon: 25, Rare: 70, Legendary: 200 };
@@ -769,6 +810,7 @@
     const screen = el('div', { class: 'sl-screen sunken', 'aria-live': 'off' }, el('div', { class: 'sl-big' }, bigText, dots), timeText);
     let dotN = 0, dotT = 0;
     function headline() {
+      if (S.dr && mode === 'focus') return !running ? (left > 0 && left < length(mode) ? 'Holding position' : 'Distress Run: leg ' + (S.dr.n + 1) + ' of ' + S.dr.need) : 'Answering the distress call';
       const b = building(), c = charging(), d = !b && !c && discovering() && atP(), o = !b && !c && !d && heldP();
       if (d) return !running ? (left > 0 && left < length(mode) ? 'Holding position' : 'Ready to survey') : 'Surveying ' + nm(d) + ' for collectibles';
       if (!running) return left > 0 && left < length(mode) ? 'Holding position' : mode === 'focus' ? (b ? (b.k === 'upgrade' ? 'Ready to upgrade' : 'Ready to build') : c ? 'Ready to charge' : o ? 'Outlaws ahead' : S.coord ? 'Ready for a lucky launch' : 'Ready for launch') : 'Docked. Take a breather';
@@ -818,7 +860,20 @@
         el('small', { class: 'sl-muted' }, i.need ? (i.need - i.into) + (k === 'xp' ? ' XP' : ' Knowledge') + ' to Lv ' + (i.L + 1) : 'Maxed out. ' + (S[k] || 0).toLocaleString() + ' total.'));
     }
     function drawLv() { lvStrip.replaceChildren(lvBar('xp', '⭐', CAPT), lvBar('kn', '📚', KNOW)); }
-    const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), mission, hint, trans, encBox, card, settings);
+    const drBox = el('div', { class: 'sl-dr', hidden: true });
+    function drawDr() {
+      if (S.dr) {
+        const [ic, title] = DISTRESS[S.dr.sc], ab = el('button', { type: 'button', class: 'btn', disabled: (running && mode === 'focus') || null, title: 'Give up today\'s run (no reward, and it still counts as today\'s)' }, 'Abandon');
+        ab.addEventListener('click', () => { if (!ab.classList.contains('arm')) { ab.classList.add('arm'); ab.textContent = 'Click again to abandon'; return; } drAbandon(); });
+        drBox.hidden = false; drBox.className = 'sl-dr on';
+        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress Run: ' + title), el('div', { class: 'sl-dr-legs' }, Array.from({ length: S.dr.need }, (_, i) => el('span', { class: i < S.dr.n ? 'done' : i === S.dr.n ? 'now' : '' }, 'Leg ' + (i + 1)))), el('div', { class: 'sl-dr-row' }, el('span', { class: 'sl-muted' }, 'Other missions are locked until the run is over.'), ab));
+      } else if (drAvail()) {
+        drBox.hidden = false; drBox.className = 'sl-dr offer';
+        drBox.replaceChildren(el('div', { class: 'sl-dr-h' }, '🆘 Distress call received!'), el('p', {}, 'Someone out there needs help. Answering takes this whole cycle (' + S.set.every + ' study sessions) with no other missions, and pays about ✦ 500–700 plus a random bonus, XP and Knowledge. One run a day.'),
+          el('div', { class: 'sl-dr-row' }, el('button', { type: 'button', class: 'btn sl-go', onclick: drAccept }, 'Accept Distress Run')));
+      } else { drBox.hidden = true; drBox.replaceChildren(); }
+    }
+    const timerPane = el('div', { class: 'sl-pane' }, lvStrip, el('div', { class: 'sl-modes' }, modeBtns), screen, bar, el('div', { class: 'sl-btns' }, startB, resetB, skipB), drBox, mission, hint, trans, encBox, card, settings);
 
     const find = el('input', { type: 'search', class: 'sl-find', placeholder: 'Search worlds...', 'aria-label': 'Search your logbook' });
     const typeSel = el('select', { 'aria-label': 'Planet class' }, el('option', { value: '' }, 'All classes'), el('option', { value: '@post' }, '🗼 With a Listening Post'), ...Object.keys(TYPES).map(t => el('option', { value: t }, t)));
@@ -984,7 +1039,13 @@
         const forced = !!S.eventNext; S.eventNext = false;
         const ev = rollEvent(forced); if (ev) reps.unshift({ ev });
         let foundP = null;
-        if (charging()) {
+        if (S.dr) {
+          const msg = drLeg(reps); award(15, 5); showCard(null);
+          if (!quiet && hooks.tada) hooks.tada();
+          if (hooks.show) hooks.show();
+          toBreak();
+          hint.textContent = msg + ' Now a ' + MODES[mode].toLowerCase() + '.';
+        } else if (charging()) {
           S.coord = true; S.mission = 0; award(15, 0);
           if (!quiet && hooks.tada) hooks.tada();
           if (hooks.show) hooks.show();
@@ -1062,6 +1123,7 @@
         hint.textContent = 'Equipment ready. Pick a mission and press Start.';
         if (wasLong) { // Full Cycle: every session and break of the cycle finished, nothing skipped
           if (!S.fc.broken && S.fc.n >= S.set.every) {
+            S.fcDay = today();
             if (!S.coord) { S.coord = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle, so the Interplanetary Coordinator is charged for free.'; }
             else { S.eventNext = true; hint.textContent = '★ Full Cycle bonus! Nothing skipped all cycle: something interesting is waiting on your next trip.'; }
             const notes = ['✦ +' + addDust(50 + (lvl('hull') - 1) * 15) + ' stardust (Full Cycle)'];
@@ -1082,19 +1144,20 @@
       if (!running && dotT) { clearInterval(dotT); dotT = 0; dotN = 0; }
       drawDots();
       barFill.style.width = pct + '%'; bar.setAttribute('aria-valuenow', Math.round(pct));
-      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : discovering() ? 'Surveying' : heldP() ? 'Fighting' : 'Traveling') : 'Preparing') : 'Solarist');
+      if (hooks.title) hooks.title(running ? fmt(r) + ' · ' + (mode === 'focus' ? (S.dr ? 'Distress Run' : building() ? (building().k === 'upgrade' ? 'Upgrading' : 'Building') : charging() ? 'Charging' : discovering() ? 'Surveying' : heldP() ? 'Fighting' : 'Traveling') : 'Preparing') : 'Solarist');
     }
     function draw() {
       drawClock(); drawLv();
       root.dataset.mode = mode;
       modeBtns.forEach(b => { const on = b.dataset.m === mode; b.classList.toggle('on', on); b.disabled = running && !on; });
-      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : discovering() ? 'Survey' : heldP() ? 'Fight' : 'Launch') : 'Start break');
-      if (!hint.textContent) hint.textContent = mode === 'focus' ? (building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : discovering() ? '🔍 Finish this session to survey ' + nm(atP()) + ' (where you are now). You\'ll bring back collectibles made from its materials.' : heldP() ? '🏴 ' + heldP().outlaw.gang.replace(/^the/, 'The') + ' hold ' + nm(heldP()) + '. Finish this study session to drive them out. (Build and Charge still work.)' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Break time. The crew is getting the gear ready for the next mission.';
+      startB.textContent = running ? 'Pause' : (left < length(mode) && left > 0 ? 'Resume' : mode === 'focus' ? (S.dr ? (S.dr.n ? 'Continue the Run' : 'Start the Run') : building() ? (building().k === 'upgrade' ? 'Upgrade' : 'Build') : charging() ? 'Charge' : discovering() ? 'Survey' : heldP() ? 'Fight' : 'Launch') : 'Start break');
+      if (!hint.textContent) hint.textContent = mode === 'focus' ? (S.dr ? '🆘 ' + DISTRESS[S.dr.sc][2] + ' Finish this study session to keep going.' : building() ? 'Finish this session: ' + jobText(building()).replace(/^./, c => c.toLowerCase()) + '.' : charging() ? 'Finish this session to charge the Interplanetary Coordinator. No new world this time, but the next one will be a good one.' : discovering() ? '🔍 Finish this session to survey ' + nm(atP()) + ' (where you are now). You\'ll bring back collectibles made from its materials.' : heldP() ? '🏴 ' + heldP().outlaw.gang.replace(/^the/, 'The') + ' hold ' + nm(heldP()) + '. Finish this study session to drive them out. (Build and Charge still work.)' : S.coord ? '🧭 The Coordinator is charged: this trip has much better odds.' : 'Finish a trip (a study session) to discover a new world.') : 'Break time. The crew is getting the gear ready for the next mission.';
       if (S.mission > 0 && !building()) { S.mission = 0; S.job = null; }
       if (S.mission === -1 && S.coord) S.mission = 0;
       if (S.mission === -2 && !discovering()) S.mission = 0;
       const cm = curMission(), locked = running && mode === 'focus', canBuild = anyBuild();
       mission.classList.toggle('off', mode !== 'focus');
+      mission.hidden = !!S.dr; drawDr();
       misBtns.forEach(b => {
         const k = b.dataset.m, on = k === cm;
         b.setAttribute('aria-checked', String(on)); b.classList.toggle('on', on);
@@ -1170,7 +1233,9 @@
       const records = group('🏆 Records', recRows.length ? el('table', { class: 'sl-rec' }, el('tbody', {}, recRows)) : el('p', { class: 'sl-muted' }, 'No records yet. Find some worlds.'));
       const rank = group('⭐ Captain & 📚 Knowledge', el('p', { class: 'sl-muted' }, 'XP comes from everything that moves the game forward: trips, building, upgrades, fights, surveys, bounties and Full Cycles. Knowledge comes from what you learn: transmissions, logs, events, survey logs and new collectibles. Every 10 levels earns a new title.'),
         lvMsg && Date.now() - lvMsgAt < 10000 ? el('p', { class: 'sl-lv-msg' }, lvMsg) : null, lvBar('xp', '⭐', CAPT, true), lvBar('kn', '📚', KNOW, true));
-      const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [bounties, records],
+      const drGroup = group('🆘 Distress Run', el('p', {}, S.dr ? 'In progress: ' + DISTRESS[S.dr.sc][1] + ', leg ' + (S.dr.n + 1) + ' of ' + S.dr.need + '.' : S.drDay === today() ? 'Today\'s run is used up. A new distress call comes in tomorrow.' : S.fcDay === today() ? 'Available at the start of your next cycle (right after a long break).' : 'Earn a ★ Full Cycle today (no skipping for a whole cycle) and a distress call comes in when the long break ends.'),
+        el('p', { class: 'sl-muted' }, 'Once a day: a whole cycle of study sessions with no other missions, for about ✦ 500–700, a random bonus, 250 XP and 120 Knowledge. ' + (S.drN || 0) + ' completed so far.'));
+      const SUB = { Ship: [rank, el('div', { class: 'sl-next' }, el('span', {}, 'Next study session: '), el('b', {}, next)), mods, cyc, coord], Goals: [drGroup, bounties, records],
         Posts: [group('🗼 Posts (' + pl.length + ')', el('p', { class: 'sl-muted' }, 'The tuned post reports every study session. Travelers\' Posts are also overheard without tuning, grow settlers every session, and a tuned one adds news from its facilities.'), postRows, plan), facPanel], Logs: [trans, evLog] };
       const subBtns = Object.keys(SUB).map(k => el('button', { type: 'button', role: 'tab', class: 'sl-stab', 'aria-selected': String(k === shipTab), onclick: () => { shipTab = k; drawShip(); } }, k));
       shipPane.replaceChildren(el('div', { class: 'sl-stabs sl-shiptabs', role: 'tablist' }, subBtns), el('div', { class: 'sl-subpane' }, SUB[shipTab]));
